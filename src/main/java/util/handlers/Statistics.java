@@ -1,13 +1,31 @@
 package util.handlers;
 
 import java.io.File;
+import java.util.ArrayList;
 
+import util.struct.DirectoryStats;
+import util.struct.FileTypeStats;
 import util.struct.MediaFile;
 
 public class Statistics extends MediaHandler {
 
+	// Store all computed statistics
+	protected ArrayList<DirectoryStats> directoryStats;
+	
+	// Aggregate statistics for all directories
+	FileTypeStats rootStats; 
+	
+	// Directories we're currently working on
+	
+	
 	public Statistics() {
 		super();
+		directoryStats = new ArrayList<DirectoryStats>();
+	}
+	
+	@Override
+	public void initialize() {
+		directoryStats.clear();
 	}
 	
 	@Override
