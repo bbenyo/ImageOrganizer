@@ -36,10 +36,15 @@ abstract public class MediaHandler {
 	// If you've handled it, return true, this will prevent the rest of the handlers from executing it
 	// If not, return false, and the next handler will operate on it.
 	abstract public boolean handleFile(MediaFile f1);
-	
+
 	// Done processing all directories, do any final reporting or cleanup
 	public void finalize() {
 		logger.info(getLabel()+" finalized");
+	}
+
+	// Start (or restart) processing directories
+	public void initialize() {
+		logger.info(getLabel()+" initialized");
 	}
 	
 }

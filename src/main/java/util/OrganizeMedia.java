@@ -61,6 +61,7 @@ public class OrganizeMedia {
 	}
 	
 	public void organize() {
+		fireHandlerInitialize();
 		organize(rootDirectory);
 		fireHandlerFinalize();
 	}
@@ -101,6 +102,13 @@ public class OrganizeMedia {
 		for (MediaHandler handler : handlers) {
 			logger.fine("Firing finalize for "+handler.getLabel());
 			handler.finalize();
+		}
+	}
+	
+	protected void fireHandlerInitialize() {
+		for (MediaHandler handler : handlers) {
+			logger.fine("Firing Initialize for "+handler.getLabel());
+			handler.initialize();
 		}
 	}
 	
