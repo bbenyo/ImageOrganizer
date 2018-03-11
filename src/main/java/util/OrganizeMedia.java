@@ -1,6 +1,9 @@
 package util;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -24,16 +27,26 @@ public class OrganizeMedia {
 	static public String PropertyFileName = "om.properties";
 	static public String DefaultDir = "data";
 	
-	public OrganizeMedia(String rootDir, String pFileName) {
+	public OrganizeMedia(String pFileName, String rootDir) {
 		rootDirectory = new File(rootDir);
 		if (!rootDirectory.exists()) {
 			error("Root Directory: "+rootDir+" does not exist!");
+		} else if (!rootDirectory.isDirectory()) {
+			error("Root Directory: "+rootDir+" is not a directory!");
 		}
 		
 		Properties props = new Properties();
 		File pFile = new File(pFileName);
 		if (!pFile.exists()) {
 			logger.warning("Unable to find properties at "+pFileName);
+		} else {
+			try {
+				props.load(new FileReader(pFile));
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 		
 		initProperties(props);
