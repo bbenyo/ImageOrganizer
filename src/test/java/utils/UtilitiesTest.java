@@ -73,7 +73,8 @@ public class UtilitiesTest {
 		for (File f : files) {
 			boolean ret = fStats.handleFile(f);
 			if (f.getName().startsWith("notajpg") ||
-				f.getName().equals("babyvision.bmp")) {
+				f.getName().equals("babyvision.bmp") ||
+				f.getName().endsWith("properties")) {
 				Assert.assertFalse(ret);
 			} else {
 				Assert.assertTrue(ret);
