@@ -1,7 +1,6 @@
 package util.struct;
 
 import java.io.File;
-//import java.util.logging.Logger;
 
 public class FileTypeStats {
 	//static private Logger logger = Logger.getLogger(FileTypeStats.class.getName());

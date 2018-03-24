@@ -1,7 +1,8 @@
 package util.handlers;
 
 import java.io.File;
-import java.util.logging.Logger;
+
+import org.apache.log4j.Logger;
 
 import util.struct.MediaFile;
 

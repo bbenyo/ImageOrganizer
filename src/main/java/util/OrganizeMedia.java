@@ -7,13 +7,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.log4j.Logger;
 
 import util.handlers.MediaHandler;
 import util.struct.MediaFile;
@@ -38,7 +38,7 @@ public class OrganizeMedia {
 		Properties props = new Properties();
 		File pFile = new File(pFileName);
 		if (!pFile.exists()) {
-			logger.warning("Unable to find properties at "+pFileName);
+			logger.warn("Unable to find properties at "+pFileName);
 		} else {
 			try {
 				props.load(new FileReader(pFile));
@@ -99,28 +99,28 @@ public class OrganizeMedia {
 	
 	protected void fireHandlerDirectoryStart(File dir) {
 		for (MediaHandler handler : handlers) {
-			logger.fine("Firing "+handler.getLabel()+" for directory start: "+dir.getName());
+			logger.debug("Firing "+handler.getLabel()+" for directory start: "+dir.getName());
 			handler.directoryInit(dir);
 		}
 	}
 	
 	protected void fireHandlerDirectoryComplete(File dir) {
 		for (MediaHandler handler : handlers) {
-			logger.fine("Firing "+handler.getLabel()+" for directory complete: "+dir.getName());
+			logger.debug("Firing "+handler.getLabel()+" for directory complete: "+dir.getName());
 			handler.directoryComplete(dir);
 		}
 	}
 	
 	protected void fireHandlerFinalize() {
 		for (MediaHandler handler : handlers) {
-			logger.fine("Firing finalize for "+handler.getLabel());
+			logger.debug("Firing finalize for "+handler.getLabel());
 			handler.finalize();
 		}
 	}
 	
 	protected void fireHandlerInitialize() {
 		for (MediaHandler handler : handlers) {
-			logger.fine("Firing Initialize for "+handler.getLabel());
+			logger.debug("Firing Initialize for "+handler.getLabel());
 			handler.initialize();
 		}
 	}
@@ -129,21 +129,21 @@ public class OrganizeMedia {
 		MediaFile mFile = new MediaFile(f);
 		for (MediaHandler handler : handlers) {
 			if (handler.fileFilter(mFile)) {
-				logger.finer("Firing "+handler.getLabel()+" for file "+f.getName());
+				logger.debug("Firing "+handler.getLabel()+" for file "+f.getName());
 				boolean handled = handler.handleFile(mFile);
 				if (handled) {
-					logger.fine("File "+f.getName()+" handled by "+handler.getLabel());
+					logger.debug("File "+f.getName()+" handled by "+handler.getLabel());
 					break;
 				}
 			} else {
-				logger.finer("Handler "+handler.getLabel()+" won't handle "+f.getName());
+				logger.debug("Handler "+handler.getLabel()+" won't handle "+f.getName());
 			}
 		}
 		completeMediaFileHandling(mFile);
 	}
 	
 	protected void completeMediaFileHandling(MediaFile mFile) {
-		logger.fine("Complete handling for "+mFile.getBaseFile().getName());
+		logger.debug("Complete handling for "+mFile.getBaseFile().getName());
 		// If the file is marked delete, remove it my moving it to trash
 		if (mFile.isDelete()) {
 			
@@ -156,13 +156,13 @@ public class OrganizeMedia {
 	}
 	
 	static public void error(String msg) {
-		logger.severe(msg);
+		logger.error(msg);
 		System.exit(-1);;
 	}
 	
 	public void addHandler(MediaHandler handler) {
 		if (handler == null) {
-			logger.warning("addHandler null parameter!");
+			logger.warn("addHandler null parameter!");
 			return;
 		}
 		logger.info("Registering "+handler.getClass());
@@ -173,7 +173,7 @@ public class OrganizeMedia {
 		if (handlers.remove(handler)) {
 			logger.info("Unregistered "+handler.getClass());
 		} else {
-			logger.warning("Attempted to unregister "+handler.getClass()+" which was not registered!");
+			logger.warn("Attempted to unregister "+handler.getClass()+" which was not registered!");
 		}
 	}
 	
