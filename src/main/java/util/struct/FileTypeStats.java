@@ -1,12 +1,14 @@
 package util.struct;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 
 public class FileTypeStats {
 	//static private Logger logger = Logger.getLogger(FileTypeStats.class.getName());
 	
 	// No need for full regexs for file types, we'll just have a single wildcard for "all types"
 	static public String WILDCARD = "*";
+	
 	String fileType;
 	File directory;
 	boolean includeSubdirs = false;
@@ -18,6 +20,8 @@ public class FileTypeStats {
 	double stddevSize;
 	long earliestTime;
 	long latestTime;
+	
+	protected static SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
 	
 	public FileTypeStats(File dir, String type) {
 		this.directory = dir;
@@ -127,6 +131,22 @@ public class FileTypeStats {
 		} else {
 			return false;
 		}
+	}
+	
+	public String toString() {
+		return "FileStats for "+directory+": "+fileType;
+	}
+	
+	public String report() {
+		StringBuffer sb = new StringBuffer(toString());
+		String lineSep = System.lineSeparator();
+		sb.append(lineSep);
+		sb.append("File Count: "+fileCount+lineSep);
+		if (fileCount > 0) {
+			sb.append("Avg size: "+meanSize+" Min: "+minSize+" Max: "+maxSize+" Stddev: "+getStddevSize()+lineSep);
+			sb.append("Time Window: "+sdf.format(earliestTime)+" - "+sdf.format(latestTime));
+		}
+		return sb.toString();
 	}
 
 }

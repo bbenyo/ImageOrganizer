@@ -88,13 +88,16 @@ public class OrganizeMedia {
 				fireHandlerFile(f);
 			}
 		}
+		logger.info("PROGRESS Organized files, starting on subdirectories: "+dir);
+		
 		for (File f : dFiles) {
 			if (f.isDirectory()) {
 				organize(f);
 			}
 		}
-		fireHandlerDirectoryComplete(dir);
+
 		logger.info("COMPLETE Organizing directory: "+dir);
+		fireHandlerDirectoryComplete(dir);
 	}
 	
 	protected void fireHandlerDirectoryStart(File dir) {

@@ -13,8 +13,8 @@ public class DirectoryStats extends FileTypeStats {
 
 	HashMap<String, FileTypeStats> typeStatistics;
 	
-	public DirectoryStats(File dir, String type) {
-		super(dir, type);
+	public DirectoryStats(File dir) {
+		super(dir, FileTypeStats.WILDCARD);
 	}
 	
 	
