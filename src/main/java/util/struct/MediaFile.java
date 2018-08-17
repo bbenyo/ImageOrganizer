@@ -1,6 +1,7 @@
 package util.struct;
 
 import java.io.File;
+import java.util.ArrayList;
 
 public class MediaFile {
 
@@ -14,6 +15,20 @@ public class MediaFile {
 	// next tag = 0x4
 
 	int tag = 0;
+
+	static ArrayList<String> ImageFileExtensions = new ArrayList<String>();
+	static ArrayList<String> VideoFileExtensions = new ArrayList<String>();
+	
+	static {
+		ImageFileExtensions.add("gif");
+		ImageFileExtensions.add("jpg");
+		ImageFileExtensions.add("png");
+		ImageFileExtensions.add("bmp");
+		ImageFileExtensions.add("tiff");
+		
+		VideoFileExtensions.add("mp4");
+		VideoFileExtensions.add("mov");
+	}
 	
 	public MediaFile(File f) {
 		this.baseFile = f;
@@ -85,6 +100,20 @@ public class MediaFile {
 	
 	public void clearDelete() {
 		clearTag(TAG_DELETE);
+	}
+	
+	public boolean isImageFile() {
+		if (ext != null && ImageFileExtensions.contains(ext)) {
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean isVideoFile() {
+		if (ext != null && VideoFileExtensions.contains(ext)) {
+			return true;
+		}
+		return false;
 	}
 	
 }

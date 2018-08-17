@@ -11,7 +11,6 @@ public class FileTypeStats {
 	
 	String fileType;
 	File directory;
-	boolean includeSubdirs = false;
 	int fileCount;
 	long maxSize;
 	long minSize;
@@ -50,14 +49,6 @@ public class FileTypeStats {
 
 	public void setDirectory(File directory) {
 		this.directory = directory;
-	}
-
-	public boolean isIncludeSubdirs() {
-		return includeSubdirs;
-	}
-
-	public void setIncludeSubdirs(boolean includeSubdirs) {
-		this.includeSubdirs = includeSubdirs;
 	}
 
 	public String getFileType() {
@@ -134,18 +125,32 @@ public class FileTypeStats {
 	}
 	
 	public String toString() {
-		return "FileStats for "+directory+": "+fileType;
+		return directory+","+fileType;
 	}
 	
 	public String report() {
 		StringBuffer sb = new StringBuffer(toString());
-		String lineSep = System.lineSeparator();
-		sb.append(lineSep);
-		sb.append("File Count: "+fileCount+lineSep);
+		sb.append(": Count: "+fileCount);
 		if (fileCount > 0) {
-			sb.append("Avg size: "+meanSize+" Min: "+minSize+" Max: "+maxSize+" Stddev: "+getStddevSize()+lineSep);
-			sb.append("Time Window: "+sdf.format(earliestTime)+" - "+sdf.format(latestTime));
+			sb.append(" Avg: "+meanSize+" Min: "+minSize+" Max: "+maxSize);
+			double stddev = getStddevSize();
+			String stddevStr = String.format("%.02f", stddev);
+			sb.append(" Stddev: "+stddevStr);
+			sb.append(" Time Window: "+sdf.format(earliestTime)+" - "+sdf.format(latestTime));
 		}
+		return sb.toString();
+	}
+	
+	public String toCSV() {
+		StringBuffer sb = new StringBuffer(directory.toString());
+		sb.append(","+fileType);
+		sb.append(","+fileCount);
+		sb.append(","+meanSize);
+		sb.append(","+minSize);
+		sb.append(","+maxSize);
+		sb.append(","+getStddevSize());
+		sb.append(","+sdf.format(earliestTime));
+		sb.append(","+sdf.format(latestTime));
 		return sb.toString();
 	}
 

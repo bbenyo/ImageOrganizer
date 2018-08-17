@@ -6,17 +6,16 @@ import java.util.HashMap;
 import org.apache.log4j.Logger;
 
 import util.struct.DirectoryStats;
-import util.struct.FileTypeStats;
 import util.struct.MediaFile;
 
 public class Statistics extends MediaHandler {
+	
 	static private Logger logger = Logger.getLogger(Statistics.class.getName());
 	
 	// Store all computed statistics
 	protected HashMap<File, DirectoryStats> directoryStats;
 	
-	// Aggregate statistics for all directories
-	FileTypeStats rootStats; 
+	DirectoryStats rootStats; 
 		
 	public Statistics() {
 		super();
@@ -36,7 +35,21 @@ public class Statistics extends MediaHandler {
 		}
 		directoryStats.put(directory, dStats);
 	}
+	
+	@Override
+	public void subDirectoryInit(File directory, File subdir) {
+		// no-op, on complete we'll add if necessary
+	}
 
+	@Override
+	public void subDirectoryComplete(File directory, File subdir) {
+		DirectoryStats subStats = directoryStats.get(subdir);
+		DirectoryStats dStats = directoryStats.get(directory);
+		if (dStats != null) {
+			dStats.addSubdirectory(subStats);
+		}
+	}
+	
 	@Override
 	public boolean handleFile(MediaFile f1) {
 		File f = f1.getBaseFile();
@@ -63,6 +76,15 @@ public class Statistics extends MediaHandler {
 	@Override
 	public boolean fileFilter(MediaFile f1) {
 		return true;
+	}
+	
+	@Override
+	public void finalize() {
+		if (rootStats != null) {
+			logger.info(rootStats.reportTree());
+		} else {
+			logger.error("No root stats found");
+		}
 	}
 
 }

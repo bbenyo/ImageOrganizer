@@ -16,6 +16,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 
 import util.handlers.MediaHandler;
+import util.struct.FileUtilities;
 import util.struct.MediaFile;
 
 public class OrganizeMedia {
@@ -36,8 +37,8 @@ public class OrganizeMedia {
 		}
 		
 		Properties props = new Properties();
-		File pFile = new File(pFileName);
-		if (!pFile.exists()) {
+		File pFile = FileUtilities.findFile(pFileName);
+		if (pFile == null || !pFile.exists()) {
 			logger.warn("Unable to find properties at "+pFileName);
 		} else {
 			try {
@@ -92,7 +93,9 @@ public class OrganizeMedia {
 		
 		for (File f : dFiles) {
 			if (f.isDirectory()) {
+				fireHandlerSubDirectoryStart(dir, f);
 				organize(f);
+				fireHandlerSubDirectoryComplete(dir, f);
 			}
 		}
 
@@ -114,6 +117,20 @@ public class OrganizeMedia {
 		}
 	}
 	
+	protected void fireHandlerSubDirectoryStart(File dir, File subDir) {
+		for (MediaHandler handler : handlers) {
+			logger.debug("Firing "+handler.getLabel()+" for subdirectory start: "+dir.getName()+" -> "+subDir.getName());
+			handler.subDirectoryInit(dir, subDir);
+		}
+	}
+	
+	protected void fireHandlerSubDirectoryComplete(File dir, File subDir) {
+		for (MediaHandler handler : handlers) {
+			logger.debug("Firing "+handler.getLabel()+" for subdirectory complete: "+dir.getName()+" -> "+subDir.getName());
+			handler.subDirectoryComplete(dir, subDir);
+		}
+	}
+
 	protected void fireHandlerFinalize() {
 		for (MediaHandler handler : handlers) {
 			logger.debug("Firing finalize for "+handler.getLabel());

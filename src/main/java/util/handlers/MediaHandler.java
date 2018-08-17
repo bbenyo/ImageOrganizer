@@ -32,6 +32,12 @@ abstract public class MediaHandler {
 
 	// Do any finishing up processing/bookkeeping, we have just finished processing the given directory
 	abstract public void directoryComplete(File directory);
+
+	// Do any subdir start up processing/bookkeeping, we will start processing the given subdirectory next
+	abstract public void subDirectoryInit(File directory, File subDirectory);
+
+	// Do any finishing up processing/bookkeeping, we have just finished processing the given directory
+	abstract public void subDirectoryComplete(File directory, File subDirectory);
 	
 	// Given this file, apply whatever tags you want to it
 	// If you've handled it, return true, this will prevent the rest of the handlers from executing it

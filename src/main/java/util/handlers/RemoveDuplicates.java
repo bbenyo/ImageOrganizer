@@ -32,4 +32,14 @@ public class RemoveDuplicates extends MediaHandler {
 		return true; 
 	}
 
+	@Override
+	public void subDirectoryInit(File directory, File subDirectory) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void subDirectoryComplete(File directory, File subDirectory) {
+		// TODO Auto-generated method stub
+	}
+
 }
