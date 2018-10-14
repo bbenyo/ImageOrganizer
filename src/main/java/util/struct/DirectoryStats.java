@@ -56,15 +56,33 @@ public class DirectoryStats extends FileTypeStats {
 			FileTypeStats fStats = typeStatistics.get(type);
 			if (fStats != null) {
 				sb.append(lineSep+indent);
-				sb.append(fStats.report());
+				sb.append(fStats.report(indent));
+			}
+		}
+		return sb.toString();		
+	}
+	
+	public String reportLocalCSV() {
+		StringBuffer sb = new StringBuffer();
+		String lineSep = System.lineSeparator();
+		Set<String> types = typeStatistics.keySet();
+		if (types.isEmpty()) {
+			return sb.toString();
+		}
+		List<String> sTypes = new ArrayList<String>(types);
+		Collections.sort(sTypes);
+		for (String type : sTypes) {
+			FileTypeStats fStats = typeStatistics.get(type);
+			if (fStats != null) {
+				sb.append(fStats.reportCSV()+lineSep);
 			}
 		}
 		return sb.toString();		
 	}
 	
 	@Override
-	public String report() {
-		return reportLocal();
+	public String report(String indent) {
+		return reportLocal(indent);
 	}
 	
 	public String reportTree() {
@@ -76,6 +94,19 @@ public class DirectoryStats extends FileTypeStats {
 		String lineSep = System.lineSeparator();
 		for (DirectoryStats sub : subdirectories) {
 			sb.append(lineSep+indent+sub.reportTree(indent+"  "));
+		}
+		return sb.toString();
+	}
+	
+	public String csvHeaders() {
+		return "Directory,FileType,count,total,mean,min,max,stddev,earliest,latest" + System.lineSeparator();
+	}
+	
+	public String reportTreeCSV() {
+		StringBuffer sb = new StringBuffer(reportLocalCSV());
+		String lineSep = System.lineSeparator();
+		for (DirectoryStats sub : subdirectories) {
+			sb.append(sub.reportTreeCSV());
 		}
 		return sb.toString();
 	}

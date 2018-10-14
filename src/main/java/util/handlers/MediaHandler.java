@@ -1,6 +1,7 @@
 package util.handlers;
 
 import java.io.File;
+import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
@@ -50,7 +51,7 @@ abstract public class MediaHandler {
 	}
 
 	// Start (or restart) processing directories
-	public void initialize() {
+	public void initialize(Properties props) {
 		logger.info(getLabel()+" initialized");
 	}
 	

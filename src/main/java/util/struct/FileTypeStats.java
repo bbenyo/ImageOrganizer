@@ -15,6 +15,7 @@ public class FileTypeStats {
 	long maxSize;
 	long minSize;
 	float meanSize;
+	long totalSize;
 	double powSumAvg;
 	double stddevSize;
 	long earliestTime;
@@ -36,6 +37,7 @@ public class FileTypeStats {
 		fileCount = 0;
 		maxSize = -1; // if fileCount is 0, we consider these to be uninitialized, so this default value is irrelevant
 		minSize = -1;
+		totalSize = 0;
 		meanSize = 0;
 		powSumAvg = 0;
 		stddevSize = 0;
@@ -70,6 +72,10 @@ public class FileTypeStats {
 	public float getMeanSize() {
 		return meanSize;
 	}
+	
+	public long getTotalSize() {
+		return totalSize;
+	}
 
 	public double getStddevSize() {
 		if (fileCount <= 1) {
@@ -95,6 +101,7 @@ public class FileTypeStats {
 		if (fileType.equals(WILDCARD) || FileUtilities.getExtension(f).equals(fileType)) {
 			long size = f.length();
 			long lastMod = f.lastModified();
+			totalSize += size;
 			if (fileCount == 0) {
 				maxSize = size;
 				minSize = size;
@@ -128,17 +135,67 @@ public class FileTypeStats {
 		return directory+","+fileType;
 	}
 	
-	public String report() {
+	public String report(String indent) {
 		StringBuffer sb = new StringBuffer(toString());
 		sb.append(": Count: "+fileCount);
 		if (fileCount > 0) {
-			sb.append(" Avg: "+meanSize+" Min: "+minSize+" Max: "+maxSize);
+			sb.append(" Total: "+humanReadableBytes(totalSize));
+			sb.append(" Avg: "+humanReadableBytes(meanSize));
+			sb.append(" Min: "+humanReadableBytes(minSize));
+			sb.append(" Max: "+humanReadableBytes(maxSize));
 			double stddev = getStddevSize();
-			String stddevStr = String.format("%.02f", stddev);
-			sb.append(" Stddev: "+stddevStr);
+			//String stddevStr = String.format("%.02f", stddev);
+			sb.append(" SD: "+humanReadableBytes(stddev)); // stddevStr); 
+			sb.append(System.lineSeparator()+indent);
 			sb.append(" Time Window: "+sdf.format(earliestTime)+" - "+sdf.format(latestTime));
 		}
 		return sb.toString();
+	}
+	
+	public String reportCSV() {
+		StringBuffer sb = new StringBuffer(toString());
+		sb.append(","+fileCount);
+		if (fileCount > 0) {
+			sb.append(","+totalSize);
+			sb.append(","+meanSize);
+			sb.append(","+minSize);
+			sb.append(","+maxSize);
+			double stddev = getStddevSize();
+			sb.append(","+stddev); // stddevStr); 
+			sb.append(","+sdf.format(earliestTime));
+			sb.append(","+sdf.format(latestTime));
+		} else {
+			sb.append(",0,0,0,0,,,");
+		}
+		return sb.toString();
+	}
+	
+	public String humanReadableBytes(double bytes) {
+		if (Double.isNaN(bytes)) {
+			return "-";
+		}
+		// If less than 1K, report bytes
+		if (bytes <= 0) {
+			return String.format("%d B", (long)bytes);
+		}
+		int exponent = (int)(Math.log10(bytes) / 3.0);
+		float val = (float)(bytes / Math.pow(1000, exponent));
+		String num = "";
+		if (val == (long)val)
+			num = String.format("%d", (long)val);
+		else
+			num = String.format("%.3f", val);
+		switch (exponent) {
+		case 0 : return num+" B"; 
+		case 1 : return num+" K";
+		case 2 : return num+" M";
+		case 3 : return num+" G";
+		case 4 : return num+" T";
+		case 5 : return num+" P";
+		case 6 : return num+" E";
+		default :
+			return bytes+" (Huge!?!)";
+		} 
 	}
 	
 	public String toCSV() {

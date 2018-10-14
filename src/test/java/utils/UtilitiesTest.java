@@ -102,4 +102,25 @@ public class UtilitiesTest {
 		// Last mod time can vary depending on os, when downloaded, touching, etc, so lets not test that
 		// Not important anyway
 	}
+	
+	@Test
+	public void testHumanReadableBytes() {
+		FileTypeStats fstats = new FileTypeStats(null, null);
+		Assert.assertTrue(fstats.humanReadableBytes(0).equals("0 B"));
+		Assert.assertTrue(fstats.humanReadableBytes(1).equals("1 B"));
+		Assert.assertTrue(fstats.humanReadableBytes(999).equals("999 B"));
+		Assert.assertTrue(fstats.humanReadableBytes(1000).equals("1 K"));
+		Assert.assertTrue(fstats.humanReadableBytes(1001).equals("1.001 K"));
+		Assert.assertTrue(fstats.humanReadableBytes(2400).equals("2.400 K"));
+		Assert.assertTrue(fstats.humanReadableBytes(10000).equals("10 K"));
+		Assert.assertTrue(fstats.humanReadableBytes(100000).equals("100 K"));
+		Assert.assertTrue(fstats.humanReadableBytes(999999).equals("999.999 K"));
+		Assert.assertTrue(fstats.humanReadableBytes(1000000).equals("1 M"));
+		Assert.assertTrue(fstats.humanReadableBytes(1000001).equals("1.000 M"));
+		Assert.assertTrue(fstats.humanReadableBytes(1000000000.0).equals("1 G"));
+		Assert.assertTrue(fstats.humanReadableBytes(4222000000000.0).equals("4.222 T"));
+		Assert.assertTrue(fstats.humanReadableBytes(5100000000000111.0).equals("5.100 P"));
+		Assert.assertTrue(fstats.humanReadableBytes(7010000000000111222.0).equals("7.010 E"));
+		Assert.assertTrue(fstats.humanReadableBytes(5999999999999999999999.0).equals("6.0E21 (Huge!?!)"));
+	}
 }

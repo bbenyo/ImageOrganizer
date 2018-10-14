@@ -1,10 +1,15 @@
 package util.handlers;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
+import util.PropertyNames;
 import util.struct.DirectoryStats;
 import util.struct.MediaFile;
 
@@ -14,6 +19,9 @@ public class Statistics extends MediaHandler {
 	
 	// Store all computed statistics
 	protected HashMap<File, DirectoryStats> directoryStats;
+	protected String OutputFileName = "imageStatistics.txt";
+	protected String OutputFileCSV = "imageStatistics.csv";                         
+	protected String OutputFileDir = null; // Use the root of the searched directory
 	
 	DirectoryStats rootStats; 
 		
@@ -23,8 +31,27 @@ public class Statistics extends MediaHandler {
 	}
 	
 	@Override
-	public void initialize() {
+	public void initialize(Properties props) {
 		directoryStats.clear();
+		String of = props.getProperty(PropertyNames.STATS_OUTPUTFILENAME);
+		if (of != null) {
+			OutputFileName = of;
+		}
+		String ofd = props.getProperty(PropertyNames.STATS_OUTPUTFILEDIR);
+		if (ofd != null) {
+			OutputFileDir = ofd;
+		}
+		String ofc = props.getProperty(PropertyNames.STATS_OUTPUTFILECSV);
+		if (ofc != null) {
+			OutputFileCSV = ofc;
+		}
+
+		// Empty string (or "null") OutputFile means we don't write to a file
+		if (OutputFileName != null) {
+			if (OutputFileName.length() == 0 || OutputFileName.equalsIgnoreCase("null")) {
+				OutputFileName = null;
+			}
+		}	
 	}
 	
 	@Override
@@ -69,7 +96,7 @@ public class Statistics extends MediaHandler {
 		if (cDir == null) {
 			logger.error("Can't find stats for "+directory);
 		} else {
-			logger.info(cDir.report());
+			logger.info(cDir.report(""));
 		}
 	}
 
@@ -81,7 +108,35 @@ public class Statistics extends MediaHandler {
 	@Override
 	public void finalize() {
 		if (rootStats != null) {
-			logger.info(rootStats.reportTree());
+			String out = rootStats.reportTree();
+			if (OutputFileDir == null) {
+				OutputFileDir = rootStats.getDirectory().getAbsolutePath();
+			}
+			if (OutputFileName != null) {
+				File f1 = new File(OutputFileDir, OutputFileName);
+				logger.info("Writing statistics to "+f1);
+				try {
+					BufferedWriter bwrite = new BufferedWriter(new FileWriter(f1));
+					bwrite.write(out);
+					bwrite.close();
+				} catch (IOException ex) {
+					ex.printStackTrace();
+				}
+			}
+			if (OutputFileCSV != null) {
+				File f1 = new File(OutputFileDir, OutputFileCSV);
+				String outCSV = rootStats.reportTreeCSV();
+				logger.info("Writing statistics to "+f1);
+				try {
+					BufferedWriter bwrite = new BufferedWriter(new FileWriter(f1));
+					bwrite.write(rootStats.csvHeaders());
+					bwrite.write(outCSV);
+					bwrite.close();
+				} catch (IOException ex) {
+					ex.printStackTrace();
+				}
+			}
+			logger.info(out);
 		} else {
 			logger.error("No root stats found");
 		}

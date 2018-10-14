@@ -27,6 +27,9 @@ public class OrganizeMedia {
 
 	static public String PropertyFileName = "om.properties";
 	static public String DefaultDir = "data";
+	static public boolean ImageOnly = true;
+	
+	protected Properties props = null;
 	
 	public OrganizeMedia(String pFileName, String rootDir) {
 		rootDirectory = new File(rootDir);
@@ -36,7 +39,7 @@ public class OrganizeMedia {
 			error("Root Directory: "+rootDir+" is not a directory!");
 		}
 		
-		Properties props = new Properties();
+		props = new Properties();
 		File pFile = FileUtilities.findFile(pFileName);
 		if (pFile == null || !pFile.exists()) {
 			logger.warn("Unable to find properties at "+pFileName);
@@ -53,6 +56,7 @@ public class OrganizeMedia {
 		initProperties(props);
 	}
 	
+	// TODO: refactor using a ConfigItem or Option system
 	protected void initProperties(Properties props) {
 		String pDir = props.getProperty(PropertyNames.HANDLER_DEFAULT_PACKAGE, "util.handlers");
 		String hList = props.getProperty(PropertyNames.HANDLER_LIST);
@@ -71,6 +75,10 @@ public class OrganizeMedia {
 				ex.printStackTrace();
 				error(ex.toString());
 			}
+		}
+		String ionly = props.getProperty(PropertyNames.IMAGE_ONLY);
+		if (ionly != null) {
+			ImageOnly = Boolean.parseBoolean(ionly);
 		}
 	}
 	
@@ -141,12 +149,16 @@ public class OrganizeMedia {
 	protected void fireHandlerInitialize() {
 		for (MediaHandler handler : handlers) {
 			logger.debug("Firing Initialize for "+handler.getLabel());
-			handler.initialize();
+			handler.initialize(props);
 		}
 	}
 	
 	protected void fireHandlerFile(File f) {
 		MediaFile mFile = new MediaFile(f);
+		if (ImageOnly && !mFile.isImageFile()) {
+			logger.debug("Ignoring non image file: "+f);
+			return;
+		}
 		for (MediaHandler handler : handlers) {
 			if (handler.fileFilter(mFile)) {
 				logger.debug("Firing "+handler.getLabel()+" for file "+f.getName());

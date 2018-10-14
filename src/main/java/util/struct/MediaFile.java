@@ -32,16 +32,7 @@ public class MediaFile {
 	
 	public MediaFile(File f) {
 		this.baseFile = f;
-		try {
-			int dPos = f.getName().indexOf(".");
-			if (dPos > -1) {
-				ext = f.getName().substring(dPos+1);
-			} else {
-				ext = null;
-			}
-		} catch (Exception ex) {
-			throw new IllegalArgumentException(ex);
-		}
+		ext = FileUtilities.getExtension(f).toLowerCase();
 	}
 
 	// Accessors
