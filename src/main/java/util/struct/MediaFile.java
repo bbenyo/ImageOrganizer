@@ -25,6 +25,7 @@ public class MediaFile {
 		ImageFileExtensions.add("png");
 		ImageFileExtensions.add("bmp");
 		ImageFileExtensions.add("tiff");
+		ImageFileExtensions.add("heic");
 		
 		VideoFileExtensions.add("mp4");
 		VideoFileExtensions.add("mov");
