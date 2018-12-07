@@ -54,6 +54,15 @@ public class Statistics extends MediaHandler {
 		}	
 	}
 	
+	public String printConfig(String indent) {
+		StringBuffer sb = new StringBuffer();
+		String ls = System.lineSeparator();
+		sb.append(indent+" Stats OutputFile Name: "+OutputFileName+ls);
+		sb.append(indent+" Stats OutputFile Directory: "+OutputFileDir+ls);
+		sb.append(indent+" Stats OutputFile CSV: "+OutputFileCSV+ls);
+		return sb.toString();
+	}
+	
 	@Override
 	public void directoryInit(File directory) {
 		DirectoryStats dStats = new DirectoryStats(directory);

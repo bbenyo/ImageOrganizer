@@ -4,6 +4,7 @@ import java.io.File;
 
 import util.struct.MediaFile;
 
+// Make sure the file is valid and can be read. 
 public class RemoveUnreadable extends MediaHandler {
 
 	@Override

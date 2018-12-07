@@ -4,6 +4,7 @@ import java.io.File;
 
 import util.struct.MediaFile;
 
+// Verify that a defined archive directory has a copy of every file here
 public class VerifyArchive extends MediaHandler {
 
 	public VerifyArchive() {

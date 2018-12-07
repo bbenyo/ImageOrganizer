@@ -24,6 +24,10 @@ abstract public class MediaHandler {
 	public String getLabel() {
 		return label;
 	}
+	
+	public String printConfig(String indent) {
+		return indent+"No additional configuration options";
+	}
 
 	// Return true if you handle this type of file, false if not
 	abstract public boolean fileFilter(MediaFile f1);
