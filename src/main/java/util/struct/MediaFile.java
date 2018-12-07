@@ -108,4 +108,19 @@ public class MediaFile {
 		return false;
 	}
 	
+	// If we were going to move this file from oldroot dir to newRoot dir, what's the new absolute pathname?
+	public File getNewFilePath(File oldRoot, File newRoot) {
+		File pFile = baseFile;
+		String relativePath = "";
+		while (pFile != null && !pFile.equals(oldRoot)) {
+			relativePath = pFile.getName() + "/" + relativePath;
+			pFile = pFile.getParentFile();
+		}
+		
+		if (relativePath == "") {
+			return newRoot;
+		}
+		return new File(newRoot, relativePath);
+	}
+	
 }
