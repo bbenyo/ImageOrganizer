@@ -21,16 +21,19 @@ import util.struct.MediaFile;
 
 public class OrganizeMedia {
 
-	File rootDirectory;
 	static private Logger logger = Logger.getLogger(OrganizeMedia.class.getName());
-	List<MediaHandler> handlers = new ArrayList<MediaHandler>();
-
 	static public String PropertyFileName = "om.properties";
-	static public String DefaultDir = "data";
-	static public boolean ImageOnly = true;
-	
+	static public String DefaultDir = "data/test/Pictures";
+		
 	protected Properties props = null;
-	
+
+	File rootDirectory;
+	List<MediaHandler> handlers = new ArrayList<MediaHandler>();
+	public File goodDir = new File("data/test/Good");
+	public File trashDir = new File("data/test/ForDeletion");
+	public boolean imageOnly = true;
+	public boolean moveFiles = true;
+		
 	public OrganizeMedia(String pFileName, String rootDir) {
 		rootDirectory = new File(rootDir);
 		if (!rootDirectory.exists()) {
@@ -54,16 +57,21 @@ public class OrganizeMedia {
 		}
 		
 		initProperties(props);
+		printConfig();
 	}
 	
 	// TODO: refactor using a ConfigItem or Option system
 	protected void initProperties(Properties props) {
+		// This is the default package for handlers
 		String pDir = props.getProperty(PropertyNames.HANDLER_DEFAULT_PACKAGE, "util.handlers");
+		// This is the list of handlers, comma separated
+		// Handlers do something to a file or directory, and can mark files as either Good, move to archive, or delete
 		String hList = props.getProperty(PropertyNames.HANDLER_LIST);
 		if (hList == null) {
 			error("No Handlers defined in handler.list");
 		}
 		String[] hArray = hList.split(",");
+		// For each handler in the list, generate its full class name, instantiate it, and add it 
 		for (String h : hArray) {
 			String hName = pDir+"."+h.trim();
 			try {
@@ -76,12 +84,57 @@ public class OrganizeMedia {
 				error(ex.toString());
 			}
 		}
+		
+		// Boolean flag for whether we're only handling images, not video or other files
 		String ionly = props.getProperty(PropertyNames.IMAGE_ONLY);
 		if (ionly != null) {
-			ImageOnly = Boolean.parseBoolean(ionly);
+			imageOnly = Boolean.parseBoolean(ionly);
+		}
+		
+		// Boolean flag for whether we're actually moving files or not
+		String moveFilesStr = props.getProperty(PropertyNames.MOVE_FILES);
+		if (moveFilesStr != null) {
+			moveFiles = Boolean.parseBoolean(moveFilesStr);
+		}
+				
+		// Directory to store files for deleteion
+		String tDir = props.getProperty(PropertyNames.TRASH_DIR);
+		if (tDir != null) {
+			this.trashDir = new File(tDir);
+		}
+		if (!this.trashDir.exists()) {
+			this.trashDir.mkdirs();
+		}
+		
+		String gDir = props.getProperty(PropertyNames.GOOD_DIR);
+		if (gDir != null) {
+			this.goodDir = new File(gDir);
+		}
+		if (!this.goodDir.exists()) {
+			this.goodDir.mkdirs();
 		}
 	}
 	
+	private void printConfig() {
+		String ls = System.lineSeparator();
+		StringBuffer sb = new StringBuffer("OrganizeMedia Configuration: "+ls);
+		sb.append("  Working Directory: "+rootDirectory+ls);
+		sb.append("  Good Storage Directory: "+goodDir+ls);
+		sb.append("  Trash Directory: "+trashDir+ls);
+		sb.append("  Image Only? "+imageOnly+ls);
+		sb.append("  Move Files? "+moveFiles+ls);
+		sb.append("  Handlers: "+ls);
+		for (MediaHandler handler : handlers) {
+			sb.append("    "+handler.getLabel()+" "+handler.getClass().getName());
+			sb.append(ls);
+			sb.append(handler.printConfig("    "));
+		}
+		logger.info(sb.toString());
+	}
+		
+	/**
+	 * Main method to organize a directory.  Fire each handler on all directories and files
+	 */
 	public void organize() {
 		fireHandlerInitialize();
 		organize(rootDirectory);
@@ -155,7 +208,7 @@ public class OrganizeMedia {
 	
 	protected void fireHandlerFile(File f) {
 		MediaFile mFile = new MediaFile(f);
-		if (ImageOnly && !mFile.isImageFile()) {
+		if (imageOnly && !mFile.isImageFile()) {
 			logger.debug("Ignoring non image file: "+f);
 			return;
 		}
@@ -178,12 +231,23 @@ public class OrganizeMedia {
 		logger.debug("Complete handling for "+mFile.getBaseFile().getName());
 		// If the file is marked delete, remove it my moving it to trash
 		if (mFile.isDelete()) {
-			
+			logger.debug("Marked for deletion");
+			try {
+				FileUtilities.copyFile(mFile.getBaseFile(), mFile.getNewFilePath(rootDirectory, trashDir), true, true);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		} else if (mFile.isGood()) {
-			// If the file is marked good, keep it
-			
+			// If the file is marked good, move it to the good dir
+			logger.debug("Marked GOOD");
+			try {
+				FileUtilities.copyFile(mFile.getBaseFile(), mFile.getNewFilePath(rootDirectory, goodDir), true, true);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		} else {
-			// The file is neither good nor delete, so move it to archive
+			// The file is neither good nor delete, so keep it here
+			logger.debug("Marked ARCHIVE");
 		}
 	}
 	
@@ -213,7 +277,7 @@ public class OrganizeMedia {
 		Options options = new Options();
 		options.addOption("p", "properties", true, "Properties file name");
 		options.addOption("d", "dir", true, "Root directory to organize");
-		
+
 		CommandLineParser parser = new DefaultParser();
 		try {
 			CommandLine cLine = parser.parse(options, args);
