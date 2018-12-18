@@ -104,7 +104,7 @@ public class DirectoryStats extends FileTypeStats {
 	
 	public String reportTreeCSV() {
 		StringBuffer sb = new StringBuffer(reportLocalCSV());
-		String lineSep = System.lineSeparator();
+		//String lineSep = System.lineSeparator();
 		for (DirectoryStats sub : subdirectories) {
 			sb.append(sub.reportTreeCSV());
 		}
