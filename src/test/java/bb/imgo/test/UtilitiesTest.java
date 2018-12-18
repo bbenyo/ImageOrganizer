@@ -1,4 +1,4 @@
-package utils;
+package bb.imgo.test;
 
 import static org.junit.Assert.fail;
 
@@ -7,9 +7,9 @@ import java.io.File;
 import org.junit.Assert;
 import org.junit.Test;
 
-import util.MD5Checksum;
-import util.struct.FileTypeStats;
-import util.struct.FileUtilities;
+import bb.imgo.MD5Checksum;
+import bb.imgo.struct.FileTypeStats;
+import bb.imgo.struct.FileUtilities;
 
 public class UtilitiesTest {
 

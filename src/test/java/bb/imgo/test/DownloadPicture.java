@@ -1,4 +1,4 @@
-package utils;
+package bb.imgo.test;
 
 import java.io.File;
 import java.io.IOException;

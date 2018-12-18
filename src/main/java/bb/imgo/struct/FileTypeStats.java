@@ -1,4 +1,4 @@
-package util.struct;
+package bb.imgo.struct;
 
 import java.io.File;
 import java.text.SimpleDateFormat;

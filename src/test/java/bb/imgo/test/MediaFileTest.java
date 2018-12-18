@@ -1,11 +1,11 @@
-package utils;
+package bb.imgo.test;
 
 import java.io.File;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import util.struct.ImageFile;
+import bb.imgo.struct.ImageFile;
 
 public class MediaFileTest {
 	

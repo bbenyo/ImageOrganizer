@@ -1,4 +1,4 @@
-package utils;
+package bb.imgo.test;
 
 import java.io.File;
 
@@ -6,8 +6,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import util.OrganizeMedia;
-import utils.DownloadPicture.PictureParameters;
+import bb.imgo.OrganizeMedia;
+import bb.imgo.test.DownloadPicture.PictureParameters;
 
 public class OrganizeMediaFunctionalTests {
 
@@ -147,5 +147,8 @@ public class OrganizeMediaFunctionalTests {
 		OrganizeMedia.main(new String[] {"-p", "data/test/resources/statsonly.properties", "-d", testdir});
 	}
 		
+	public void testFileMove() {
+		OrganizeMedia.main(new String[] {"-p", "data/test/resources/testmove.properties", "-d", testdir});
+	}
 	
 }
