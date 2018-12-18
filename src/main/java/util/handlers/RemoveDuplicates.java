@@ -1,19 +1,11 @@
 package util.handlers;
 
-import java.io.File;
-
 import util.struct.MediaFile;
 
 public class RemoveDuplicates extends MediaHandler {
 
 	public RemoveDuplicates() {
 		super();
-	}
-	
-	@Override
-	public void directoryInit(File directory) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -23,23 +15,8 @@ public class RemoveDuplicates extends MediaHandler {
 	}
 
 	@Override
-	public void directoryComplete(File directory) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
 	public boolean fileFilter(MediaFile f1) {
 		return true; 
-	}
-
-	@Override
-	public void subDirectoryInit(File directory, File subDirectory) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void subDirectoryComplete(File directory, File subDirectory) {
-		// TODO Auto-generated method stub
 	}
 
 }

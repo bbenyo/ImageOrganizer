@@ -33,18 +33,27 @@ abstract public class MediaHandler {
 	abstract public boolean fileFilter(MediaFile f1);
 	
 	// Do any start up processing/bookkeeping, we will start processing the given directory next
-	abstract public void directoryInit(File directory);
+	public void directoryInit(File directory) {
+		logger.debug(label+" DirectoryInit");
+	}
 
 	// Do any finishing up processing/bookkeeping, we have just finished processing the given directory
-	abstract public void directoryComplete(File directory);
+	public void directoryComplete(File directory) {
+		logger.debug(label+" DirectoryComplete");
+	}
 
 	// Do any subdir start up processing/bookkeeping, we will start processing the given subdirectory next
-	abstract public void subDirectoryInit(File directory, File subDirectory);
+	public void subDirectoryInit(File directory, File subDirectory) {
+		logger.debug(label+" SubDirectoryInit");
+	}
 
 	// Do any finishing up processing/bookkeeping, we have just finished processing the given directory
-	abstract public void subDirectoryComplete(File directory, File subDirectory);
+	public void subDirectoryComplete(File directory, File subDirectory) {
+		logger.debug(label+" SubDirectoryComplete");
+	}
 	
 	// Given this file, apply whatever tags you want to it
+	
 	// If you've handled it, return true, this will prevent the rest of the handlers from executing it
 	// If not, return false, and the next handler will operate on it.
 	abstract public boolean handleFile(MediaFile f1);
