@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -33,6 +35,9 @@ public class OrganizeMedia {
 	public File trashDir = new File("data/test/ForDeletion");
 	public boolean imageOnly = true;
 	public boolean moveFiles = true;
+	
+	// True if we can use File.renameTo.  If that fails, we'll try move instead
+	private boolean ableToRename = true;
 		
 	public OrganizeMedia(String pFileName, String rootDir) {
 		rootDirectory = new File(rootDir);
@@ -233,6 +238,9 @@ public class OrganizeMedia {
 		if (mFile.isDelete()) {
 			logger.debug("Marked for deletion");
 			try {
+				File p1 = mFile.getBaseFile();
+				File p2 = mFile.getNewFilePath(rootDirectory, trashDir);
+				p1.renameTo(p2);
 				FileUtilities.copyFile(mFile.getBaseFile(), mFile.getNewFilePath(rootDirectory, trashDir), true, true);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -253,7 +261,7 @@ public class OrganizeMedia {
 	
 	static public void error(String msg) {
 		logger.error(msg);
-		System.exit(-1);;
+		System.exit(-1);
 	}
 	
 	public void addHandler(MediaHandler handler) {
