@@ -31,8 +31,8 @@ public class OrganizeMedia {
 
 	File rootDirectory;
 	List<MediaHandler> handlers = new ArrayList<MediaHandler>();
-	public File goodDir = new File("data/test/Good");
-	public File trashDir = new File("data/test/ForDeletion");
+	File goodDir = new File("data/test/Good");
+	File trashDir = new File("data/test/ForDeletion");
 	public boolean imageOnly = true;
 	public boolean moveFiles = true;
 	
@@ -64,7 +64,7 @@ public class OrganizeMedia {
 		initProperties(props);
 		printConfig();
 	}
-	
+
 	// TODO: refactor using a ConfigItem or Option system
 	protected void initProperties(Properties props) {
 		// This is the default package for handlers
@@ -232,6 +232,29 @@ public class OrganizeMedia {
 		completeMediaFileHandling(mFile);
 	}
 	
+	public void moveFile(File p1, File p2) throws IOException {
+		if (!p2.getParentFile().exists()) {
+			p2.getParentFile().mkdirs();
+		}
+		if (ableToRename) {
+			try {
+				boolean success = p1.renameTo(p2);
+				if (success) {
+					logger.debug("Renamed to "+p2.getAbsolutePath());
+					return;
+				} else {
+					logger.warn("Unable to rename file: "+p1+" to "+p2);
+					ableToRename = false;
+				}
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				ableToRename = false;
+			}
+		}				
+		Files.move(p1.toPath(), p2.toPath());
+		logger.debug("Moved to "+p2.getAbsolutePath());
+	}
+	
 	protected void completeMediaFileHandling(MediaFile mFile) {
 		logger.debug("Complete handling for "+mFile.getBaseFile().getName());
 		// If the file is marked delete, remove it my moving it to trash
@@ -240,8 +263,7 @@ public class OrganizeMedia {
 			try {
 				File p1 = mFile.getBaseFile();
 				File p2 = mFile.getNewFilePath(rootDirectory, trashDir);
-				p1.renameTo(p2);
-				FileUtilities.copyFile(mFile.getBaseFile(), mFile.getNewFilePath(rootDirectory, trashDir), true, true);
+				moveFile(p1, p2);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -249,7 +271,9 @@ public class OrganizeMedia {
 			// If the file is marked good, move it to the good dir
 			logger.debug("Marked GOOD");
 			try {
-				FileUtilities.copyFile(mFile.getBaseFile(), mFile.getNewFilePath(rootDirectory, goodDir), true, true);
+				File p1 = mFile.getBaseFile();
+				File p2 = mFile.getNewFilePath(rootDirectory, goodDir);
+				moveFile(p1, p2);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -281,6 +305,30 @@ public class OrganizeMedia {
 		}
 	}
 	
+	public File getRootDirectory() {
+		return rootDirectory;
+	}
+
+	public void setRootDirectory(File rootDirectory) {
+		this.rootDirectory = rootDirectory;
+	}
+
+	public File getGoodDir() {
+		return goodDir;
+	}
+
+	public void setGoodDir(File goodDir) {
+		this.goodDir = goodDir;
+	}
+
+	public File getTrashDir() {
+		return trashDir;
+	}
+
+	public void setTrashDir(File trashDir) {
+		this.trashDir = trashDir;
+	}
+
 	static public void main(String[] args) {
 		Options options = new Options();
 		options.addOption("p", "properties", true, "Properties file name");

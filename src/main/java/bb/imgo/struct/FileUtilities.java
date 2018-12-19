@@ -63,70 +63,6 @@ public class FileUtilities {
        logger.warn("Unable to find "+fileUri+" via classloader or pathname");
        return null;
 	}
-	
-	/**
-	 * Convenience method to copy a file from a source to a destination.
-	 * Overwrite is prevented, and the last modified is kept.
-	 *
-	 * @param sourceFile String filename
-	 * @param destFile String filename
-	 *
-	 * @throws IOException
-	 */
-
-	static public void copyFile(String sourceFile, String destFile) throws IOException {
-		copyFile(new File(sourceFile), new File(destFile), false, true);
-	}
-
-	/**
-	 * Method to copy a file from a source to destination specifying if
-	 * source files may overwrite newer destination files and the
-	 * last modified time of <code>destFile</code> file should be made equal
-	 * to the last modified time of <code>sourceFile</code>.
-	 *
-	 * @param sourceFile File
-	 * @param destFile File
-	 * @param overwrite boolean whether to overwrite the destination file if it exists
-	 * @param preserveLastModified boolean whether to change the lastModifiied file value or not
-	 *        if true, the dest file will have the same lastModified as the source file
-	 *        if false, the dest file will have lastModified set to now.
-	 *
-	 * @throws IOException
-	 */
-	
-	static public void copyFile(File sourceFile, File destFile, boolean overwrite, boolean preserveLastModified)
-			throws IOException {
-
-		if (overwrite || !destFile.exists() ||
-				destFile.lastModified() < sourceFile.lastModified()) {
-
-			if (destFile.exists() && destFile.isFile()) {
-				destFile.delete();
-			}
-
-			File parent = new File(destFile.getParent());
-			if (!parent.exists()) {
-				parent.mkdirs();
-			}
-
-			FileInputStream in = new FileInputStream(sourceFile);
-			FileOutputStream out = new FileOutputStream(destFile);
-
-			byte[] buffer = new byte[8 * 1024];
-			int count = 0;
-			do {
-				out.write(buffer, 0, count);
-				count = in.read(buffer, 0, buffer.length);
-			} while (count != -1);
-
-			in.close();
-			out.close();
-
-			if (preserveLastModified) {
-				destFile.setLastModified(sourceFile.lastModified());
-			}
-		}
-	}
 
 	public static String readFileContents(File file) throws FileNotFoundException, IOException {
 
@@ -152,6 +88,30 @@ public class FileUtilities {
 
 		reader.close();
 		return buf.toString();
+	}
+	
+	static public boolean deleteDirectoryContents(File dir) {
+		if (!dir.isDirectory()) {
+			logger.error(dir+" isn't a directory in deleteDirectoryContents!");
+			return false;
+		}
+		
+		File[] files = dir.listFiles();
+		boolean allSuccessful = true;
+		int count = 0;
+		for (File f : files) {
+			if (f.isDirectory()) {
+				deleteDirectoryContents(f);
+			}
+			if (!f.delete()) { 
+				allSuccessful = false;
+			} else {
+				count++;
+			}
+		}
+		
+		logger.info("Deleted "+count+" files from "+dir);
+		return allSuccessful;		
 	}
 }
 

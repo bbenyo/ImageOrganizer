@@ -1,12 +1,16 @@
 package bb.imgo.test;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import bb.imgo.OrganizeMedia;
+import bb.imgo.struct.FileUtilities;
+import bb.imgo.struct.MediaFile;
 import bb.imgo.test.DownloadPicture.PictureParameters;
 
 public class OrganizeMediaFunctionalTests {
@@ -147,8 +151,131 @@ public class OrganizeMediaFunctionalTests {
 		OrganizeMedia.main(new String[] {"-p", "data/test/resources/statsonly.properties", "-d", testdir});
 	}
 		
+	@Test
 	public void testFileMove() {
-		OrganizeMedia.main(new String[] {"-p", "data/test/resources/testmove.properties", "-d", testdir});
+		OrganizeMedia oMedia = new OrganizeMedia("data/test/resources/testmove.properties", testdir);
+		// Cleanup first
+		File goodDir = oMedia.getGoodDir();
+		File trashDir = oMedia.getTrashDir();
+		
+		Assert.assertTrue(goodDir.getAbsolutePath().indexOf("unittest") > -1);
+		FileUtilities.deleteDirectoryContents(goodDir);
+		FileUtilities.deleteDirectoryContents(trashDir);
+		Assert.assertTrue(goodDir.listFiles().length == 0);
+		Assert.assertTrue(trashDir.listFiles().length == 0);
+				
+		boolean failMe = false;
+		try {
+
+			oMedia.organize();
+			
+			// Expect Pic_0's to be good, Pic_1's to be deleted
+			File testFile = new File(goodDir, "Pic_0.jpg");
+			Assert.assertTrue(testFile.exists());
+			testFile = new File(goodDir, "A/Pic_0.jpg");
+			Assert.assertTrue(testFile.exists());
+			testFile = new File(goodDir, "A/B/Pic_0.jpg");
+			Assert.assertTrue(testFile.exists());
+			testFile = new File(goodDir, "A/D/E/Pic_0.jpg");
+			Assert.assertTrue(testFile.exists());
+			testFile = new File(goodDir, "A/D/F/Pic_0.jpg");
+			Assert.assertTrue(testFile.exists());
+			testFile = new File(goodDir, "A/D/G/Pic_0.jpg");
+			Assert.assertTrue(testFile.exists());
+			testFile = new File(goodDir, "H/Pic_0.jpg");
+			Assert.assertTrue(testFile.exists());
+			testFile = new File(goodDir, "I/J/K/Pic_0.jpg");
+			Assert.assertTrue(testFile.exists());
+			testFile = new File(goodDir, "I/J/K/L/Pic_0.jpg");
+			Assert.assertTrue(testFile.exists());
+			checkFileExists(goodDir, "Pic_0.jpg", true);
+			checkFileExists(oMedia.getRootDirectory(), "Pic_0.jpg", false);
+			
+			testFile = new File(trashDir, "Pic_1.jpg");
+			Assert.assertTrue(testFile.exists());
+			testFile = new File(trashDir, "A/Pic_1.jpg");
+			Assert.assertTrue(testFile.exists());
+			testFile = new File(trashDir, "A/B/Pic_1.jpg");
+			Assert.assertTrue(testFile.exists());
+			testFile = new File(trashDir, "A/D/E/Pic_1.jpg");
+			Assert.assertFalse(testFile.exists());
+			
+			testFile = new File(trashDir, "A/D/F/Pic_1.jpg");
+			Assert.assertTrue(testFile.exists());
+			testFile = new File(trashDir, "A/D/G/Pic_1.jpg");
+			Assert.assertTrue(testFile.exists());
+			testFile = new File(trashDir, "H/Pic_1.jpg");
+			Assert.assertFalse(testFile.exists());
+			
+			testFile = new File(trashDir, "I/J/K/Pic_1.jpg");
+			Assert.assertFalse(testFile.exists());
+			testFile = new File(trashDir, "I/J/K/L/Pic_1.jpg");
+			Assert.assertTrue(testFile.exists());
+			
+			checkFileExists(trashDir, "Pic_1.jpg", true);
+			checkFileExists(oMedia.getRootDirectory(), "Pic_1.jpg", false);
+
+		} catch (AssertionError ae) {
+			ae.printStackTrace();
+			failMe = true;
+		} finally {
+			// Clean up, copy goodDir files back
+			System.out.println("Moving files back from "+goodDir+" to "+oMedia.getRootDirectory());
+			moveFilesBack(oMedia, goodDir, oMedia.getRootDirectory());
+			System.out.println("Moving files back from "+trashDir+" to "+oMedia.getRootDirectory());
+			moveFilesBack(oMedia, trashDir, oMedia.getRootDirectory());
+		}
+		
+		File rootDir = oMedia.getRootDirectory();
+		File testFile = new File(rootDir, "Pic_0.jpg");
+		Assert.assertTrue(testFile.exists());
+		testFile = new File(rootDir, "Pic_1.jpg");
+		Assert.assertTrue(testFile.exists());
+		testFile = new File(rootDir, "I/J/K/L/Pic_0.jpg");
+		Assert.assertTrue(testFile.exists());
+		testFile = new File(rootDir, "I/J/K/L/Pic_1.jpg");
+		Assert.assertTrue(testFile.exists());
+		
+		if (failMe) {
+			Assert.fail();
+		}
 	}
 	
+	// Check that all files in dir are either named 'fname' (wantIt = true) or not 'fname' (wantIt = false).
+	private void checkFileExists(File dir, String fname, boolean wantIt) {
+		File[] files = dir.listFiles();
+		for (File f : files) {
+			if (f.isDirectory()) {
+				checkFileExists(f, fname, wantIt);
+			} else {
+				if (wantIt) {
+					Assert.assertTrue(f.getName().equals(fname));
+				} else {
+					Assert.assertFalse(f.getName().equals(fname));
+				}
+			}
+		}
+	}
+	
+	private void moveFilesBack(OrganizeMedia oMedia, File dir, File root) {
+		moveFilesBack1(oMedia, dir, dir, root);
+	}
+	
+	private void moveFilesBack1(OrganizeMedia oMedia, File dir, File currentDir, File root) {
+		File[] files = currentDir.listFiles();
+		for (File f : files) {
+			if (f.isDirectory()) {
+				moveFilesBack1(oMedia, dir, f, root);
+			} else {
+				MediaFile mFile = new MediaFile(f);
+				File p2 = mFile.getNewFilePath(dir, root);
+				try {
+					oMedia.moveFile(f, p2);
+				} catch (IOException e) {
+					e.printStackTrace();
+					Assert.fail();
+				}
+			}
+		}
+	}
 }
