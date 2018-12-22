@@ -96,7 +96,8 @@ public class Statistics extends MediaHandler {
 			directoryStats.put(f.getParentFile(), cDir);
 		} 
 		// Statistics doesn't apply any tags to the MediaFile, so we can just get the base File
-		return cDir.handleFile(f1.getBaseFile());
+		cDir.handleFile(f1.getBaseFile());
+		return false;
 	}
 
 	@Override
