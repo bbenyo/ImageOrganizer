@@ -3,12 +3,14 @@ package bb.imgo.test;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import bb.imgo.OrganizeMedia;
+import bb.imgo.struct.ActionLog;
 import bb.imgo.struct.FileUtilities;
 import bb.imgo.struct.MediaFile;
 import bb.imgo.test.DownloadPicture.PictureParameters;
@@ -16,6 +18,7 @@ import bb.imgo.test.DownloadPicture.PictureParameters;
 public class OrganizeMediaFunctionalTests {
 
 	static public String testdir = "data/test/Pictures";
+	static public String resDir = "data/test/resources";
 	
 	@Before
 	public void setUp() {
@@ -149,6 +152,7 @@ public class OrganizeMediaFunctionalTests {
 	@Test
 	public void testStatistics() {
 		OrganizeMedia.main(new String[] {"-p", "data/test/resources/statsonly.properties", "-d", testdir});
+		// todo assertions
 	}
 		
 	@Test
@@ -277,5 +281,16 @@ public class OrganizeMediaFunctionalTests {
 				}
 			}
 		}
+	}
+	
+
+	@Test
+	public void testRemoveDuplicates() {
+		OrganizeMedia org = new OrganizeMedia("data/test/resources/testdup.properties", resDir);
+		org.organize();
+		ArrayList<ActionLog> alog = org.getActionLog();
+		Assert.assertTrue(alog.size() == 4);
+		
+		
 	}
 }
