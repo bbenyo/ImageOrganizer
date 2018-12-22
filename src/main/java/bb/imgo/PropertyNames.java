@@ -10,6 +10,8 @@ public class PropertyNames {
 	static public String IMAGE_ONLY = "handler.imageonly";
 	// Move marked files?  If false, we'll just log the marks
 	static public String MOVE_FILES = "handler.moveFiles";
+	// Action Log output name
+	static public String ACTION_LOG_NAME = "handler.actionLog.name";
 
 	// Output file name for stats
 	static public String STATS_OUTPUTFILENAME = "statistics.outputfile.name";

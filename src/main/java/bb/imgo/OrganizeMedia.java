@@ -1,11 +1,12 @@
 package bb.imgo;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -18,6 +19,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 
 import bb.imgo.handlers.MediaHandler;
+import bb.imgo.struct.ActionLog;
 import bb.imgo.struct.FileUtilities;
 import bb.imgo.struct.MediaFile;
 
@@ -38,6 +40,9 @@ public class OrganizeMedia {
 	
 	// True if we can use File.renameTo.  If that fails, we'll try move instead
 	private boolean ableToRename = true;
+	
+	protected ArrayList<ActionLog> actionLog = new ArrayList<ActionLog>();
+	protected String actionLogFilename = "action.log";
 		
 	public OrganizeMedia(String pFileName, String rootDir) {
 		rootDirectory = new File(rootDir);
@@ -118,6 +123,11 @@ public class OrganizeMedia {
 		if (!this.goodDir.exists()) {
 			this.goodDir.mkdirs();
 		}
+		
+		String alf = props.getProperty(PropertyNames.ACTION_LOG_NAME);
+		if (alf != null) {
+			this.actionLogFilename = alf;
+		}
 	}
 	
 	private void printConfig() {
@@ -128,11 +138,13 @@ public class OrganizeMedia {
 		sb.append("  Trash Directory: "+trashDir+ls);
 		sb.append("  Image Only? "+imageOnly+ls);
 		sb.append("  Move Files? "+moveFiles+ls);
+		sb.append("  Action Log Filename: "+actionLogFilename+ls);
 		sb.append("  Handlers: "+ls);
 		for (MediaHandler handler : handlers) {
 			sb.append("    "+handler.getLabel()+" "+handler.getClass().getName());
 			sb.append(ls);
-			sb.append(handler.printConfig("    "));
+			sb.append(handler.printConfig("      "));
+			sb.append(ls);
 		}
 		logger.info(sb.toString());
 	}
@@ -141,9 +153,11 @@ public class OrganizeMedia {
 	 * Main method to organize a directory.  Fire each handler on all directories and files
 	 */
 	public void organize() {
+		actionLog.clear();
 		fireHandlerInitialize();
 		organize(rootDirectory);
 		fireHandlerFinalize();
+		writeActionLog();
 	}
 	
 	protected void organize(File dir) {
@@ -255,32 +269,60 @@ public class OrganizeMedia {
 		logger.debug("Moved to "+p2.getAbsolutePath());
 	}
 	
+	protected void addActionLog(String fname, ActionLog.Action act) {
+		ActionLog al = new ActionLog(fname, act);
+		actionLog.add(al);
+	}
+	
 	protected void completeMediaFileHandling(MediaFile mFile) {
 		logger.debug("Complete handling for "+mFile.getBaseFile().getName());
 		// If the file is marked delete, remove it my moving it to trash
 		if (mFile.isDelete()) {
 			logger.debug("Marked for deletion");
-			try {
-				File p1 = mFile.getBaseFile();
-				File p2 = mFile.getNewFilePath(rootDirectory, trashDir);
-				moveFile(p1, p2);
-			} catch (IOException e) {
-				e.printStackTrace();
+			addActionLog(mFile.getBaseFile().getAbsolutePath(), ActionLog.Action.DELETE);
+			if (moveFiles) {
+				try {
+					File p1 = mFile.getBaseFile();
+					File p2 = mFile.getNewFilePath(rootDirectory, trashDir);
+					moveFile(p1, p2);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		} else if (mFile.isGood()) {
 			// If the file is marked good, move it to the good dir
 			logger.debug("Marked GOOD");
-			try {
-				File p1 = mFile.getBaseFile();
-				File p2 = mFile.getNewFilePath(rootDirectory, goodDir);
-				moveFile(p1, p2);
-			} catch (IOException e) {
-				e.printStackTrace();
+			addActionLog(mFile.getBaseFile().getAbsolutePath(), ActionLog.Action.GOOD);
+			if (moveFiles) {
+				try {
+					File p1 = mFile.getBaseFile();
+					File p2 = mFile.getNewFilePath(rootDirectory, goodDir);
+					moveFile(p1, p2);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		} else {
 			// The file is neither good nor delete, so keep it here
 			logger.debug("Marked ARCHIVE");
 		}
+	}
+	
+	public void writeActionLog() {
+		File alf = new File(actionLogFilename);
+		try {
+			BufferedWriter bwrite = new BufferedWriter(new FileWriter(alf));
+			for (ActionLog al : actionLog) {
+				bwrite.write(al.toString()+System.lineSeparator());
+			}
+			bwrite.close();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
+	
+	public ArrayList<ActionLog> getActionLog() {
+		return actionLog;
 	}
 	
 	static public void error(String msg) {
