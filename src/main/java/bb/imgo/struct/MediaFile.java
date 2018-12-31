@@ -1,12 +1,18 @@
 package bb.imgo.struct;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.io.IOException;
+
+import org.apache.log4j.Logger;
+import org.apache.tika.Tika;
 
 public class MediaFile {
 
+	static private Logger logger = Logger.getLogger(MediaFile.class.getName());
+	
 	File baseFile;
 	String ext = null;  // File extension: Null extension is unknown or no extension
+	String type = null;
 	
 	// Tags as a bitmask to keep the structure size down
 	// These values are 1 << n
@@ -15,25 +21,24 @@ public class MediaFile {
 	// next tag = 0x4
 
 	int tag = 0;
-
-	static ArrayList<String> ImageFileExtensions = new ArrayList<String>();
-	static ArrayList<String> VideoFileExtensions = new ArrayList<String>();
 	
-	static {
-		ImageFileExtensions.add("gif");
-		ImageFileExtensions.add("jpg");
-		ImageFileExtensions.add("png");
-		ImageFileExtensions.add("bmp");
-		ImageFileExtensions.add("tiff");
-		ImageFileExtensions.add("heic");
-		
-		VideoFileExtensions.add("mp4");
-		VideoFileExtensions.add("mov");
-	}
+	Tika tika = new Tika();
 	
 	public MediaFile(File f) {
 		this.baseFile = f;
 		ext = FileUtilities.getExtension(f).toLowerCase();
+		// Figure out the real type with apache tika
+		try {
+			type = tika.detect(f);
+			// TIKA currently thinks that HEIC files are video/quicktime
+			logger.info("TIKA Determined "+f+ " is: " + type);
+			if (type.equalsIgnoreCase("video/quicktime") && ext.equalsIgnoreCase("HEIC")) {
+				type = "image/heic";
+				logger.info("\tChanging to "+type);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	// Accessors
@@ -95,14 +100,14 @@ public class MediaFile {
 	}
 	
 	public boolean isImageFile() {
-		if (ext != null && ImageFileExtensions.contains(ext)) {
+		if (type != null && type.startsWith("image")) {
 			return true;
 		}
 		return false;
 	}
 	
 	public boolean isVideoFile() {
-		if (ext != null && VideoFileExtensions.contains(ext)) {
+		if (type != null && type.startsWith("video")) {
 			return true;
 		}
 		return false;
