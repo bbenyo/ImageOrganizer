@@ -72,9 +72,7 @@ public class UtilitiesTest {
 		File[] files = rDir.listFiles();
 		for (File f : files) {
 			boolean ret = fStats.handleFile(f);
-			if (f.getName().startsWith("notajpg") ||
-				f.getName().equals("babyvision.bmp") ||
-				f.getName().endsWith("properties")) {
+			if (!f.getName().endsWith(".png")) {
 				Assert.assertFalse(ret);
 			} else {
 				Assert.assertTrue(ret);
@@ -91,13 +89,13 @@ public class UtilitiesTest {
 		File minFile = new File(rDir, "001.png");
 		File maxFile = new File(rDir, "cube.png");
 		
-		Assert.assertTrue(fStats.getFileCount() == 5);
+		Assert.assertTrue(fStats.getFileCount() == 10);
 		Assert.assertTrue(fStats.getMinSize() == minFile.length());
 		Assert.assertTrue(fStats.getMaxSize() == maxFile.length());
 		
 		// Try to account for potential differences in file sizes across different systems
-		Assert.assertTrue(fStats.getMeanSize() > 24000 && fStats.getMeanSize() < 25000);
-		Assert.assertTrue(fStats.getStddevSize() > 35000 && fStats.getStddevSize() < 36000);
+		Assert.assertTrue(fStats.getMeanSize() > 33000 && fStats.getMeanSize() < 35000);
+		Assert.assertTrue(fStats.getStddevSize() > 35000 && fStats.getStddevSize() < 40000);
 		
 		// Last mod time can vary depending on os, when downloaded, touching, etc, so lets not test that
 		// Not important anyway

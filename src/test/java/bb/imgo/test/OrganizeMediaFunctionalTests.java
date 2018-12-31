@@ -289,7 +289,7 @@ public class OrganizeMediaFunctionalTests {
 		OrganizeMedia org = new OrganizeMedia("data/test/resources/testdup.properties", resDir);
 		org.organize();
 		ArrayList<ActionLog> alog = org.getActionLog();
-		Assert.assertTrue(alog.size() == 4);
+		Assert.assertTrue(alog.size() == 6);
 		
 		
 	}
