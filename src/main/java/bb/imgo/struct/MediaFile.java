@@ -2,6 +2,10 @@ package bb.imgo.struct;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.apache.log4j.Logger;
 import org.apache.tika.Tika;
@@ -23,6 +27,8 @@ public class MediaFile {
 	int tag = 0;
 	
 	Tika tika = new Tika();
+	
+	static public SimpleDateFormat ymdhm = new SimpleDateFormat("YYYY-MM-DD HH:mm");
 	
 	public MediaFile(File f) {
 		this.baseFile = f;
@@ -46,9 +52,24 @@ public class MediaFile {
 	public File getBaseFile() {
 		return baseFile;
 	}
+	
+	public URL getURL() {
+		try {
+			return baseFile.toURI().toURL();
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 
 	public void setBaseFile(File baseFile) {
 		this.baseFile = baseFile;
+	}
+	
+	public String getDateTime() {
+		long time = baseFile.lastModified();
+		Date d = new Date(time);
+		return ymdhm.format(d);
 	}
 
 	public String getExt() {

@@ -171,31 +171,7 @@ public class FileTypeStats {
 	}
 	
 	public String humanReadableBytes(double bytes) {
-		if (Double.isNaN(bytes)) {
-			return "-";
-		}
-		// If less than 1K, report bytes
-		if (bytes <= 0) {
-			return String.format("%d B", (long)bytes);
-		}
-		int exponent = (int)(Math.log10(bytes) / 3.0);
-		float val = (float)(bytes / Math.pow(1000, exponent));
-		String num = "";
-		if (val == (long)val)
-			num = String.format("%d", (long)val);
-		else
-			num = String.format("%.3f", val);
-		switch (exponent) {
-		case 0 : return num+" B"; 
-		case 1 : return num+" K";
-		case 2 : return num+" M";
-		case 3 : return num+" G";
-		case 4 : return num+" T";
-		case 5 : return num+" P";
-		case 6 : return num+" E";
-		default :
-			return bytes+" (Huge!?!)";
-		} 
+		return FileUtilities.humanReadableBytes(bytes);
 	}
 	
 	public String toCSV() {
