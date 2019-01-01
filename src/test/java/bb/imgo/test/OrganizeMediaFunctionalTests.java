@@ -290,7 +290,36 @@ public class OrganizeMediaFunctionalTests {
 		org.organize();
 		ArrayList<ActionLog> alog = org.getActionLog();
 		Assert.assertTrue(alog.size() == 6);
+	}
+	
+	@Test
+	public void testRemoveEmptySubdirectories() {
+		OrganizeMedia org = new OrganizeMedia("data/test/resources/testrmempty.properties", resDir);
+		File makeEmpty = new File("data/test/resources/testEmpty1");
+		File makeEmpty2 = new File("data/test/resources/testEmpty1/testEmpty2");
+		File makeEmpty3 = new File("data/test/resources/testEmpty3");
+		File makeNonEmpty4 = new File("data/test/resources/testNotEmpty4");
+		makeEmpty.mkdirs();
+		makeEmpty2.mkdirs();
+		makeEmpty3.mkdirs();
+		makeNonEmpty4.mkdirs();
+		File f1 = new File(makeNonEmpty4, "test.txt");
+		try {
+			f1.createNewFile();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
+		Assert.assertTrue(f1.exists());
 		
+		org.organize();
+		ArrayList<ActionLog> alog = org.getActionLog();
+		Assert.assertTrue(alog.size() == 3);  
+		// Expect to delete testEmpty1, 2, 3
+				
+		Assert.assertFalse(makeEmpty.exists());
+		Assert.assertFalse(makeEmpty2.exists());
+		Assert.assertFalse(makeEmpty3.exists());
+		Assert.assertTrue(makeNonEmpty4.exists());
 	}
 }
