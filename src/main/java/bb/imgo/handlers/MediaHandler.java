@@ -5,6 +5,8 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
+import bb.imgo.OrganizeMedia;
+import bb.imgo.struct.ActionLog;
 import bb.imgo.struct.MediaFile;
 
 // Handle a media file, decide what flag to apply to it
@@ -12,6 +14,7 @@ abstract public class MediaHandler {
 
 	static private Logger logger = Logger.getLogger(MediaHandler.class.getName());
 	String label;
+	OrganizeMedia main;
 	
 	protected MediaHandler() {
 		label = this.getClass().getSimpleName();
@@ -27,6 +30,16 @@ abstract public class MediaHandler {
 	
 	public String printConfig(String indent) {
 		return indent+"No additional configuration options";
+	}
+	
+	public void linkOrganizeMedia(OrganizeMedia om) {
+		this.main = om;
+	}
+	
+	public void addActionLog(String filename, ActionLog.Action action) {
+		if (main != null) {
+			main.addActionLog(filename, action);
+		}
 	}
 
 	// Return true if you handle this type of file, false if not

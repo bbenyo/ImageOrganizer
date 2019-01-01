@@ -269,7 +269,7 @@ public class OrganizeMedia {
 		logger.debug("Moved to "+p2.getAbsolutePath());
 	}
 	
-	protected void addActionLog(String fname, ActionLog.Action act) {
+	public void addActionLog(String fname, ActionLog.Action act) {
 		ActionLog al = new ActionLog(fname, act);
 		actionLog.add(al);
 	}
@@ -337,6 +337,7 @@ public class OrganizeMedia {
 		}
 		logger.info("Registering "+handler.getClass());
 		handlers.add(handler);
+		handler.linkOrganizeMedia(this);
 	}
 	
 	public void removeHandler(MediaHandler handler) {
