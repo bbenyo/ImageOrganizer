@@ -1,9 +1,11 @@
 package bb.imgo.handlers;
 
 import java.io.File;
+import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
+import bb.imgo.PropertyNames;
 import bb.imgo.struct.ActionLog;
 import bb.imgo.struct.MediaFile;
 
@@ -14,13 +16,23 @@ import bb.imgo.struct.MediaFile;
  */
 public class RemoveEmptySubdirectory extends MediaHandler {
 	static private Logger logger = Logger.getLogger(RemoveDuplicates.class.getName());
+	boolean logOnly = true;
 	
+	@Override
+	public void initialize(Properties props) {
+		String mf = props.getProperty(PropertyNames.MOVE_FILES);
+		logOnly = !Boolean.parseBoolean(mf);
+		logger.info(getLabel()+" initialized, logOnly: "+logOnly);
+	}
+		
 	@Override
 	public void directoryComplete(File directory) {
 		if (directory.listFiles().length == 0) {
 			logger.info("Removing empty directory: "+directory.getAbsolutePath());
 			try {
-				directory.delete();
+				if (!logOnly) {
+					directory.delete();
+				}
 				addActionLog(directory.getAbsolutePath(), ActionLog.Action.DELETE);
 			} catch (Exception ex) {
 				ex.printStackTrace();
