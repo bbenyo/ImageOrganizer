@@ -16,10 +16,12 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.SwingConstants;
 
+import org.apache.log4j.Logger;
+
 @SuppressWarnings("serial")
 
 public class ImagePanel extends JPanel {
-
+	static private Logger logger = Logger.getLogger(ImagePanel.class.getName());
 	// Image icon
 	// Stat label
 	// Radio button (good/trash/archive)
@@ -57,15 +59,20 @@ public class ImagePanel extends JPanel {
 	
 	private void init() {
 		setLayout(new BorderLayout());
-		
 		URL imgUrl = mFile.getURL();
 		try {
 			if (imgUrl != null) {
 				BufferedImage img = null;
-				img = ImageIO.read(imgUrl);			
-				// TODO: Allow you to set the size via properties
-				Image imgResized = img.getScaledInstance(256, 256, Image.SCALE_SMOOTH);
-				imgIcon = new ImageIcon(imgResized);
+				img = ImageIO.read(imgUrl);		
+				if (img != null) {
+					// TODO: Allow you to set the size via properties
+					Image imgResized = img.getScaledInstance(256, 256, Image.SCALE_SMOOTH);
+					imgIcon = new ImageIcon(imgResized);
+				} else {
+					logger.info("Unable to read Image from "+imgUrl);
+					imgIcon = new ImageIcon();
+					mFile.setDelete();
+				}
 			} else {
 				imgIcon = new ImageIcon();
 			}

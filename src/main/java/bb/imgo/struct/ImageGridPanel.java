@@ -1,18 +1,29 @@
 package bb.imgo.struct;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileFilter;
 
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import org.apache.log4j.Logger;
+
 @SuppressWarnings("serial")
 public class ImageGridPanel extends JFrame {
-
+	static private Logger logger = Logger.getLogger(ImageGridPanel.class.getName());
+	
 	JPanel mainPanel;
+	JPanel buttonPanel;
 	JButton back;
 	JButton next;
 	JButton done;
@@ -23,7 +34,7 @@ public class ImageGridPanel extends JFrame {
 	int startIndex = -1;
 	int endIndex = -1;
 	
-	static public FileFilter dirFilter = new DirectoryFileFilter();
+	static public FileFilter imageFilter = new ImageFileFilter();
 	
 	public ImageGridPanel(File directory, int x, int y) {
 		super(directory.getAbsolutePath());
@@ -42,45 +53,87 @@ public class ImageGridPanel extends JFrame {
 		startIndex = 0;
 		back = null;
 		next = null;
-		showPage();
-		
-		JPanel buttonPanel = new JPanel();
-		buttonPanel.setLayout(new BorderLayout());
-		if (back != null) {
-			buttonPanel.add(back, BorderLayout.WEST);
-		}
-		if (next != null) {
-			buttonPanel.add(next, BorderLayout.EAST);
-		}
-		done = new JButton("Done");
-		buttonPanel.add(done, BorderLayout.CENTER);
-		
+
 		JPanel cPane = new JPanel();
 		cPane.setLayout(new BorderLayout());
+		buttonPanel = new JPanel();
+		buttonPanel.setLayout(new BorderLayout());
+	
+		done = new JButton("Done");
+		done.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				cleanup();
+			}
+		});
+		
+		back = new JButton("<<");
+		back.setFont(new Font("Arial", Font.BOLD, 32));
+		back.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				logger.info("BACK");
+				startIndex = startIndex - (x*y);
+				if (startIndex < 0) {
+					startIndex = 0;
+				}
+				showPage();
+			}
+		});
+		
+		next = new JButton(">>");	
+		next.setFont(new Font("Arial", Font.BOLD, 32));
+		next.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				startIndex = startIndex + (x*y);
+				logger.info("NEXT");
+				showPage();
+			}
+			
+		});
+		
 		cPane.add(mainPanel, BorderLayout.CENTER);
 		cPane.add(buttonPanel, BorderLayout.SOUTH);
 		this.setContentPane(cPane);
+
+		showPage();
+	}
+	
+	public void cleanup() {
+		setVisible(false);
+		dispose();
 	}
 	
 	private void showPage() {
-		File[] files = directory.listFiles(dirFilter);
-		int showingCount = x*y;
+		logger.info("Showing page for "+directory+" starting at "+startIndex);
+		mainPanel.removeAll();
+		buttonPanel.removeAll();
+		File[] files = directory.listFiles(imageFilter);
 		
-		for (int i=startIndex; (i<showingCount && i<files.length); ++i) {
+		int expectedEndIndex = startIndex + x*y;
+		for (int i=startIndex; (i<expectedEndIndex && i<files.length); ++i) {
 			File f = files[i];
 			MediaFile mFile = new MediaFile(f);
 			ImagePanel iPanel = new ImagePanel(mFile);
+			iPanel.setBorder(BorderFactory.createLineBorder(Color.black, 4));
 			mainPanel.add(iPanel);
 			endIndex = i;
 		}
 		
 		if (startIndex > 0) {
-			back = new JButton("Back");			
+			buttonPanel.add(back, BorderLayout.WEST);
 		}
 		
 		if (endIndex < (files.length - 1)) {
-			next = new JButton("Next");			
+			buttonPanel.add(next, BorderLayout.EAST);
 		}
-				
+		
+		JPanel bcPanel = new JPanel();
+		bcPanel.add(done);
+		buttonPanel.add(bcPanel, BorderLayout.CENTER);
+		
+		revalidate();	
+		repaint();
 	}
 }

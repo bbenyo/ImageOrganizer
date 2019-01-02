@@ -24,12 +24,6 @@ public class UITest {
 		ImagePanel ip1 = new ImagePanel(p0);
 		JFrame if1 = ip1.createFrame();
 		Assert.assertTrue(if1.isVisible());
-		
-		try {
-			Thread.sleep(10000);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
 	}
 	
 	@Test
@@ -37,14 +31,8 @@ public class UITest {
 		File rDir = new File("data/test/Pictures/I/J/K/L");
 		Assert.assertTrue(rDir.exists());
 		
-		ImageGridPanel ig = new ImageGridPanel(rDir, 4, 3);
+		ImageGridPanel ig = new ImageGridPanel(rDir, 5, 2);
 		ig.setVisible(true);
 		Assert.assertTrue(ig.isVisible());
-		
-		try {
-			Thread.sleep(10000);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
 	}
 }
