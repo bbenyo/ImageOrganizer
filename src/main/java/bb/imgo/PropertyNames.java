@@ -12,6 +12,10 @@ public class PropertyNames {
 	static public String MOVE_FILES = "handler.moveFiles";
 	// Action Log output name
 	static public String ACTION_LOG_NAME = "handler.actionLog.name";
+	// Intermediate state file, used to resume an incomplete run
+	static public String INTERMED_STATE_FILE = "handler.intermedstate.name";
+	// Show the UI
+	static public String SHOW_UI = "handler.ui";
 
 	// Output file name for stats
 	static public String STATS_OUTPUTFILENAME = "statistics.outputfile.name";

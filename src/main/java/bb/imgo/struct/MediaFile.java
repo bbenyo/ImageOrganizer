@@ -131,7 +131,10 @@ public class MediaFile {
 	}
 	
 	public boolean isImageFile() {
-		if (type != null && type.startsWith("image")) {
+		if (type == null) {
+			getType();
+		}
+		if (type.startsWith("image")) {
 			return true;
 		}
 		return false;

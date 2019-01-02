@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -22,6 +23,7 @@ import bb.imgo.handlers.MediaHandler;
 import bb.imgo.struct.ActionLog;
 import bb.imgo.struct.FileUtilities;
 import bb.imgo.struct.MediaFile;
+import bb.imgo.ui.OverviewFrame;
 
 public class OrganizeMedia {
 
@@ -43,7 +45,16 @@ public class OrganizeMedia {
 	
 	protected ArrayList<ActionLog> actionLog = new ArrayList<ActionLog>();
 	protected String actionLogFilename = "action.log";
-		
+	
+	protected boolean showUI = true;
+	protected OverviewFrame ui = null;
+	
+	protected AtomicBoolean running = new AtomicBoolean(true);
+	protected boolean abortFlag = false;
+	
+	// To synchronize thread wait/notify
+	private Object sync = new Object();
+	
 	public OrganizeMedia(String pFileName, String rootDir) {
 		rootDirectory = new File(rootDir);
 		if (!rootDirectory.exists()) {
@@ -128,6 +139,11 @@ public class OrganizeMedia {
 		if (alf != null) {
 			this.actionLogFilename = alf;
 		}
+		
+		String sui = props.getProperty(PropertyNames.SHOW_UI);
+		if (sui != null) {
+			showUI = Boolean.parseBoolean(sui);
+		}
 	}
 	
 	private void printConfig() {
@@ -139,6 +155,7 @@ public class OrganizeMedia {
 		sb.append("  Image Only? "+imageOnly+ls);
 		sb.append("  Move Files? "+moveFiles+ls);
 		sb.append("  Action Log Filename: "+actionLogFilename+ls);
+		sb.append("  Show UI? "+showUI+ls);
 		sb.append("  Handlers: "+ls);
 		for (MediaHandler handler : handlers) {
 			sb.append("    "+handler.getLabel()+" "+handler.getClass().getName());
@@ -155,17 +172,44 @@ public class OrganizeMedia {
 	public void organize() {
 		actionLog.clear();
 		fireHandlerInitialize();
+		running.set(true);
 		organize(rootDirectory);
 		fireHandlerFinalize();
 		writeActionLog();
 	}
 	
+	private boolean checkPause() {
+		if (!running.get()) {
+			if (abortFlag) {
+				logger.info("ABORT");
+				return false;
+			}
+			synchronized(sync) {
+				try {
+					logger.info("PAUSED");
+					sync.wait();
+					logger.info("RESUMED");
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		return true;
+	}
+	
 	protected void organize(File dir) {
+		if (!checkPause()) {
+			return;
+		}
 		logger.info("START Organizing directory: "+dir);
 		File[] dFiles = dir.listFiles();
 		fireHandlerDirectoryStart(dir);
 		for (File f : dFiles) {
 			if (!f.isDirectory()) {
+				if (!checkPause()) {
+					return;
+				}
 				fireHandlerFile(f);
 			}
 		}
@@ -183,10 +227,20 @@ public class OrganizeMedia {
 		fireHandlerDirectoryComplete(dir);
 	}
 	
+	private void uiStatus(String status) {
+		if (ui != null) {
+			ui.updateStatus(status);
+		}
+		logger.debug(status);
+	}
+	
 	protected void fireHandlerDirectoryStart(File dir) {
 		for (MediaHandler handler : handlers) {
 			logger.debug("Firing "+handler.getLabel()+" for directory start: "+dir.getName());
 			handler.directoryInit(dir);
+		}
+		if (ui != null) {
+			ui.changeCurrentDirectory(dir.getAbsolutePath());
 		}
 	}
 	
@@ -195,6 +249,7 @@ public class OrganizeMedia {
 			logger.debug("Firing "+handler.getLabel()+" for directory complete: "+dir.getName());
 			handler.directoryComplete(dir);
 		}
+		uiStatus("COMPLETE directory "+dir.getAbsolutePath());
 	}
 	
 	protected void fireHandlerSubDirectoryStart(File dir, File subDir) {
@@ -213,14 +268,14 @@ public class OrganizeMedia {
 
 	protected void fireHandlerFinalize() {
 		for (MediaHandler handler : handlers) {
-			logger.debug("Firing finalize for "+handler.getLabel());
+			uiStatus("Firing finalize for "+handler.getLabel());
 			handler.finalize();
 		}
 	}
 	
 	protected void fireHandlerInitialize() {
 		for (MediaHandler handler : handlers) {
-			logger.debug("Firing Initialize for "+handler.getLabel());
+			uiStatus("Firing Initialize for "+handler.getLabel());
 			handler.initialize(props);
 		}
 	}
@@ -233,7 +288,7 @@ public class OrganizeMedia {
 		}
 		for (MediaHandler handler : handlers) {
 			if (handler.fileFilter(mFile)) {
-				logger.debug("Firing "+handler.getLabel()+" for file "+f.getName());
+				uiStatus(handler.getLabel()+" for file "+f.getName());
 				boolean handled = handler.handleFile(mFile);
 				if (handled) {
 					logger.debug("File "+f.getName()+" handled by "+handler.getLabel());
@@ -266,7 +321,7 @@ public class OrganizeMedia {
 			}
 		}				
 		Files.move(p1.toPath(), p2.toPath());
-		logger.debug("Moved to "+p2.getAbsolutePath());
+		uiStatus("Moved to "+p2.getAbsolutePath());
 	}
 	
 	public void addActionLog(String fname, ActionLog.Action act) {
@@ -275,9 +330,12 @@ public class OrganizeMedia {
 	}
 	
 	protected void completeMediaFileHandling(MediaFile mFile) {
-		logger.debug("Complete handling for "+mFile.getBaseFile().getName());
+		uiStatus("Complete handling for "+mFile.getBaseFile().getName());
 		// If the file is marked delete, remove it my moving it to trash
 		if (mFile.isDelete()) {
+			if (ui != null) {
+				ui.handleFile(false, true);
+			}
 			logger.debug("Marked for deletion");
 			addActionLog(mFile.getBaseFile().getAbsolutePath(), ActionLog.Action.DELETE);
 			if (moveFiles) {
@@ -292,6 +350,9 @@ public class OrganizeMedia {
 		} else if (mFile.isGood()) {
 			// If the file is marked good, move it to the good dir
 			logger.debug("Marked GOOD");
+			if (ui != null) {
+				ui.handleFile(true, false);
+			}
 			addActionLog(mFile.getBaseFile().getAbsolutePath(), ActionLog.Action.GOOD);
 			if (moveFiles) {
 				try {
@@ -305,6 +366,9 @@ public class OrganizeMedia {
 		} else {
 			// The file is neither good nor delete, so keep it here
 			logger.debug("Marked ARCHIVE");
+			if (ui != null) {
+				ui.handleFile(false, false);
+			}
 		}
 	}
 	
@@ -371,7 +435,46 @@ public class OrganizeMedia {
 	public void setTrashDir(File trashDir) {
 		this.trashDir = trashDir;
 	}
+	
+	public void startUI() {
+		ui = new OverviewFrame();
+		ui.init(this);
+		ui.setLocationRelativeTo(null);
+		ui.setVisible(true);
+	}
+	
+	public void pause() {
+		running.set(false);
+	}
+	
+	public void abort() {
+		abortFlag = true;
+		running.set(false);
+	}
 
+	public void resume() {
+		running.set(true);
+		synchronized(sync) {
+			sync.notifyAll();
+		}
+	}
+	
+	public void exit() {
+		abort();
+		while (running.get()) {
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		System.exit(1);
+	}
+	
+	public List<MediaHandler> getHandlers() {
+		return handlers;
+	}
+	
 	static public void main(String[] args) {
 		Options options = new Options();
 		options.addOption("p", "properties", true, "Properties file name");
@@ -383,7 +486,11 @@ public class OrganizeMedia {
 			String pFileName = cLine.getOptionValue("p", PropertyFileName);
 			String rDir = cLine.getOptionValue("d", DefaultDir);
 			OrganizeMedia oMedia = new OrganizeMedia(pFileName, rDir);
-			oMedia.organize();
+			if (oMedia.showUI) {
+				oMedia.startUI();
+			} else {
+				oMedia.organize();
+			}
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
