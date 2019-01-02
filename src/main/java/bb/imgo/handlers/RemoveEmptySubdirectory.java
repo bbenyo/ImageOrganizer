@@ -15,7 +15,7 @@ import bb.imgo.struct.MediaFile;
  *
  */
 public class RemoveEmptySubdirectory extends MediaHandler {
-	static private Logger logger = Logger.getLogger(RemoveDuplicates.class.getName());
+	static private Logger logger = Logger.getLogger(RemoveEmptySubdirectory.class.getName());
 	boolean logOnly = true;
 	
 	@Override
