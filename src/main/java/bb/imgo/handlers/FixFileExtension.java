@@ -3,6 +3,7 @@ package bb.imgo.handlers;
 import java.io.IOException;
 import java.util.HashMap;
 
+import org.apache.log4j.Logger;
 import org.apache.tika.Tika;
 
 import bb.imgo.struct.MediaFile;
@@ -13,7 +14,8 @@ import bb.imgo.struct.MediaFile;
  *
  */
 public class FixFileExtension extends MediaHandler {
-
+	
+	static private Logger logger = Logger.getLogger(FixFileExtension.class.getName());
 	static HashMap<String, String> extensionMap = new HashMap<String, String>();
 	
 	static {
@@ -31,20 +33,8 @@ public class FixFileExtension extends MediaHandler {
 
 	@Override
 	public boolean handleFile(MediaFile f1) {
-
-        Tika tika = new Tika();
-		try {
-			String type = tika.detect(f1.getBaseFile());
-			// TIKA currently thinks that HEIC files are video/quicktime
-	        System.out.println("TIKA Determined "+f1.getBaseFile() + " is: " + type);
-			if (type.equalsIgnoreCase("video/quicktime") && f1.getExt().equalsIgnoreCase("HEIC")) {
-				type = "image/heic";
-				System.out.println("\tChanging to "+type);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
+		String type = f1.getType();
+		logger.info("File type: "+type);
 		return false;
 	}
 
