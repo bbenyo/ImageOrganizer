@@ -5,12 +5,11 @@ import java.io.File;
 import javax.swing.JFrame;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import bb.imgo.struct.ImageGridPanel;
-import bb.imgo.struct.ImagePanel;
 import bb.imgo.struct.MediaFile;
+import bb.imgo.ui.ImageGridPanel;
+import bb.imgo.ui.ImagePanel;
 
 public class UITest {
 	

@@ -2,7 +2,7 @@ package bb.imgo;
 
 import java.io.File;
 
-import bb.imgo.struct.ImageGridPanel;
+import bb.imgo.ui.ImageGridPanel;
 
 public class UITestMain {
 	

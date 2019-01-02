@@ -1,4 +1,4 @@
-package bb.imgo.struct;
+package bb.imgo.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
@@ -17,6 +17,9 @@ import javax.swing.JRadioButton;
 import javax.swing.SwingConstants;
 
 import org.apache.log4j.Logger;
+
+import bb.imgo.struct.FileUtilities;
+import bb.imgo.struct.MediaFile;
 
 @SuppressWarnings("serial")
 

@@ -1,4 +1,4 @@
-package bb.imgo.struct;
+package bb.imgo.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -17,6 +17,9 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
+
+import bb.imgo.struct.ImageFileFilter;
+import bb.imgo.struct.MediaFile;
 
 @SuppressWarnings("serial")
 public class ImageGridPanel extends JFrame {
