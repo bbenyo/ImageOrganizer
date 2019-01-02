@@ -16,7 +16,7 @@ public class MediaFile {
 	
 	File baseFile;
 	String ext = null;  // File extension: Null extension is unknown or no extension
-	String type = null;
+	private String type = null;
 	
 	// Tags as a bitmask to keep the structure size down
 	// These values are 1 << n
@@ -33,20 +33,9 @@ public class MediaFile {
 	public MediaFile(File f) {
 		this.baseFile = f;
 		ext = FileUtilities.getExtension(f).toLowerCase();
-		// Figure out the real type with apache tika
-		try {
-			type = tika.detect(f);
-			// TIKA currently thinks that HEIC files are video/quicktime
-			logger.info("TIKA Determined "+f+ " is: " + type);
-			if (type.equalsIgnoreCase("video/quicktime") && ext.equalsIgnoreCase("HEIC")) {
-				type = "image/heic";
-				logger.info("\tChanging to "+type);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		
 	}
-
+		
 	// Accessors
 	
 	public File getBaseFile() {
@@ -60,6 +49,27 @@ public class MediaFile {
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	public String getType() {
+		if (type == null) {
+			// Figure out the real type with apache tika the first time it's needed.
+			try {
+				type = tika.detect(baseFile);
+				// TIKA currently thinks that HEIC files are video/quicktime
+				logger.info("TIKA Determined "+baseFile+ " is: " + type);
+				if (type.equalsIgnoreCase("video/quicktime") && ext.equalsIgnoreCase("HEIC")) {
+					type = "image/heic";
+					logger.info("\tChanging to "+type);
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			if (type == null) {
+				type = "unknown";
+			}
+		}
+		return type;
 	}
 
 	public void setBaseFile(File baseFile) {
