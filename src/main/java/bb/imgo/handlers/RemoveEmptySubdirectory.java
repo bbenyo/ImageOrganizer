@@ -20,8 +20,7 @@ public class RemoveEmptySubdirectory extends MediaHandler {
 	
 	@Override
 	public void initialize(Properties props) {
-		String mf = props.getProperty(PropertyNames.MOVE_FILES);
-		logOnly = !Boolean.parseBoolean(mf);
+		logOnly = !main.moveFiles;
 		logger.info(getLabel()+" initialized, logOnly: "+logOnly);
 	}
 		
@@ -37,7 +36,7 @@ public class RemoveEmptySubdirectory extends MediaHandler {
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
-		}		
+		} 
 	}
 	
 	@Override
