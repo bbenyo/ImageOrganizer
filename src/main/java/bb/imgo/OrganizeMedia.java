@@ -233,7 +233,7 @@ public class OrganizeMedia {
 		}
 		logger.debug(status);
 	}
-	
+		
 	protected void fireHandlerDirectoryStart(File dir) {
 		for (MediaHandler handler : handlers) {
 			logger.debug("Firing "+handler.getLabel()+" for directory start: "+dir.getName());
@@ -327,6 +327,9 @@ public class OrganizeMedia {
 	public void addActionLog(String fname, ActionLog.Action act) {
 		ActionLog al = new ActionLog(fname, act);
 		actionLog.add(al);
+		if (ui != null) {
+			ui.updateActionLog(al.toString());
+		}
 	}
 	
 	protected void completeMediaFileHandling(MediaFile mFile) {

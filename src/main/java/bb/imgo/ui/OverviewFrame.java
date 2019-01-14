@@ -4,6 +4,9 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
@@ -16,6 +19,10 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+
+import org.apache.commons.logging.Log;
 
 import bb.imgo.OrganizeMedia;
 import bb.imgo.OrganizeMediaUIInterface;
@@ -27,9 +34,16 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 	JLabel rootDirectoryLabel;
 	// JButton rootDirectoryBrowse;
 	
+	JScrollPane actionLogPane;
+	JTextArea actionLogArea;
+	
 	JLabel activeHandlers;
 	JLabel startTimeLabel;
 	JLabel statisticsLabel;
+	
+	JButton viewFullLogButton;
+	JButton viewGoodDirectory;
+	JButton viewTrashDirectory;
 	
 	JLabel curDirectoryLabel;
 	JLabel statusLabel;
@@ -63,63 +77,112 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		String rootDir = oMedia.getRootDirectory().getAbsolutePath();
 		List<MediaHandler> handlers = oMedia.getHandlers();
 		JPanel mainPanel = new JPanel();
-		mainPanel.setLayout(new BorderLayout());
+		mainPanel.setLayout(new GridBagLayout());
+		GridBagConstraints gbc = new GridBagConstraints();
 		
-		rootDirectoryLabel = new JLabel("  Root: "+rootDir+"  ");
+		rootDirectoryLabel = new JLabel("Root: "+rootDir+"  ");
 		rootDirectoryLabel.setFont(arial18);
+		gbc.gridx=0;
+		gbc.gridy=0;
+		gbc.weightx=1.0;
+		gbc.gridwidth=4;
+		gbc.gridheight=1;
+		gbc.insets = new Insets(5,5,5,5); 
+		gbc.fill=GridBagConstraints.BOTH;
+		gbc.anchor=GridBagConstraints.LINE_START;
+		mainPanel.add(rootDirectoryLabel, gbc);
 		
-		StringBuffer handlerStr = new StringBuffer("<html><h1>Media Handlers in Operation</h1>");
+		StringBuffer handlerStr = new StringBuffer("Handlers: ");
 		for (MediaHandler handler : handlers) {
-			handlerStr.append("<br><center>"+handler.getLabel()+"</center>");
+			handlerStr.append(handler.getLabel()+" ");
 		}
-		handlerStr.append("</html>");
+		gbc.gridy=1;
 		activeHandlers = new JLabel(handlerStr.toString());
 		activeHandlers.setFont(arial18);
+		mainPanel.add(activeHandlers, gbc);
+		
+		actionLogArea = new JTextArea("Action Log:\n");
+		actionLogArea.setFont(arial18);
+		actionLogPane = new JScrollPane(actionLogArea);
+		gbc.gridy=2;
+		gbc.gridheight=6;
+		gbc.weighty=1.0;
+		gbc.fill=GridBagConstraints.BOTH;
+		mainPanel.add(actionLogPane, gbc);
 		
 		statisticsLabel = new JLabel();
 		statisticsLabel.setFont(arial18);
+		gbc.gridy=7;
+		gbc.weighty=0;
+		gbc.gridwidth=3;
+		gbc.gridheight=1;
 		startTimeLabel = new JLabel("Not Started");
 		startTimeLabel.setFont(arial18);
 		updateStatistics();
+		mainPanel.add(startTimeLabel, gbc);
 		
-		mainPanel.add(rootDirectoryLabel, BorderLayout.NORTH);
+		viewFullLogButton = new JButton("View Full Log");
+		viewFullLogButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+			}
+		});
+		gbc.gridx=3;
+		gbc.gridwidth=1;
+		mainPanel.add(viewFullLogButton, gbc);
 		
-		JPanel p1 = new JPanel();
-		p1.setLayout(new BorderLayout());
-		p1.add(activeHandlers, BorderLayout.CENTER);
-		p1.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+		gbc.gridx=0;
+		gbc.gridy=8;
+		gbc.gridwidth=3;
+		gbc.gridheight=3;
+		mainPanel.add(statisticsLabel, gbc);
 		
-		JPanel p2 = new JPanel();
-		p2.setLayout(new BorderLayout());
-		p2.add(startTimeLabel, BorderLayout.NORTH);
-		p2.add(statisticsLabel, BorderLayout.CENTER);
-		p2.setBorder(BorderFactory.createLineBorder(Color.BLUE, 4));
-		p1.add(p2, BorderLayout.SOUTH);
+		viewGoodDirectory = new JButton("Good Directory");
+		viewGoodDirectory.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+			}
+		});
+		gbc.gridx=3;
+		gbc.gridy=9;
+		gbc.gridwidth=1;
+		gbc.gridheight=1;
+		mainPanel.add(viewGoodDirectory, gbc);
 		
-		JPanel p3 = new JPanel();
-		p3.setLayout(new BorderLayout());
+		viewTrashDirectory = new JButton("Trash Directory");
+		viewTrashDirectory.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+			}
+		});
+		gbc.gridy=10;
+		mainPanel.add(viewTrashDirectory, gbc);
+		
 		curDirectoryLabel = new JLabel("Working in: ");
 		curDirectoryLabel.setFont(arial18);
-		curDirectoryLabel.setPreferredSize(new Dimension(400,30));
+		gbc.gridy=12;
+		gbc.gridx=0;
+		gbc.gridwidth=4;
+		gbc.gridheight=1;
+		mainPanel.add(curDirectoryLabel, gbc);
+		
 		statusLabel = new JLabel("Status");
 		statusLabel.setFont(arial18);
-		p3.add(curDirectoryLabel, BorderLayout.NORTH);
-		p3.add(statusLabel, BorderLayout.CENTER);
-		p3.setBorder(BorderFactory.createLineBorder(Color.BLUE, 4));
-		
+		gbc.gridy=13;
+		gbc.gridx=0;
+		gbc.gridwidth=4;
+		gbc.gridheight=2;
+		mainPanel.add(statusLabel, gbc);
+				
 		progress = new JProgressBar();
 		progress.setMinimum(0);
 		progress.setMaximum(100);
 		progress.setValue(1);
-		p3.add(progress, BorderLayout.SOUTH);
-		
-		JPanel cPanel = new JPanel();
-		cPanel.setLayout(new BorderLayout());
-		cPanel.add(p1, BorderLayout.NORTH);
-		cPanel.add(p3, BorderLayout.CENTER);
-		
-		mainPanel.add(cPanel, BorderLayout.CENTER);
-		
+		progress.setFont(arial18);
+		gbc.gridy=15;
+		gbc.gridheight=1;
+		mainPanel.add(progress, gbc);
+				
 		JPanel buttonPanel = new JPanel();
 		startButton = new JButton("Start");
 		startButton.addActionListener(new ActionListener() {
@@ -162,7 +225,11 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		buttonPanel.add(cancelButton);
 		buttonPanel.add(exitButton);
 		
-		mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+		gbc.gridy=16;
+		gbc.gridx=0;
+		gbc.gridwidth=4;
+		gbc.gridheight=1;
+		mainPanel.add(buttonPanel, gbc);
 		
 		this.setContentPane(mainPanel);
 		// TODO: Set size via propeties
@@ -202,6 +269,10 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		statusLabel.setText(status);
 		// TODO: Do I need to call these repaints?
 		statusLabel.repaint();
+	}
+	
+	public void updateActionLog(String log) {
+		actionLogArea.append(System.lineSeparator()+log);
 	}
 	
 	public void start() {
