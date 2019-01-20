@@ -1,28 +1,26 @@
 package bb.imgo.ui;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
+import java.awt.Desktop;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-
-import org.apache.commons.logging.Log;
 
 import bb.imgo.OrganizeMedia;
 import bb.imgo.OrganizeMediaUIInterface;
@@ -38,6 +36,7 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 	JTextArea actionLogArea;
 	
 	JLabel activeHandlers;
+	JCheckBox moveFilesBox;
 	JLabel startTimeLabel;
 	JLabel statisticsLabel;
 	
@@ -96,15 +95,31 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		for (MediaHandler handler : handlers) {
 			handlerStr.append(handler.getLabel()+" ");
 		}
-		gbc.gridy=1;
+		gbc.gridy++;
 		activeHandlers = new JLabel(handlerStr.toString());
 		activeHandlers.setFont(arial18);
 		mainPanel.add(activeHandlers, gbc);
 		
+		moveFilesBox = new JCheckBox("Move Files (or just log) ?");
+		moveFilesBox.setFont(arial18);
+		if (oMedia.moveFiles) {
+			moveFilesBox.setSelected(true);
+		} else {
+			moveFilesBox.setSelected(false);
+		}
+		moveFilesBox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				controller.setMoveFiles(moveFilesBox.isSelected());
+			}
+		});
+		
+		gbc.gridy++;
+		mainPanel.add(moveFilesBox, gbc);
+		
 		actionLogArea = new JTextArea("Action Log:\n");
 		actionLogArea.setFont(arial18);
 		actionLogPane = new JScrollPane(actionLogArea);
-		gbc.gridy=2;
+		gbc.gridy++;
 		gbc.gridheight=6;
 		gbc.weighty=1.0;
 		gbc.fill=GridBagConstraints.BOTH;
@@ -112,7 +127,7 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		
 		statisticsLabel = new JLabel();
 		statisticsLabel.setFont(arial18);
-		gbc.gridy=7;
+		gbc.gridy = gbc.gridy + 6;
 		gbc.weighty=0;
 		gbc.gridwidth=3;
 		gbc.gridheight=1;
@@ -124,7 +139,15 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		viewFullLogButton = new JButton("View Full Log");
 		viewFullLogButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
+				File gd = new File("io.log"); // TODO: get the log file from log4j.properties
+				if (gd != null && gd.exists()) {
+					Desktop desktop = Desktop.getDesktop();
+					try {
+						desktop.open(gd);
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				}
 			}
 		});
 		gbc.gridx=3;
@@ -132,7 +155,7 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		mainPanel.add(viewFullLogButton, gbc);
 		
 		gbc.gridx=0;
-		gbc.gridy=8;
+		gbc.gridy++;
 		gbc.gridwidth=3;
 		gbc.gridheight=3;
 		mainPanel.add(statisticsLabel, gbc);
@@ -140,11 +163,19 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		viewGoodDirectory = new JButton("Good Directory");
 		viewGoodDirectory.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
+				File gd = controller.getGoodDir();
+				if (gd != null && gd.exists()) {
+					Desktop desktop = Desktop.getDesktop();
+					try {
+						desktop.open(gd);
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				}
 			}
 		});
 		gbc.gridx=3;
-		gbc.gridy=9;
+		gbc.gridy++;
 		gbc.gridwidth=1;
 		gbc.gridheight=1;
 		mainPanel.add(viewGoodDirectory, gbc);
@@ -152,15 +183,23 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		viewTrashDirectory = new JButton("Trash Directory");
 		viewTrashDirectory.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
+				File gd = controller.getTrashDir();
+				if (gd != null && gd.exists()) {
+					Desktop desktop = Desktop.getDesktop();
+					try {
+						desktop.open(gd);
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				}
 			}
 		});
-		gbc.gridy=10;
+		gbc.gridy++;
 		mainPanel.add(viewTrashDirectory, gbc);
 		
 		curDirectoryLabel = new JLabel("Working in: ");
 		curDirectoryLabel.setFont(arial18);
-		gbc.gridy=12;
+		gbc.gridy++;
 		gbc.gridx=0;
 		gbc.gridwidth=4;
 		gbc.gridheight=1;
@@ -168,7 +207,7 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		
 		statusLabel = new JLabel("Status");
 		statusLabel.setFont(arial18);
-		gbc.gridy=13;
+		gbc.gridy++;
 		gbc.gridx=0;
 		gbc.gridwidth=4;
 		gbc.gridheight=2;
@@ -179,7 +218,7 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		progress.setMaximum(100);
 		progress.setValue(1);
 		progress.setFont(arial18);
-		gbc.gridy=15;
+		gbc.gridy+=2;
 		gbc.gridheight=1;
 		mainPanel.add(progress, gbc);
 				
@@ -225,7 +264,7 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		buttonPanel.add(cancelButton);
 		buttonPanel.add(exitButton);
 		
-		gbc.gridy=16;
+		gbc.gridy++;
 		gbc.gridx=0;
 		gbc.gridwidth=4;
 		gbc.gridheight=1;
@@ -234,17 +273,19 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		this.setContentPane(mainPanel);
 		// TODO: Set size via propeties
 		this.pack();
-		this.setSize(600,500);
+		this.setSize(600,600);
 	}
 	
-	public void handleFile(boolean good, boolean delete) {
+	public void handleFile(String fname, boolean good, boolean delete) {
 		filesHandled++;
+		progress.setString(fname);
+		progress.setValue(progress.getValue() + 1);
 		if (good) {
 			filesToGood++;
 		} 
 		if (delete) {
 			filesToDelete++;
-		}
+		}		
 		updateStatistics();
 	}
 		
@@ -282,16 +323,23 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 	}
 
 	@Override
-	public void initializeProgressBar(int min, int max) {
-		progress.setMinimum(min);
-		progress.setMaximum(max);
-		progress.setValue(min);
+	public void initializeUI(int progressmax) {
+		progress.setMinimum(0);
+		progress.setMaximum(progressmax);
+		progress.setValue(0);
+		progress.setStringPainted(true);
 		progress.revalidate();
+		
+		actionLogArea.setText("Action Log:\n");
+		filesHandled = 0;
+		filesToGood = 0;
+		filesToDelete = 0;
+		updateStatistics();
 	}
 
 	@Override
-	public void updateProgress(int value) {
-		progress.setValue(value);		
+	public void incrementProgress() {
+		progress.setValue(progress.getValue() + 1);		
 	}
 
 }

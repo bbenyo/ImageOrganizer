@@ -21,8 +21,11 @@ import org.apache.log4j.Logger;
 
 import bb.imgo.handlers.MediaHandler;
 import bb.imgo.struct.ActionLog;
+import bb.imgo.struct.DirectoryFileFilter;
 import bb.imgo.struct.FileUtilities;
+import bb.imgo.struct.ImageFileFilter;
 import bb.imgo.struct.MediaFile;
+import bb.imgo.struct.NonDirectoryFileFilter;
 import bb.imgo.ui.OverviewFrame;
 
 public class OrganizeMedia {
@@ -54,7 +57,10 @@ public class OrganizeMedia {
 	
 	// To synchronize thread wait/notify
 	private Object sync = new Object();
-	
+
+	private NonDirectoryFileFilter noDirectories = new NonDirectoryFileFilter();
+	private DirectoryFileFilter directories = new DirectoryFileFilter();
+
 	public OrganizeMedia(String pFileName, String rootDir) {
 		rootDirectory = new File(rootDir);
 		if (!rootDirectory.exists()) {
@@ -173,6 +179,10 @@ public class OrganizeMedia {
 		actionLog.clear();
 		fireHandlerInitialize();
 		running.set(true);
+		int totalFiles = countFiles(rootDirectory);
+		if (ui != null) {
+			ui.initializeUI(totalFiles);
+		}
 		organize(rootDirectory);
 		fireHandlerFinalize();
 		writeActionLog();
@@ -197,24 +207,35 @@ public class OrganizeMedia {
 		}
 		return true;
 	}
+		
+	public int countFiles(File dir) {
+		logger.debug("Counting files under "+dir);
+		File[] dFiles = dir.listFiles(noDirectories);
+		int count = dFiles.length;
+		dFiles = dir.listFiles(directories);
+		for (File f : dFiles) {
+			count += countFiles(f);
+		}
+		logger.debug("Counted "+count+" files under "+dir);
+		return count;
+	}
 	
 	protected void organize(File dir) {
 		if (!checkPause()) {
 			return;
 		}
 		logger.info("START Organizing directory: "+dir);
-		File[] dFiles = dir.listFiles();
+		File[] dFiles = dir.listFiles(noDirectories);
 		fireHandlerDirectoryStart(dir);
 		for (File f : dFiles) {
-			if (!f.isDirectory()) {
-				if (!checkPause()) {
-					return;
-				}
-				fireHandlerFile(f);
+			if (!checkPause()) {
+				return;
 			}
+			fireHandlerFile(f);
 		}
 		logger.info("PROGRESS Organized files, starting on subdirectories: "+dir);
 		
+		dFiles = dir.listFiles(directories);
 		for (File f : dFiles) {
 			if (f.isDirectory()) {
 				fireHandlerSubDirectoryStart(dir, f);
@@ -284,6 +305,9 @@ public class OrganizeMedia {
 		MediaFile mFile = new MediaFile(f);
 		if (imageOnly && !mFile.isImageFile()) {
 			logger.debug("Ignoring non image file: "+f);
+			if (ui != null) {
+				ui.incrementProgress();
+			}
 			return;
 		}
 		for (MediaHandler handler : handlers) {
@@ -301,10 +325,38 @@ public class OrganizeMedia {
 		completeMediaFileHandling(mFile);
 	}
 	
+	public void setMoveFiles(boolean f) {
+		logger.info("Setting MoveFiles flag to "+f);
+		moveFiles = f;
+	}
+	
 	public void moveFile(File p1, File p2) throws IOException {
 		if (!p2.getParentFile().exists()) {
 			p2.getParentFile().mkdirs();
 		}
+		
+		if (p2.exists()) {
+			logger.warn("Trying to move to "+p2.getAbsolutePath()+", but it already exists!");
+			String fname = p2.getName();
+			int pos = fname.lastIndexOf(".");
+			String basename = fname;
+			String ext = "";
+			if (pos > -1) {
+				basename = fname.substring(0, pos);
+				ext = fname.substring(pos+1);
+			}
+			int index = 2;
+			while (p2.exists()) {
+				if (ext.length() > 0) {
+					p2 = new File(p2.getParentFile(), basename+"_"+index+"."+ext);
+				} else {
+					p2 = new File(p2.getParentFile(), basename+"_"+index);
+				}
+				logger.warn("Trying: "+p2.getAbsolutePath());
+				index++;
+			}
+		}
+		
 		if (ableToRename) {
 			try {
 				boolean success = p1.renameTo(p2);
@@ -332,12 +384,21 @@ public class OrganizeMedia {
 		}
 	}
 	
+	public void addRenameActionLog(String oldFileName, String newFileName) {
+		ActionLog al = new ActionLog(oldFileName, ActionLog.Action.RENAME, newFileName);
+		actionLog.add(al);
+		if (ui != null) {
+			ui.updateActionLog(al.toString());
+		}
+	}
+	
 	protected void completeMediaFileHandling(MediaFile mFile) {
-		uiStatus("Complete handling for "+mFile.getBaseFile().getName());
+		String mFileName = mFile.getBaseFile().getName();
+		uiStatus("Complete handling for "+mFileName);
 		// If the file is marked delete, remove it my moving it to trash
 		if (mFile.isDelete()) {
 			if (ui != null) {
-				ui.handleFile(false, true);
+				ui.handleFile(mFileName, false, true);
 			}
 			logger.debug("Marked for deletion");
 			addActionLog(mFile.getBaseFile().getAbsolutePath(), ActionLog.Action.DELETE);
@@ -354,7 +415,7 @@ public class OrganizeMedia {
 			// If the file is marked good, move it to the good dir
 			logger.debug("Marked GOOD");
 			if (ui != null) {
-				ui.handleFile(true, false);
+				ui.handleFile(mFileName, true, false);
 			}
 			addActionLog(mFile.getBaseFile().getAbsolutePath(), ActionLog.Action.GOOD);
 			if (moveFiles) {
@@ -370,7 +431,7 @@ public class OrganizeMedia {
 			// The file is neither good nor delete, so keep it here
 			logger.debug("Marked ARCHIVE");
 			if (ui != null) {
-				ui.handleFile(false, false);
+				ui.handleFile(mFileName, false, false);
 			}
 		}
 	}
@@ -390,6 +451,11 @@ public class OrganizeMedia {
 	
 	public ArrayList<ActionLog> getActionLog() {
 		return actionLog;
+	}
+	
+	public File getActionLogFile() {
+		File alf = new File(actionLogFilename);
+		return alf;
 	}
 	
 	static public void error(String msg) {

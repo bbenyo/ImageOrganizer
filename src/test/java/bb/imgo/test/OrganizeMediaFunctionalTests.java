@@ -151,7 +151,12 @@ public class OrganizeMediaFunctionalTests {
 	
 	@Test
 	public void testStatistics() {
-		OrganizeMedia.main(new String[] {"-p", "data/test/resources/statsonly.properties", "-d", testdir});
+		OrganizeMedia oMedia = new OrganizeMedia("data/test/resources/statsonly.properties", testdir);
+		int count = oMedia.countFiles(oMedia.getRootDirectory());
+		System.out.println("Counted files: "+count);
+		Assert.assertTrue(count >= 47 && count <= 49); // Depends on if we've run statistics yet or not
+		oMedia.organize();
+		
 		// todo assertions
 	}
 		
