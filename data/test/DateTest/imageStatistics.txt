@@ -1,0 +1,9 @@
+c:\Dev\ImageOrganizer\data\test\DateTest,*
+c:\Dev\ImageOrganizer\data\test\DateTest,jpg: Count: 1 Total: 19.328 K Avg: 19.328 K Min: 19.328 K Max: 19.328 K SD: -
+ Time Window: 01/20/2018 00:00:00 - 01/20/2018 00:00:00
+c:\Dev\ImageOrganizer\data\test\DateTest\2018,* (Empty)
+c:\Dev\ImageOrganizer\data\test\DateTest\2018-01,* (Empty)
+  c:\Dev\ImageOrganizer\data\test\DateTest\2018-01\2017,* (Empty)
+c:\Dev\ImageOrganizer\data\test\DateTest\2018-12-25,*
+  c:\Dev\ImageOrganizer\data\test\DateTest\2018-12-25,jpg: Count: 2 Total: 38.656 K Avg: 19.328 K Min: 19.328 K Max: 19.328 K SD: 0 B
+   Time Window: 10/10/2018 00:00:00 - 12/25/2018 00:00:00

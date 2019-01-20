@@ -1,0 +1,3 @@
+Directory,FileType,count,total,mean,min,max,stddev,earliest,latest
+c:\Dev\ImageOrganizer\data\test\DateTest,jpg,1,19328,19328.0,19328,19328,NaN,01/20/2018 00:00:00,01/20/2018 00:00:00
+c:\Dev\ImageOrganizer\data\test\DateTest\2018-12-25,jpg,2,38656,19328.0,19328,19328,0.0,10/10/2018 00:00:00,12/25/2018 00:00:00
