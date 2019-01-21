@@ -76,7 +76,7 @@ public class FixFileExtension extends MediaHandler {
 					index++;
 				}
 				
-				main.addRenameActionLog(f1.getBaseFile().getName(), f2.getName());
+				main.addRenameActionLog(f1.getBaseFile().getName(), f2.getName(), "Wrong Extension: "+type);
 				if (main.moveFiles) {
 					try {
 						main.moveFile(f1.getBaseFile(), f2);

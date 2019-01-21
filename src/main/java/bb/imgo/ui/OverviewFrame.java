@@ -96,9 +96,11 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 			handlerStr.append(handler.getLabel()+" ");
 		}
 		gbc.gridy++;
+		gbc.gridheight=2;
+		gbc.weighty=0.25;
 		activeHandlers = new JLabel(handlerStr.toString());
 		activeHandlers.setFont(arial18);
-		mainPanel.add(activeHandlers, gbc);
+		mainPanel.add(new JScrollPane(activeHandlers), gbc);
 		
 		moveFilesBox = new JCheckBox("Move Files (or just log) ?");
 		moveFilesBox.setFont(arial18);
@@ -113,7 +115,9 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 			}
 		});
 		
-		gbc.gridy++;
+		gbc.gridy+=2;
+		gbc.weighty=0;
+		gbc.gridheight=1;
 		mainPanel.add(moveFilesBox, gbc);
 		
 		actionLogArea = new JTextArea("Action Log:\n");
@@ -121,7 +125,7 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		actionLogPane = new JScrollPane(actionLogArea);
 		gbc.gridy++;
 		gbc.gridheight=6;
-		gbc.weighty=1.0;
+		gbc.weighty=0.75;
 		gbc.fill=GridBagConstraints.BOTH;
 		mainPanel.add(actionLogPane, gbc);
 		

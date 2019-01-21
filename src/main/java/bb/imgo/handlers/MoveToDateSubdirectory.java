@@ -110,7 +110,7 @@ public class MoveToDateSubdirectory extends MediaHandler {
 			correctPath = new File(cDirs);
 		}
 		logger.debug("Correct Path: "+correctPath);
-		main.addRenameActionLog(f.getAbsolutePath(), correctPath.getAbsolutePath());
+		main.addRenameActionLog(f.getAbsolutePath(), correctPath.getAbsolutePath(), "MoveToDateDir");
 		
 		if (main.moveFiles) {
 			correctPath.getParentFile().mkdirs();

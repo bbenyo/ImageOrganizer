@@ -32,7 +32,7 @@ public class RemoveEmptySubdirectory extends MediaHandler {
 				if (!logOnly) {
 					directory.delete();
 				}
-				addActionLog(directory.getAbsolutePath(), ActionLog.Action.DELETE);
+				addActionLog(directory.getAbsolutePath(), ActionLog.Action.DELETE, "Empty Dir");
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}

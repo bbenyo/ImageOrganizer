@@ -14,9 +14,9 @@ public class TestNameHandler extends MediaHandler {
 	public boolean handleFile(MediaFile f1) {
 		String name = f1.getBaseFile().getName();
 		if (name.equals("Pic_0.jpg")) {
-			f1.setGood();			
+			f1.setGood("Test");			
 		} else if (name.equals("Pic_1.jpg")) {
-			f1.setDelete();
+			f1.setDelete("Test");
 		}
 		return true;
 	}

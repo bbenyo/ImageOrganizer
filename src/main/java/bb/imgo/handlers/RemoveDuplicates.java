@@ -48,7 +48,7 @@ public class RemoveDuplicates extends MediaHandler {
 					return false;
 				}
 				logger.info("Duplicate found: "+f1.getBaseFile().getName()+" and "+dName);
-				f1.setDelete();
+				f1.setDelete("Duplicate Found");
 				return true;
 			} else {
 				md5Checksums.put(cs, f1.getBaseFile().getName());

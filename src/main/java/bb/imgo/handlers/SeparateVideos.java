@@ -43,7 +43,7 @@ public class SeparateVideos extends MediaHandler {
 	public boolean handleFile(MediaFile f1) {
 		// Video file, move it
 		File moveTo = f1.getNewFilePath(main.getRootDirectory(), videoRoot);
-		main.addRenameActionLog(f1.getBaseFile().getAbsolutePath(), moveTo.getAbsolutePath());
+		main.addRenameActionLog(f1.getBaseFile().getAbsolutePath(), moveTo.getAbsolutePath(), "Video File");
 		if (main.moveFiles) {
 			try {
 				main.moveFile(f1.getBaseFile(), moveTo);

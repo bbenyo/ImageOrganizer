@@ -10,6 +10,7 @@ import bb.imgo.struct.ActionLog;
 import bb.imgo.struct.MediaFile;
 
 // Handle a media file, decide what flag to apply to it
+// TODO: Add a flag or subclass for whether we move files or not
 abstract public class MediaHandler {
 
 	static private Logger logger = Logger.getLogger(MediaHandler.class.getName());
@@ -36,9 +37,9 @@ abstract public class MediaHandler {
 		this.main = om;
 	}
 	
-	public void addActionLog(String filename, ActionLog.Action action) {
+	public void addActionLog(String filename, ActionLog.Action action, String reason) {
 		if (main != null) {
-			main.addActionLog(filename, action);
+			main.addActionLog(filename, action, reason);
 		}
 	}
 

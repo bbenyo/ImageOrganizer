@@ -74,7 +74,7 @@ public class ImagePanel extends JPanel {
 				} else {
 					logger.info("Unable to read Image from "+imgUrl);
 					imgIcon = new ImageIcon();
-					mFile.setDelete();
+					mFile.setDelete("Unreadable");
 				}
 			} else {
 				imgIcon = new ImageIcon();

@@ -17,10 +17,10 @@ public class MediaFileTest {
 		ImageFile i1 = new ImageFile(f1);
 		Assert.assertFalse(i1.isGood());
 		Assert.assertFalse(i1.isDelete());
-		i1.setGood();
+		i1.setGood("Test");
 		Assert.assertTrue(i1.isGood());
 		Assert.assertFalse(i1.isDelete());
-		i1.setDelete();
+		i1.setDelete("Test");
 		Assert.assertTrue(i1.isGood());
 		Assert.assertTrue(i1.isDelete());
 		i1.clearGood();
@@ -35,8 +35,8 @@ public class MediaFileTest {
 		Assert.assertFalse(i1.isGood());
 		Assert.assertFalse(i1.isDelete());
 		
-		i1.setGood();
-		i1.setDelete();
+		i1.setGood("Test");
+		i1.setDelete("Test");
 		i1.clearTag(0x4);
 		Assert.assertFalse(i1.isTag(0x4));
 		Assert.assertTrue(i1.isGood());

@@ -18,6 +18,7 @@ public class MediaFile {
 	String ext = null;  // File extension: Null extension is unknown or no extension
 	private String type = null;
 	
+	// TODO: Since there are only 2 options, we don't really need a bitmask...  Replace with 2 flags
 	// Tags as a bitmask to keep the structure size down
 	// These values are 1 << n
 	static public int TAG_DELETE = 0x1;
@@ -29,6 +30,9 @@ public class MediaFile {
 	Tika tika = new Tika();
 	
 	static public SimpleDateFormat ymdhm = new SimpleDateFormat("YYYY-MM-DD HH:mm");
+	
+	private String deleteReason;
+	private String goodReason;
 	
 	public MediaFile(File f) {
 		this.baseFile = f;
@@ -42,6 +46,22 @@ public class MediaFile {
 		return baseFile;
 	}
 	
+	public String getDeleteReason() {
+		return deleteReason;
+	}
+
+	public void setDeleteReason(String deleteReason) {
+		this.deleteReason = deleteReason;
+	}
+
+	public String getGoodReason() {
+		return goodReason;
+	}
+
+	public void setGoodReason(String goodReason) {
+		this.goodReason = goodReason;
+	}
+
 	public URL getURL() {
 		try {
 			return baseFile.toURI().toURL();
@@ -106,16 +126,18 @@ public class MediaFile {
 		return true;
 	}
 	
-	public void setGood() {
+	public void setGood(String reason) {
 		setTag(TAG_GOOD);
+		this.goodReason = reason;
 	}
 	
 	public boolean isGood() {
 		return isTag(TAG_GOOD);
 	}
 	
-	public void setDelete() {
+	public void setDelete(String reason) {
 		setTag(TAG_DELETE);
+		this.deleteReason = reason;
 	}
 	
 	public boolean isDelete() {
@@ -124,10 +146,12 @@ public class MediaFile {
 	
 	public void clearGood() {
 		clearTag(TAG_GOOD);
+		goodReason = null;
 	}
 	
 	public void clearDelete() {
 		clearTag(TAG_DELETE);
+		deleteReason = null;
 	}
 	
 	public boolean isImageFile() {

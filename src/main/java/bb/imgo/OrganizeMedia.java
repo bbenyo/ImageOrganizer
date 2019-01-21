@@ -176,6 +176,7 @@ public class OrganizeMedia {
 	 * Main method to organize a directory.  Fire each handler on all directories and files
 	 */
 	public void organize() {
+		// TODO: Two phase pass, first for moving file handlers, second for handlers that don't move
 		actionLog.clear();
 		fireHandlerInitialize();
 		running.set(true);
@@ -376,16 +377,16 @@ public class OrganizeMedia {
 		uiStatus("Moved to "+p2.getAbsolutePath());
 	}
 	
-	public void addActionLog(String fname, ActionLog.Action act) {
-		ActionLog al = new ActionLog(fname, act);
+	public void addActionLog(String fname, ActionLog.Action act, String reason) {
+		ActionLog al = new ActionLog(fname, act, reason);
 		actionLog.add(al);
 		if (ui != null) {
 			ui.updateActionLog(al.toString());
 		}
 	}
 	
-	public void addRenameActionLog(String oldFileName, String newFileName) {
-		ActionLog al = new ActionLog(oldFileName, ActionLog.Action.RENAME, newFileName);
+	public void addRenameActionLog(String oldFileName, String newFileName, String reason) {
+		ActionLog al = new ActionLog(oldFileName, ActionLog.Action.RENAME, newFileName, reason);
 		actionLog.add(al);
 		if (ui != null) {
 			ui.updateActionLog(al.toString());
@@ -401,7 +402,7 @@ public class OrganizeMedia {
 				ui.handleFile(mFileName, false, true);
 			}
 			logger.debug("Marked for deletion");
-			addActionLog(mFile.getBaseFile().getAbsolutePath(), ActionLog.Action.DELETE);
+			addActionLog(mFile.getBaseFile().getAbsolutePath(), ActionLog.Action.DELETE, mFile.getDeleteReason());
 			if (moveFiles) {
 				try {
 					File p1 = mFile.getBaseFile();
@@ -417,7 +418,7 @@ public class OrganizeMedia {
 			if (ui != null) {
 				ui.handleFile(mFileName, true, false);
 			}
-			addActionLog(mFile.getBaseFile().getAbsolutePath(), ActionLog.Action.GOOD);
+			addActionLog(mFile.getBaseFile().getAbsolutePath(), ActionLog.Action.GOOD, mFile.getGoodReason());
 			if (moveFiles) {
 				try {
 					File p1 = mFile.getBaseFile();
