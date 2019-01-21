@@ -30,7 +30,12 @@ public class MoveToDateSubdirectory extends MediaHandler {
 	
 	@Override
 	public boolean fileFilter(MediaFile f1) {
-		return handlingDirectory;
+		if (handlingDirectory) {
+			if (f1.isImageFile() || f1.isVideoFile()) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	@Override
@@ -108,7 +113,7 @@ public class MoveToDateSubdirectory extends MediaHandler {
 		main.addRenameActionLog(f.getAbsolutePath(), correctPath.getAbsolutePath());
 		
 		if (main.moveFiles) {
-			correctPath.mkdirs();
+			correctPath.getParentFile().mkdirs();
 			if (main.moveFiles) {
 				try {
 					main.moveFile(f, correctPath);

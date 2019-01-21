@@ -26,6 +26,7 @@ public class FixFileExtension extends MediaHandler {
 		extensionMap.put("image/jpeg", "jpg");
 		extensionMap.put("image/heic", "heic");
 		extensionMap.put("video/x-msvideo", "avi");
+		extensionMap.put("video/quicktime", "mov");
 	}
 	
 	@Override

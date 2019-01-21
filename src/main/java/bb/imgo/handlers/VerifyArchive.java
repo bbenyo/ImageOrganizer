@@ -11,7 +11,6 @@ public class VerifyArchive extends MediaHandler {
 	
 	@Override
 	public boolean handleFile(MediaFile f1) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 

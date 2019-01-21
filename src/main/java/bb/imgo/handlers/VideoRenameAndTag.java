@@ -6,6 +6,8 @@ import bb.imgo.struct.MediaFile;
  * Prompt the user to rename a video that is named ###.avi (no letters)
  * Pop up a UI that lets the user play the video, rename, and tag (good/trash/archive)
  * 
+ * Auto name short videos as livephotoX, and auto-archive
+ * 
  * @author Brett
  *
  */
