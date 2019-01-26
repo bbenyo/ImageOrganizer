@@ -277,7 +277,7 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		this.setContentPane(mainPanel);
 		// TODO: Set size via propeties
 		this.pack();
-		this.setSize(600,600);
+		this.setSize(800,600);
 	}
 	
 	public void handleFile(String fname, boolean good, boolean delete) {

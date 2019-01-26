@@ -81,7 +81,7 @@ public class Statistics extends MediaHandler {
 	public void subDirectoryComplete(File directory, File subdir) {
 		DirectoryStats subStats = directoryStats.get(subdir);
 		DirectoryStats dStats = directoryStats.get(directory);
-		if (dStats != null) {
+		if (dStats != null && subStats != null) {
 			dStats.addSubdirectory(subStats);
 		}
 	}
