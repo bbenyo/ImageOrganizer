@@ -60,6 +60,8 @@ public class OrganizeMedia {
 
 	private NonDirectoryFileFilter noDirectories = new NonDirectoryFileFilter();
 	private DirectoryFileFilter directories = new DirectoryFileFilter();
+	
+	private List<String> ignoreSubdirNames = new ArrayList<String>();
 
 	public OrganizeMedia(String pFileName, String rootDir) {
 		rootDirectory = new File(rootDir);
@@ -83,8 +85,17 @@ public class OrganizeMedia {
 			}
 		}
 		
+		ignoreSubdirNames.add(".svn");
+		ignoreSubdirNames.add(".git");
+		
 		initProperties(props);
 		printConfig();
+	}
+	
+	public void addIgnoreSubdirName(String sname) {
+		if (!ignoreSubdirNames.contains(sname)) {
+			ignoreSubdirNames.add(sname);
+		}
 	}
 
 	// TODO: refactor using a ConfigItem or Option system
@@ -210,6 +221,10 @@ public class OrganizeMedia {
 	}
 		
 	public int countFiles(File dir) {
+		if (ignoreSubdirNames.contains(dir.getName())) {
+			logger.info("IGNORING "+dir.getName());
+			return 0;
+		}
 		logger.debug("Counting files under "+dir);
 		File[] dFiles = dir.listFiles(noDirectories);
 		int count = dFiles.length;
@@ -223,6 +238,10 @@ public class OrganizeMedia {
 	
 	protected void organize(File dir) {
 		if (!checkPause()) {
+			return;
+		}
+		if (ignoreSubdirNames.contains(dir.getName())) {
+			logger.info("IGNORING "+dir.getName());
 			return;
 		}
 		logger.info("START Organizing directory: "+dir);
@@ -387,6 +406,14 @@ public class OrganizeMedia {
 	
 	public void addRenameActionLog(String oldFileName, String newFileName, String reason) {
 		ActionLog al = new ActionLog(oldFileName, ActionLog.Action.RENAME, newFileName, reason);
+		actionLog.add(al);
+		if (ui != null) {
+			ui.updateActionLog(al.toString());
+		}
+	}
+	
+	public void addConvertActionLog(String oldFileName, String newFileName, String reason) {
+		ActionLog al = new ActionLog(oldFileName, ActionLog.Action.CONVERT, newFileName, reason);
 		actionLog.add(al);
 		if (ui != null) {
 			ui.updateActionLog(al.toString());
