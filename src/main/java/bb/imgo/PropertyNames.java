@@ -16,7 +16,11 @@ public class PropertyNames {
 	static public String INTERMED_STATE_FILE = "handler.intermedstate.name";
 	// Show the UI
 	static public String SHOW_UI = "handler.ui";
-
+	// UI frame height
+	static public String UI_HEIGHT = "ui.height";
+	// UI frame width
+	static public String UI_WIDTH = "ui.width";
+	
 	// Output file name for stats
 	static public String STATS_OUTPUTFILENAME = "statistics.outputfile.name";
 	// Output CSV filename for status
@@ -31,4 +35,8 @@ public class PropertyNames {
 
 	// Video root directory
 	static public String VIDEO_ROOT_DIR = "separate.video.root";
+	
+	// Backup directories
+	static public String BACKUP_IMAGE_ROOT="backup.image.root";
+	static public String BACKUP_VIDEO_ROOT="backup.video.root";
 }

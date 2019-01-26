@@ -19,9 +19,10 @@ public class RemoveEmptySubdirectory extends MediaHandler {
 	boolean logOnly = true;
 	
 	@Override
-	public void initialize(Properties props) {
+	public boolean initialize(Properties props) {
 		logOnly = !main.moveFiles;
 		logger.info(getLabel()+" initialized, logOnly: "+logOnly);
+		return true;
 	}
 		
 	@Override

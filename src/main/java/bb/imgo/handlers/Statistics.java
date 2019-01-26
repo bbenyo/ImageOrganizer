@@ -31,7 +31,7 @@ public class Statistics extends MediaHandler {
 	}
 	
 	@Override
-	public void initialize(Properties props) {
+	public boolean initialize(Properties props) {
 		directoryStats.clear();
 		String of = props.getProperty(PropertyNames.STATS_OUTPUTFILENAME);
 		if (of != null) {
@@ -52,6 +52,7 @@ public class Statistics extends MediaHandler {
 				OutputFileName = null;
 			}
 		}	
+		return true;
 	}
 	
 	public String printConfig(String indent) {

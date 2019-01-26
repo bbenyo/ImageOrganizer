@@ -78,8 +78,10 @@ abstract public class MediaHandler {
 	}
 
 	// Start (or restart) processing directories
-	public void initialize(Properties props) {
+	// Return true if we initialized propertly, false if there was an error
+	public boolean initialize(Properties props) {
 		logger.info(getLabel()+" initialized");
+		return true;
 	}
 	
 }

@@ -17,6 +17,6 @@ public interface OrganizeMediaUIInterface {
 	// Pointer to the controller for start/stop.  Could use an interface here, 
 	//   but there will only be one controller (OrganizeMedia)
 	// If that ever changes, convert this to an interface 
-	public void init(OrganizeMedia oMedia);
+	public void init(OrganizeMedia oMedia, int width, int height);
 
 }

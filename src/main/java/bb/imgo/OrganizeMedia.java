@@ -62,6 +62,9 @@ public class OrganizeMedia {
 	private DirectoryFileFilter directories = new DirectoryFileFilter();
 	
 	private List<String> ignoreSubdirNames = new ArrayList<String>();
+	
+	int uiHeight = 800;
+	int uiWidth = 900;
 
 	public OrganizeMedia(String pFileName, String rootDir) {
 		rootDirectory = new File(rootDir);
@@ -160,6 +163,24 @@ public class OrganizeMedia {
 		String sui = props.getProperty(PropertyNames.SHOW_UI);
 		if (sui != null) {
 			showUI = Boolean.parseBoolean(sui);
+		}
+		
+		String uih = props.getProperty(PropertyNames.UI_HEIGHT);
+		if (uih != null) {
+			try {
+				uiHeight = Integer.parseInt(uih);
+			} catch (NumberFormatException ex) {
+				ex.printStackTrace();
+			}
+		}
+		
+		String uiw = props.getProperty(PropertyNames.UI_WIDTH);
+		if (uiw != null) {
+			try {
+				uiWidth = Integer.parseInt(uiw);
+			} catch (NumberFormatException ex) {
+				ex.printStackTrace();
+			}
 		}
 	}
 	
@@ -317,7 +338,12 @@ public class OrganizeMedia {
 	protected void fireHandlerInitialize() {
 		for (MediaHandler handler : handlers) {
 			uiStatus("Firing Initialize for "+handler.getLabel());
-			handler.initialize(props);
+			if (!handler.initialize(props)) {
+				uiStatus("Initialize FAILED for "+handler.getLabel());
+				// Hard fail for initilization errors
+				// You'll want to fix any issue before running anything
+				exit();
+			}
 		}
 	}
 	
@@ -350,11 +376,7 @@ public class OrganizeMedia {
 		moveFiles = f;
 	}
 	
-	public void moveFile(File p1, File p2) throws IOException {
-		if (!p2.getParentFile().exists()) {
-			p2.getParentFile().mkdirs();
-		}
-		
+	public File getUniqueFile(File p2) {
 		if (p2.exists()) {
 			logger.warn("Trying to move to "+p2.getAbsolutePath()+", but it already exists!");
 			String fname = p2.getName();
@@ -376,6 +398,15 @@ public class OrganizeMedia {
 				index++;
 			}
 		}
+		return p2;
+	}
+	
+	public void moveFile(File p1, File p2) throws IOException {
+		if (!p2.getParentFile().exists()) {
+			p2.getParentFile().mkdirs();
+		}
+		
+		p2 = getUniqueFile(p2);		
 		
 		if (ableToRename) {
 			try {
@@ -396,6 +427,17 @@ public class OrganizeMedia {
 		uiStatus("Moved to "+p2.getAbsolutePath());
 	}
 	
+	public void copyFile(File p1, File p2) throws IOException {
+		if (!p2.getParentFile().exists()) {
+			p2.getParentFile().mkdirs();
+		}
+		
+		p2 = getUniqueFile(p2);
+		
+		Files.copy(p1.toPath(), p2.toPath());
+		uiStatus("Copied to "+p2.getAbsolutePath());
+	}
+	
 	public void addActionLog(String fname, ActionLog.Action act, String reason) {
 		ActionLog al = new ActionLog(fname, act, reason);
 		actionLog.add(al);
@@ -406,6 +448,14 @@ public class OrganizeMedia {
 	
 	public void addRenameActionLog(String oldFileName, String newFileName, String reason) {
 		ActionLog al = new ActionLog(oldFileName, ActionLog.Action.RENAME, newFileName, reason);
+		actionLog.add(al);
+		if (ui != null) {
+			ui.updateActionLog(al.toString());
+		}
+	}
+	
+	public void addCopyActionLog(String oldFileName, String newFileName, String reason) {
+		ActionLog al = new ActionLog(oldFileName, ActionLog.Action.COPY, newFileName, reason);
 		actionLog.add(al);
 		if (ui != null) {
 			ui.updateActionLog(al.toString());
@@ -535,7 +585,7 @@ public class OrganizeMedia {
 	
 	public void startUI() {
 		ui = new OverviewFrame();
-		ui.init(this);
+		ui.init(this, uiWidth, uiHeight);
 		ui.setLocationRelativeTo(null);
 		ui.setVisible(true);
 	}

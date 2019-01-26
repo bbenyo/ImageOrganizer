@@ -19,7 +19,7 @@ public class SeparateVideos extends MediaHandler {
 	
 	File videoRoot = null;
 	
-	public void initialize(Properties props) {
+	public boolean initialize(Properties props) {
 		logger.info(getLabel()+" initialized");
 		String vrname = props.getProperty(PropertyNames.VIDEO_ROOT_DIR);
 		if (vrname != null) {
@@ -29,6 +29,12 @@ public class SeparateVideos extends MediaHandler {
 		}
 		
 		logger.info("VideoRoot: "+videoRoot.getAbsolutePath());
+		if (videoRoot.exists()) {
+			return true;
+		} else {
+			logger.error(videoRoot+" doesn't exist!");
+		}
+		return false;
 	}
 	
 	@Override

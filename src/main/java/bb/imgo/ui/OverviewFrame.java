@@ -66,12 +66,12 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 	
 	// TODO: Specify via properties
 	Font arial18 = new Font("Arial", Font.PLAIN, 18);
-	
+		
 	public OverviewFrame() {
 		super("Media Organizer");
 	}
 	
-	public void init(OrganizeMedia oMedia) {
+	public void init(OrganizeMedia oMedia, int w, int h) {
 		controller = oMedia;
 		String rootDir = oMedia.getRootDirectory().getAbsolutePath();
 		List<MediaHandler> handlers = oMedia.getHandlers();
@@ -275,9 +275,8 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		mainPanel.add(buttonPanel, gbc);
 		
 		this.setContentPane(mainPanel);
-		// TODO: Set size via propeties
 		this.pack();
-		this.setSize(800,600);
+		this.setSize(w,h);
 	}
 	
 	public void handleFile(String fname, boolean good, boolean delete) {
