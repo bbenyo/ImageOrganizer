@@ -3,7 +3,7 @@ package bb.imgo.struct;
 public class ActionLog {
 
 	String filename;
-	public enum Action {GOOD, DELETE, ARCHIVE, CONVERT, RENAME, UNKNOWN};
+	public enum Action {GOOD, DELETE, ARCHIVE, CONVERT, COPY, RENAME, UNKNOWN};
 	Action action = Action.UNKNOWN;
 	String data;
 	String reason;
