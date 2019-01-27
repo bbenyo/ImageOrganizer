@@ -58,12 +58,12 @@ abstract public class MediaHandler {
 
 	// Do any subdir start up processing/bookkeeping, we will start processing the given subdirectory next
 	public void subDirectoryInit(File directory, File subDirectory) {
-		logger.debug(label+" SubDirectoryInit");
+		//logger.debug(label+" SubDirectoryInit");
 	}
 
 	// Do any finishing up processing/bookkeeping, we have just finished processing the given directory
 	public void subDirectoryComplete(File directory, File subDirectory) {
-		logger.debug(label+" SubDirectoryComplete");
+		//logger.debug(label+" SubDirectoryComplete");
 	}
 	
 	// Given this file, apply whatever tags you want to it
