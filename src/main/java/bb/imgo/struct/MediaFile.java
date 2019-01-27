@@ -197,16 +197,31 @@ public class MediaFile {
 		return new File(newRoot, relativePath);
 	}
 	
+	/**
+	 * Get the Original creation date for a file by using TIKA to get the Date/Time Original metadata field
+	 * Use tika the first time this is called, if we fail to find it, return 0
+	 * 
+	 * A value of -1 means we haven't tried to get the orig date yet
+	 * A value of 0 means we tried and didn't find it
+	 * Any other value should be the timestamp for the orig creation date
+	 * 
+	 * @return
+	 */
 	public long getOriginalTimestamp() {
 		if (originalTimestamp == -1) {
 			Parser parser = new AutoDetectParser();
 			BodyContentHandler handler = new BodyContentHandler();
 			Metadata metadata = new Metadata();   //empty metadata object 
 			ParseContext context = new ParseContext();
+			FileInputStream inputstream = null;
 			try {
-				FileInputStream inputstream = new FileInputStream(baseFile);
+				inputstream = new FileInputStream(baseFile);
 				parser.parse(inputstream, handler, metadata, context);				
 				String oDate = metadata.get("Date/Time Original");
+				if (oDate == null) {
+					originalTimestamp = 0; // don't bother trying again
+					return originalTimestamp;
+				}
 				Date d1 = tikaDate.parse(oDate);
 				logger.info("Original Date: "+d1);
 				originalTimestamp = d1.getTime();
@@ -218,6 +233,14 @@ public class MediaFile {
 				e.printStackTrace();
 			} catch (ParseException e) {
 				e.printStackTrace();
+			} finally {
+				if (inputstream != null) {
+					try {
+						inputstream.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
 			}
 		}
 		return originalTimestamp;
