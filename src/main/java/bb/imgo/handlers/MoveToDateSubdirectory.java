@@ -12,10 +12,11 @@ import bb.imgo.struct.MediaFile;
 
 /**
  * If a file is NOT in a date subdirectory (named with YYYY-MM-DD), and is instead in a YYYY only directory
- *   move it to the proper YYYY-MM-DD subdirectory based on the file timestamp
+ *   move it to the proper YYYY-MM-DD subdirectory based on the creation date or the last mod time
+ *   
  * If files are in YYYY-MM, move them to YYYY-MM-DD  
  *  
- * Do not move files that are not in a YYYY subdir (i.e. wedding or disney, etc)
+ * Do not move files that are not in a YYYY subdir (i.e. wedding or disney, etc), regardless of creation date
  * @author Brett
  *
  */
@@ -24,9 +25,14 @@ public class MoveToDateSubdirectory extends MediaHandler {
 	
 	SimpleDateFormat yyyy = new SimpleDateFormat("yyyy");
 	SimpleDateFormat yyyymm = new SimpleDateFormat("yyyy-MM");
+	SimpleDateFormat yyyymmUnderscore = new SimpleDateFormat("yyyy_MM");
 	SimpleDateFormat yyyymmdd = new SimpleDateFormat("yyyy-MM-dd");
+	SimpleDateFormat yyyymmddUnderscore = new SimpleDateFormat("yyyy_MM_dd");
 
 	boolean handlingDirectory = false;
+	
+	// TODO: Add this as a init parameter
+	boolean convertUnderscoreToDash = true;
 	
 	@Override
 	public boolean fileFilter(MediaFile f1) {
@@ -42,14 +48,33 @@ public class MoveToDateSubdirectory extends MediaHandler {
 	public void directoryInit(File dir) {
 		handlingDirectory = false;
 		String dirname = dir.getName();
-		if (dirname.length() > 7) {
+		if (dirname.length() > 10) {
 			return;
+		}
+		
+		if (convertUnderscoreToDash) {
+			// Rename underscore directories to dash directories
+			try {
+				yyyymmUnderscore.parse(dirname);
+				handlingDirectory = true;
+				logger.info("Handling yyyy_mm directory: "+dir);
+				return;				
+			} catch (ParseException e) {
+			}
+
+			try {
+				yyyymmddUnderscore.parse(dirname);
+				handlingDirectory = true;
+				logger.info("Handling yyyy_mm_dd directory: "+dir);
+				return;
+			} catch (ParseException e) {
+			}
 		}
 		
 		try {
 			yyyymm.parse(dirname);
 			handlingDirectory = true;
-			logger.info("Handling YYYY-MM directory: "+dir);
+			logger.info("Handling yyyy-MM directory: "+dir);
 			return;
 		} catch (ParseException e) {
 		}
@@ -57,10 +82,18 @@ public class MoveToDateSubdirectory extends MediaHandler {
 		try {
 			yyyy.parse(dirname);
 			handlingDirectory = true;
-			logger.info("Handling YYYY directory: "+dir);
+			logger.info("Handling yyyy directory: "+dir);
 			return;
 		} catch (ParseException e) {
 		}
+		
+		try {
+			yyyymmdd.parse(dirname);
+			handlingDirectory = true;
+			logger.info("Handling yyyy-MM-DD directory: "+dir);
+			return;
+		} catch (ParseException e) {
+		}	
 		
 	}
 	
@@ -73,12 +106,30 @@ public class MoveToDateSubdirectory extends MediaHandler {
 	public boolean handleFile(MediaFile f1) {
 		// Where should this file go?
 		File f = f1.getBaseFile();
-		long time = f.lastModified();
+		long time = f1.getOriginalTimestamp();
+		if (time <= 0) {
+			logger.debug("Using lastmodified time for "+f.getName());
+			time = f.lastModified();
+		}
 		Date d = new Date(time);
-		logger.debug("LastMod: "+d+" for "+f.getAbsolutePath());
+		logger.debug("Timestamp "+d+" for "+f.getAbsolutePath());
 		
 		String p1name = yyyymmdd.format(d);
 		String p2name = yyyy.format(d);
+		
+		File pf = f.getParentFile();
+		if (pf != null && pf.getName().equals(p1name)) {
+			logger.debug("Correct parent directory: "+p1name);
+			pf = pf.getParentFile();
+			if (pf != null && pf.getName().equals(p2name)) {
+				logger.debug("Correct year parent directory: "+p2name);
+				return false;
+			} else {
+				logger.info("Incorrect year parent directory: "+pf);
+			}
+		} else {
+			logger.info("Incorrect parent directory: "+pf);
+		}
 		
 		File cp1 = f;
 		boolean moveUp = true;
