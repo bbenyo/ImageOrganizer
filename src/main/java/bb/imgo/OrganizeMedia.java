@@ -290,8 +290,11 @@ public class OrganizeMedia {
 			return;
 		}
 		logger.info("START Organizing directory: "+dir);
+		if (!fireHandlerDirectoryStart(dir)) {
+			logger.info("ABORTING Organizing directory: "+dir+" due to handler init");
+			return;
+		}
 		File[] dFiles = dir.listFiles(noDirectories);
-		fireHandlerDirectoryStart(dir);
 		for (File f : dFiles) {
 			if (!checkPause()) {
 				return;
@@ -320,14 +323,17 @@ public class OrganizeMedia {
 		logger.debug(status);
 	}
 		
-	protected void fireHandlerDirectoryStart(File dir) {
+	protected boolean fireHandlerDirectoryStart(File dir) {
 		for (MediaHandler handler : handlers) {
 			logger.debug("Firing "+handler.getLabel()+" for directory start: "+dir.getName());
-			handler.directoryInit(dir);
+			if (!handler.directoryInit(dir)) {
+				return false;
+			}
 		}
 		if (ui != null) {
 			ui.changeCurrentDirectory(dir.getAbsolutePath());
 		}
+		return true;
 	}
 	
 	protected void fireHandlerDirectoryComplete(File dir) {

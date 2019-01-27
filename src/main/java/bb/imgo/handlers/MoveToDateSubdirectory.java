@@ -45,11 +45,11 @@ public class MoveToDateSubdirectory extends MediaHandler {
 	}
 	
 	@Override
-	public void directoryInit(File dir) {
+	public boolean directoryInit(File dir) {
 		handlingDirectory = false;
 		String dirname = dir.getName();
 		if (dirname.length() > 10) {
-			return;
+			return true;
 		}
 		
 		if (convertUnderscoreToDash) {
@@ -58,7 +58,7 @@ public class MoveToDateSubdirectory extends MediaHandler {
 				yyyymmUnderscore.parse(dirname);
 				handlingDirectory = true;
 				logger.info("Handling yyyy_mm directory: "+dir);
-				return;				
+				return true;				
 			} catch (ParseException e) {
 			}
 
@@ -66,7 +66,7 @@ public class MoveToDateSubdirectory extends MediaHandler {
 				yyyymmddUnderscore.parse(dirname);
 				handlingDirectory = true;
 				logger.info("Handling yyyy_mm_dd directory: "+dir);
-				return;
+				return true;
 			} catch (ParseException e) {
 			}
 		}
@@ -75,7 +75,7 @@ public class MoveToDateSubdirectory extends MediaHandler {
 			yyyymm.parse(dirname);
 			handlingDirectory = true;
 			logger.info("Handling yyyy-MM directory: "+dir);
-			return;
+			return true;
 		} catch (ParseException e) {
 		}
 		
@@ -83,7 +83,7 @@ public class MoveToDateSubdirectory extends MediaHandler {
 			yyyy.parse(dirname);
 			handlingDirectory = true;
 			logger.info("Handling yyyy directory: "+dir);
-			return;
+			return true;
 		} catch (ParseException e) {
 		}
 		
@@ -91,10 +91,10 @@ public class MoveToDateSubdirectory extends MediaHandler {
 			yyyymmdd.parse(dirname);
 			handlingDirectory = true;
 			logger.info("Handling yyyy-MM-DD directory: "+dir);
-			return;
+			return true;
 		} catch (ParseException e) {
 		}	
-		
+		return true;		
 	}
 	
 	@Override

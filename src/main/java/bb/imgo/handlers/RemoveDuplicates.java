@@ -30,10 +30,11 @@ public class RemoveDuplicates extends MediaHandler {
 	}
 	
 	@Override
-	public void directoryInit(File directory) {
+	public boolean directoryInit(File directory) {
 		super.directoryInit(directory);
 		md5Checksums.clear();
 		curDirectory = directory;
+		return true;
 	}
 
 	@Override

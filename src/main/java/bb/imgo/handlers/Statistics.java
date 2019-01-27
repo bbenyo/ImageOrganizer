@@ -65,12 +65,13 @@ public class Statistics extends MediaHandler {
 	}
 	
 	@Override
-	public void directoryInit(File directory) {
+	public boolean directoryInit(File directory) {
 		DirectoryStats dStats = new DirectoryStats(directory);
 		if (rootStats == null) {
 			rootStats = dStats;
 		}
 		directoryStats.put(directory, dStats);
+		return true;
 	}
 	
 	@Override

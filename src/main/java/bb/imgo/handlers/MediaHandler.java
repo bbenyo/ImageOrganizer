@@ -47,8 +47,10 @@ abstract public class MediaHandler {
 	abstract public boolean fileFilter(MediaFile f1);
 	
 	// Do any start up processing/bookkeeping, we will start processing the given directory next
-	public void directoryInit(File directory) {
+	// Return false if we need to stop processing this directory (because we changed its name)
+	public boolean directoryInit(File directory) {
 		logger.debug(label+" DirectoryInit");
+		return true;
 	}
 
 	// Do any finishing up processing/bookkeeping, we have just finished processing the given directory
