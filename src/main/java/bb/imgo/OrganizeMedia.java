@@ -437,8 +437,14 @@ public class OrganizeMedia {
 				ex.printStackTrace();
 				ableToRename = false;
 			}
-		}				
-		Files.move(p1.toPath(), p2.toPath());
+		}	
+		try {
+			Files.move(p1.toPath(), p2.toPath());
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			// TODO: UI popup (try again)
+			error(ex.toString());
+		}
 		uiStatus("Moved to "+p2.getAbsolutePath());
 	}
 	
