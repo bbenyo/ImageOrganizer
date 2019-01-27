@@ -107,7 +107,11 @@ public class MoveToDateSubdirectory extends MediaHandler {
 		// Where should this file go?
 		File f = f1.getBaseFile();
 		long time = f1.getOriginalTimestamp();
-		if (time <= 0) {
+		if (time <= 0 || time < 347155200000l) { // Before 1981 means we probably have the wrong creation date (camera time was not set)
+			//  So in that case, we'll use last mod
+			if (time > 0) {
+				logger.info("Creation time was before 1981: "+time+", so we're using the last mod time instead");
+			}
 			logger.debug("Using lastmodified time for "+f.getName());
 			time = f.lastModified();
 		}
