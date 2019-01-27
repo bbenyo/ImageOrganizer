@@ -37,6 +37,7 @@ public class OrganizeMedia {
 	protected Properties props = null;
 
 	File rootDirectory;
+	File startSubdir = null;
 	List<MediaHandler> handlers = new ArrayList<MediaHandler>();
 	File goodDir = new File("data/test/Good");
 	File trashDir = new File("data/test/ForDeletion");
@@ -65,13 +66,27 @@ public class OrganizeMedia {
 	
 	int uiHeight = 800;
 	int uiWidth = 900;
-
+	
 	public OrganizeMedia(String pFileName, String rootDir) {
+		this(pFileName, rootDir, null);
+	}
+	
+	public OrganizeMedia(String pFileName, String rootDir, String subDir) {
 		rootDirectory = new File(rootDir);
 		if (!rootDirectory.exists()) {
 			error("Root Directory: "+rootDir+" does not exist!");
 		} else if (!rootDirectory.isDirectory()) {
 			error("Root Directory: "+rootDir+" is not a directory!");
+		}
+		
+		startSubdir = rootDirectory;
+		if (subDir != null) {
+			startSubdir = new File(rootDirectory, subDir);
+			if (startSubdir.exists()) {
+				logger.info("Handling only subdirectory: "+subDir);
+			} else {
+				error("Handle Only Subdirectory: "+subDir+" doesn't exist!");
+			}
 		}
 		
 		props = new Properties();
@@ -212,11 +227,11 @@ public class OrganizeMedia {
 		actionLog.clear();
 		fireHandlerInitialize();
 		running.set(true);
-		int totalFiles = countFiles(rootDirectory);
+		int totalFiles = countFiles(startSubdir);
 		if (ui != null) {
 			ui.initializeUI(totalFiles);
 		}
-		organize(rootDirectory);
+		organize(startSubdir);
 		fireHandlerFinalize();
 		writeActionLog();
 	}
@@ -626,13 +641,15 @@ public class OrganizeMedia {
 		Options options = new Options();
 		options.addOption("p", "properties", true, "Properties file name");
 		options.addOption("d", "dir", true, "Root directory to organize");
+		options.addOption("s", "subdir", true, "Handle only this subdirectory from the root");
 
 		CommandLineParser parser = new DefaultParser();
 		try {
 			CommandLine cLine = parser.parse(options, args);
 			String pFileName = cLine.getOptionValue("p", PropertyFileName);
 			String rDir = cLine.getOptionValue("d", DefaultDir);
-			OrganizeMedia oMedia = new OrganizeMedia(pFileName, rDir);
+			String sDir = cLine.getOptionValue("s", null);
+			OrganizeMedia oMedia = new OrganizeMedia(pFileName, rDir, sDir);
 			if (oMedia.showUI) {
 				oMedia.startUI();
 			} else {
