@@ -230,13 +230,18 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		startButton = new JButton("Start");
 		startButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				Thread oThread = new Thread(new Runnable() {
-					public void run() {
-						controller.organize();
-					}
-				});
-				oThread.start();
-				start();
+				if (startButton.getText().equals("Start")) {
+					Thread oThread = new Thread(new Runnable() {
+						public void run() {
+							controller.organize();
+						}
+					});
+					oThread.start();
+					start();
+				} else {
+					startButton.setText("Start");
+					controller.resume();
+				}
 			}				
 		});
 		
