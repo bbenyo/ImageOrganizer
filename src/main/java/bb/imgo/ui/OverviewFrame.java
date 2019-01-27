@@ -15,6 +15,7 @@ import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -30,7 +31,9 @@ import bb.imgo.handlers.MediaHandler;
 public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 	
 	JLabel rootDirectoryLabel;
-	// JButton rootDirectoryBrowse;
+	JButton rootDirectoryBrowse;
+	JLabel startSubdirLabel;
+	JButton startSubdirBrowse;
 	
 	JScrollPane actionLogPane;
 	JTextArea actionLogArea;
@@ -79,23 +82,77 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		mainPanel.setLayout(new GridBagLayout());
 		GridBagConstraints gbc = new GridBagConstraints();
 		
-		rootDirectoryLabel = new JLabel("Root: "+rootDir+"  ");
+		rootDirectoryLabel = new JLabel("Root: "+rootDir);
 		rootDirectoryLabel.setFont(arial18);
 		gbc.gridx=0;
 		gbc.gridy=0;
 		gbc.weightx=1.0;
-		gbc.gridwidth=4;
+		gbc.gridwidth=3;
 		gbc.gridheight=1;
 		gbc.insets = new Insets(5,5,5,5); 
 		gbc.fill=GridBagConstraints.BOTH;
 		gbc.anchor=GridBagConstraints.LINE_START;
 		mainPanel.add(rootDirectoryLabel, gbc);
 		
+		rootDirectoryBrowse = new JButton("Browse");
+		rootDirectoryBrowse.setFont(arial18);
+		gbc.gridx=3;
+		gbc.weightx=0;
+		gbc.gridwidth=1;
+		mainPanel.add(rootDirectoryBrowse, gbc);
+		final JFrame moi = this;
+		rootDirectoryBrowse.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JFileChooser rChooser = new JFileChooser();
+				rChooser.setCurrentDirectory(controller.getRootDirectory());
+				rChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+				int retval = rChooser.showDialog(moi, "Select");
+				if (retval == JFileChooser.APPROVE_OPTION) {
+					File sFile = rChooser.getSelectedFile();
+					controller.setRootDirectory(sFile);
+					rootDirectoryLabel.setText("Root: "+sFile.getAbsolutePath());
+					controller.setStartSubdir(null);
+					startSubdirLabel.setText("Start in Subdir: ");
+				}				
+			}
+		});
+		
+		startSubdirLabel = new JLabel("Start in Subdir: "+controller.getStartSubdir().getAbsolutePath());
+		startSubdirLabel.setFont(arial18);
+		gbc.gridx=0;
+		gbc.gridy++;
+		gbc.gridwidth=3;
+		gbc.gridheight=1;
+		mainPanel.add(startSubdirLabel, gbc);
+		
+		startSubdirBrowse = new JButton("Browse");
+		startSubdirBrowse.setFont(arial18);
+		gbc.gridx=3;
+		gbc.weightx=0;
+		gbc.gridwidth=1;
+		mainPanel.add(startSubdirBrowse, gbc);
+		startSubdirBrowse.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JFileChooser rChooser = new JFileChooser();
+				rChooser.setCurrentDirectory(controller.getStartSubdir());
+				rChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+				int retval = rChooser.showDialog(moi, "Select");
+				if (retval == JFileChooser.APPROVE_OPTION) {
+					File sFile = rChooser.getSelectedFile();
+					controller.setStartSubdir(sFile);
+					startSubdirLabel.setText("Start in Subdir: "+sFile.getAbsolutePath());
+				}				
+			}
+		});
+		
+		// TODO: toggle on/off handlers via checkboxes
 		StringBuffer handlerStr = new StringBuffer("Handlers: ");
 		for (MediaHandler handler : handlers) {
 			handlerStr.append(handler.getLabel()+" ");
 		}
+		gbc.gridx=0;
 		gbc.gridy++;
+		gbc.gridwidth=4;
 		gbc.gridheight=2;
 		gbc.weighty=0.25;
 		activeHandlers = new JLabel(handlerStr.toString());
@@ -228,6 +285,7 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 				
 		JPanel buttonPanel = new JPanel();
 		startButton = new JButton("Start");
+		startButton.setFont(arial18);
 		startButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (startButton.getText().equals("Start")) {
@@ -246,6 +304,7 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		});
 		
 		stopButton = new JButton("Stop");
+		stopButton.setFont(arial18);
 		stopButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				controller.pause();
@@ -254,6 +313,7 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		});
 		
 		cancelButton = new JButton("Cancel");
+		cancelButton.setFont(arial18);
 		cancelButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				controller.abort();
@@ -262,6 +322,7 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		});
 		
 		exitButton = new JButton("Exit");
+		exitButton.setFont(arial18);
 		exitButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				controller.exit();

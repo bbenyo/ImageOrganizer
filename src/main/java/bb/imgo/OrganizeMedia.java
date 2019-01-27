@@ -199,10 +199,19 @@ public class OrganizeMedia {
 		}
 	}
 	
+	public File getStartSubdir() {
+		return startSubdir;
+	}
+	
+	public void setStartSubdir(File startSubdir) {
+		this.startSubdir = startSubdir;
+	}
+
 	private void printConfig() {
 		String ls = System.lineSeparator();
 		StringBuffer sb = new StringBuffer("OrganizeMedia Configuration: "+ls);
 		sb.append("  Working Directory: "+rootDirectory+ls);
+		sb.append("  Start Subdir: "+startSubdir+ls);
 		sb.append("  Good Storage Directory: "+goodDir+ls);
 		sb.append("  Trash Directory: "+trashDir+ls);
 		sb.append("  Image Only? "+imageOnly+ls);
