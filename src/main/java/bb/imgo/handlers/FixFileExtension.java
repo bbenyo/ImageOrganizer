@@ -37,6 +37,9 @@ public class FixFileExtension extends MediaHandler {
 		if (f1.getType().startsWith("text")) {
 			return false;
 		}
+		if (f1.getType().startsWith("application")) {
+			return false;
+		}
 		return true;
 	}
 
