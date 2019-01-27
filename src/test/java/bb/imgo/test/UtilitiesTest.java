@@ -3,6 +3,10 @@ package bb.imgo.test;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -10,6 +14,7 @@ import org.junit.Test;
 import bb.imgo.MD5Checksum;
 import bb.imgo.struct.FileTypeStats;
 import bb.imgo.struct.FileUtilities;
+import bb.imgo.struct.MediaFile;
 
 public class UtilitiesTest {
 
@@ -120,5 +125,30 @@ public class UtilitiesTest {
 		Assert.assertTrue(fstats.humanReadableBytes(5100000000000111.0).equals("5.100 P"));
 		Assert.assertTrue(fstats.humanReadableBytes(7010000000000111222.0).equals("7.010 E"));
 		Assert.assertTrue(fstats.humanReadableBytes(5999999999999999999999.0).equals("6.0E21 (Huge!?!)"));
+	}
+	
+	@Test
+	public void testDateParse() {
+
+		SimpleDateFormat tikaDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+		String date = "2004-06-28T01:26:08";
+		try {
+			Date d1 = tikaDate.parse(date);
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(d1);
+			int year = cal.get(Calendar.YEAR);
+			int month = cal.get(Calendar.MONTH) + 1; // Seriously, you're starting Months at 0? Come on...
+			int day = cal.get(Calendar.DAY_OF_MONTH);
+
+			System.out.println(year+" "+month+" "+day);
+			
+			Assert.assertTrue(year == 2004);
+			Assert.assertTrue(month == 6);
+			Assert.assertTrue(day == 28);
+			
+		} catch (ParseException ex) {
+			ex.printStackTrace();
+			Assert.fail();
+		} 
 	}
 }

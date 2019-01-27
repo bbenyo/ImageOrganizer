@@ -22,9 +22,9 @@ import bb.imgo.struct.MediaFile;
 public class MoveToDateSubdirectory extends MediaHandler {
 	static private Logger logger = Logger.getLogger(MoveToDateSubdirectory.class.getName());
 	
-	SimpleDateFormat yyyy = new SimpleDateFormat("YYYY");
-	SimpleDateFormat yyyymm = new SimpleDateFormat("YYYY-MM");
-	SimpleDateFormat yyyymmdd = new SimpleDateFormat("YYYY-MM-dd");
+	SimpleDateFormat yyyy = new SimpleDateFormat("yyyy");
+	SimpleDateFormat yyyymm = new SimpleDateFormat("yyyy-MM");
+	SimpleDateFormat yyyymmdd = new SimpleDateFormat("yyyy-MM-dd");
 
 	boolean handlingDirectory = false;
 	

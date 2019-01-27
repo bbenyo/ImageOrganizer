@@ -1,14 +1,23 @@
 package bb.imgo.struct;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.apache.log4j.Logger;
 import org.apache.tika.Tika;
+import org.apache.tika.exception.TikaException;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.parser.AutoDetectParser;
+import org.apache.tika.parser.ParseContext;
+import org.apache.tika.parser.Parser;
+import org.apache.tika.sax.BodyContentHandler;
+import org.xml.sax.SAXException;
 
 public class MediaFile {
 
@@ -28,16 +37,18 @@ public class MediaFile {
 	int tag = 0;
 	
 	Tika tika = new Tika();
-	
-	static public SimpleDateFormat ymdhm = new SimpleDateFormat("YYYY-MM-DD HH:mm");
+
+	static public SimpleDateFormat ymdhm = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+	static public SimpleDateFormat tikaDate = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
 	
 	private String deleteReason;
 	private String goodReason;
 	
+	private long originalTimestamp = -1;
+	
 	public MediaFile(File f) {
 		this.baseFile = f;
-		ext = FileUtilities.getExtension(f).toLowerCase();
-		
+		ext = FileUtilities.getExtension(f).toLowerCase();		
 	}
 		
 	// Accessors
@@ -184,6 +195,32 @@ public class MediaFile {
 			return newRoot;
 		}
 		return new File(newRoot, relativePath);
+	}
+	
+	public long getOriginalTimestamp() {
+		if (originalTimestamp == -1) {
+			Parser parser = new AutoDetectParser();
+			BodyContentHandler handler = new BodyContentHandler();
+			Metadata metadata = new Metadata();   //empty metadata object 
+			ParseContext context = new ParseContext();
+			try {
+				FileInputStream inputstream = new FileInputStream(baseFile);
+				parser.parse(inputstream, handler, metadata, context);				
+				String oDate = metadata.get("Date/Time Original");
+				Date d1 = tikaDate.parse(oDate);
+				logger.info("Original Date: "+d1);
+				originalTimestamp = d1.getTime();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (SAXException e) {
+				e.printStackTrace();
+			} catch (TikaException e) {
+				e.printStackTrace();
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}
+		return originalTimestamp;
 	}
 		
 }
