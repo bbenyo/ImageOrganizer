@@ -27,6 +27,7 @@ public class RemoveEmptySubdirectory extends MediaHandler {
 		
 	@Override
 	public void directoryComplete(File directory) {
+		logger.info("Checking for files in "+directory);
 		if (directory.listFiles().length == 0) {
 			logger.info("Removing empty directory: "+directory.getAbsolutePath());
 			try {
@@ -37,7 +38,9 @@ public class RemoveEmptySubdirectory extends MediaHandler {
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
-		} 
+		} else {
+			logger.debug(directory.listFiles().length+" files in "+directory);
+		}
 	}
 	
 	@Override
