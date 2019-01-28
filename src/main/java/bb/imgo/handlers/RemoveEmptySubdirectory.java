@@ -39,7 +39,25 @@ public class RemoveEmptySubdirectory extends MediaHandler {
 				ex.printStackTrace();
 			}
 		} else {
-			logger.debug(directory.listFiles().length+" files in "+directory);
+			File[] files = directory.listFiles();
+			if (files.length > 2) {
+				return; // Definitely not empty
+			}
+			// If the only files are Thumbs.db, and Thumbnail.info, delete it
+			for (File f : files) {
+				if (!f.getName().equals("Thumbs.db") && !f.getName().equals("ZbThumbnail.info")) {
+					return;
+				}
+			}
+			logger.debug("Only thumbnail files remain, deleting directory");
+			addActionLog(directory.getAbsolutePath(), ActionLog.Action.DELETE, "Empty Dir");
+			if (!logOnly) {
+				files = directory.listFiles();
+				for (File f : files) {
+					f.delete();
+				}
+				directory.delete();
+			}
 		}
 	}
 	
