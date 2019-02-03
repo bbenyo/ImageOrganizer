@@ -168,7 +168,6 @@ public class MoveToDateSubdirectory extends MediaHandler {
 		}
 		logger.debug("Correct Path: "+correctPath);
 		
-		// TODO: Check for a duplicate before moving
 		if (correctPath.exists()) {
 			// File already exists there
 			// Is it the same file?
@@ -177,8 +176,7 @@ public class MoveToDateSubdirectory extends MediaHandler {
 				String ns = MD5Checksum.getMD5Checksum(correctPath.getAbsolutePath());
 				if (cs.equals(ns)) {
 					// Duplicate, remove this one
-					main.addActionLog(f1.getBaseFile().getAbsolutePath(), ActionLog.Action.DELETE, "MoveToDate Duplicate File");
-					f1.setDelete("Duplicate Found (MoveToDate)");
+					f1.setDelete("Duplicate Found (MoveToDate): "+correctPath.getAbsolutePath());
 					return true;
 				}
 			} catch (Exception e) {

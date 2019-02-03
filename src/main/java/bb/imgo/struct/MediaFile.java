@@ -116,6 +116,15 @@ public class MediaFile {
 	public String getExt() {
 		return ext;
 	}
+	
+	// File name without the extension
+	public String getBaseName() {
+		int pos = baseFile.getName().lastIndexOf(".");
+		if (pos > -1) {
+			return baseFile.getName().substring(0, pos);
+		}
+		return baseFile.getName();
+	}
 
 	public void setExt(String ext) {
 		this.ext = ext;
