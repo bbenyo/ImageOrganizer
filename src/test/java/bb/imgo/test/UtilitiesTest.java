@@ -2,7 +2,10 @@ package bb.imgo.test;
 
 import static org.junit.Assert.fail;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -12,6 +15,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import bb.imgo.MD5Checksum;
+import bb.imgo.OrganizeMedia;
 import bb.imgo.struct.FileTypeStats;
 import bb.imgo.struct.FileUtilities;
 import bb.imgo.struct.MediaFile;
@@ -150,5 +154,65 @@ public class UtilitiesTest {
 			ex.printStackTrace();
 			Assert.fail();
 		} 
+	}
+	
+	private void writeDummyFile(File f1) {
+		try {
+			BufferedWriter bwrite = new BufferedWriter(new FileWriter(f1));
+			bwrite.write("Not A JPG");
+			bwrite.close();
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+	}
+	
+	@Test
+	public void testUniqueFile() {
+		String resDir = "data/test/resources";
+		OrganizeMedia oMedia = new OrganizeMedia("data/test/resources/statsonly.properties", resDir);
+		File f1 = new File(resDir, "IMG_Test2020.jpg");
+		if (f1.exists()) {
+			f1.delete();
+		}
+		File f1b = new File(resDir, "IMG_Test2020_V2.jpg");
+		if (f1b.exists()) {
+			f1b.delete();
+		}
+		f1b = new File(resDir, "IMG_Test2020_V3.jpg");
+		if (f1b.exists()) {
+			f1b.delete();
+		}
+		f1b = new File(resDir, "IMG_Test2020_V4.jpg");
+		if (f1b.exists()) {
+			f1b.delete();
+		}
+
+		writeDummyFile(f1);
+		
+		Assert.assertTrue(f1.exists());
+		File f2 = oMedia.getUniqueFile(f1);
+		Assert.assertFalse(f2.exists());
+		Assert.assertTrue(f2.getName().equals("IMG_Test2020_V2.jpg"));
+		writeDummyFile(f2);
+		
+		Assert.assertTrue(f2.exists());
+		File f3 = oMedia.getUniqueFile(f1);
+		Assert.assertFalse(f3.exists());
+		Assert.assertTrue(f3.getName().equals("IMG_Test2020_V3.jpg"));
+		writeDummyFile(f3);
+		
+		try {
+			oMedia.moveFile(f1, f2);
+			File f4 = new File(resDir, "IMG_Test2020_V4.jpg");
+			Assert.assertTrue(f4.exists());
+			f4.delete();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		
+		f1.delete();
+		f2.delete();
+		f3.delete();
 	}
 }

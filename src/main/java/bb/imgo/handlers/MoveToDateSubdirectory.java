@@ -8,6 +8,8 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 
+import bb.imgo.MD5Checksum;
+import bb.imgo.struct.ActionLog;
 import bb.imgo.struct.MediaFile;
 
 /**
@@ -165,6 +167,26 @@ public class MoveToDateSubdirectory extends MediaHandler {
 			correctPath = new File(cDirs);
 		}
 		logger.debug("Correct Path: "+correctPath);
+		
+		// TODO: Check for a duplicate before moving
+		if (correctPath.exists()) {
+			// File already exists there
+			// Is it the same file?
+			try {
+				String cs = MD5Checksum.getMD5Checksum(f1.getBaseFile().getAbsolutePath());
+				String ns = MD5Checksum.getMD5Checksum(correctPath.getAbsolutePath());
+				if (cs.equals(ns)) {
+					// Duplicate, remove this one
+					main.addActionLog(f1.getBaseFile().getAbsolutePath(), ActionLog.Action.DELETE, "MoveToDate Duplicate File");
+					f1.setDelete("Duplicate Found (MoveToDate)");
+					return true;
+				}
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
 		main.addRenameActionLog(f.getAbsolutePath(), correctPath.getAbsolutePath(), "MoveToDateDir");
 		
 		if (main.moveFiles) {

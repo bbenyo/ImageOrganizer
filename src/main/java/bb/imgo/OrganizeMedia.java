@@ -417,15 +417,34 @@ public class OrganizeMedia {
 				basename = fname.substring(0, pos);
 				ext = fname.substring(pos+1);
 			}
+			
+			// Does this end with _V#?  If so the # is the index.
+			pos = basename.lastIndexOf("_V");
+			String suffix = "_V2";
 			int index = 2;
+			if (pos > -1) {
+				try {
+					suffix = basename.substring(pos+2);
+					int idx = Integer.parseInt(suffix);
+					basename = basename.substring(0, pos);
+					idx++;
+					index = idx;
+					suffix = "_V"+idx;
+				} catch (NumberFormatException ex) {
+					ex.printStackTrace();
+					suffix = "_V2";
+				}
+			}
+			
 			while (p2.exists()) {
 				if (ext.length() > 0) {
-					p2 = new File(p2.getParentFile(), basename+"_"+index+"."+ext);
+					p2 = new File(p2.getParentFile(), basename+suffix+"."+ext);
 				} else {
-					p2 = new File(p2.getParentFile(), basename+"_"+index);
+					p2 = new File(p2.getParentFile(), basename+suffix+index);
 				}
 				logger.warn("Trying: "+p2.getAbsolutePath());
 				index++;
+				suffix="_V"+index;
 			}
 		}
 		return p2;
