@@ -6,6 +6,9 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.FileFilter;
 
@@ -44,6 +47,13 @@ public class ImageGridPanel extends JFrame {
 		this.y = y;
 		init();
 		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		WindowListener exitListener = new WindowAdapter() {
+		    @Override
+		    public void windowClosing(WindowEvent e) {
+		        cleanup();
+		    }
+		};
+		this.addWindowListener(exitListener);
 		this.pack();
 	}
 	
@@ -104,6 +114,11 @@ public class ImageGridPanel extends JFrame {
 	public void cleanup() {
 		setVisible(false);
 		dispose();
+		// Tell anyone waiting that we're done
+		// UserChooser waits for this
+		synchronized(this) {
+			this.notifyAll();
+		}
 	}
 	
 	private void showPage() {

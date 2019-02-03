@@ -3,6 +3,8 @@ package bb.imgo.ui;
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.URL;
@@ -69,7 +71,7 @@ public class ImagePanel extends JPanel {
 				img = ImageIO.read(imgUrl);		
 				if (img != null) {
 					// TODO: Allow you to set the size via properties
-					Image imgResized = img.getScaledInstance(256, 256, Image.SCALE_SMOOTH);
+					Image imgResized = img.getScaledInstance(400, 300, Image.SCALE_SMOOTH);
 					imgIcon = new ImageIcon(imgResized);
 				} else {
 					logger.info("Unable to read Image from "+imgUrl);
@@ -123,6 +125,23 @@ public class ImagePanel extends JPanel {
 			archiveButton.setSelected(true);
 		}
 		
+		goodButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				applyTags();
+			}
+		});
+		
+		trashButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				applyTags();
+			}
+		});
+		archiveButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				applyTags();
+			}
+		});
+		
 		JPanel rPanel = new JPanel();
 		rPanel.add(goodButton);
 		rPanel.add(trashButton);
@@ -133,10 +152,10 @@ public class ImagePanel extends JPanel {
 	public void applyTags() {
 		if (goodButton.isSelected()) {
 			mFile.clearDelete();
-			mFile.setTag(MediaFile.TAG_GOOD);
+			mFile.setGood("User Choice");
 		} else if (trashButton.isSelected()) {
 			mFile.clearGood();
-			mFile.setTag(MediaFile.TAG_DELETE);
+			mFile.setDelete("User Choice");
 		} else {
 			mFile.clearGood();
 			mFile.clearDelete();

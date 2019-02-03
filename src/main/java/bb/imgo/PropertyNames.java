@@ -12,8 +12,6 @@ public class PropertyNames {
 	static public String MOVE_FILES = "handler.moveFiles";
 	// Action Log output name
 	static public String ACTION_LOG_NAME = "handler.actionLog.name";
-	// Intermediate state file, used to resume an incomplete run
-	static public String INTERMED_STATE_FILE = "handler.intermedstate.name";
 	// Show the UI
 	static public String SHOW_UI = "handler.ui";
 	// UI frame height
@@ -39,4 +37,13 @@ public class PropertyNames {
 	// Backup directories
 	static public String BACKUP_IMAGE_ROOT="backup.image.root";
 	static public String BACKUP_VIDEO_ROOT="backup.video.root";
+	
+	// User chooser, do we want to take into account any previous progress and start where we left off?
+	static public String USER_CHOOSER_USE_PROGRESS="userchooser.progress.enabled";
+	// Current progress file
+	static public String USER_CHOOSER_PROGRESS_FILENAME="userchooser.progress.filename";
+	// Number of images on a row
+	static public String USER_CHOOSER_COLUMNS="userchooser.columns";
+	// Number of rows
+	static public String USER_CHOOSER_ROWS="userchooser.rows";
 }
