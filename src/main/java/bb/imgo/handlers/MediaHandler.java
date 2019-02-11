@@ -17,6 +17,9 @@ abstract public class MediaHandler {
 	String label;
 	OrganizeMedia main;
 	
+	// Handlers can temporarily disable themselves in directory inits, this can allow us to short-circuit processing
+	boolean temporarilyDisabled = false;
+	
 	protected MediaHandler() {
 		label = this.getClass().getSimpleName();
 	}
@@ -51,6 +54,14 @@ abstract public class MediaHandler {
 	public boolean directoryInit(File directory) {
 		logger.debug(label+" DirectoryInit");
 		return true;
+	}
+	
+	public boolean isTemporarilyDisabled() {
+		return temporarilyDisabled;
+	}
+	
+	public void setTemporarilyDisabled(boolean flag) {
+		temporarilyDisabled = flag;
 	}
 
 	// Do any finishing up processing/bookkeeping, we have just finished processing the given directory

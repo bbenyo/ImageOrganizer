@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -66,6 +67,8 @@ public class OrganizeMedia {
 	
 	int uiHeight = 800;
 	int uiWidth = 900;
+	
+	private Thread runningThread = null;
 	
 	public OrganizeMedia(String pFileName, String rootDir) {
 		this(pFileName, rootDir, null);
@@ -228,6 +231,33 @@ public class OrganizeMedia {
 		logger.info(sb.toString());
 	}
 		
+	public void startThread() {
+		if (runningThread != null && runningThread.isAlive()) {
+			abort();
+			int retries = 10;
+			while (runningThread.isAlive() && retries > 0) {
+				try {
+					Thread.sleep(1000);
+					logger.info("Waiting for thread to exit...");
+					retries--;
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		if (runningThread != null && runningThread.isAlive()) {
+			logger.error("Unable to terminate old thread!");
+			return;
+		}
+		
+		runningThread = new Thread(new Runnable() {
+			public void run() {
+				organize();
+			}
+		});
+		runningThread.start();
+	}
+	
 	/**
 	 * Main method to organize a directory.  Fire each handler on all directories and files
 	 */
@@ -266,18 +296,23 @@ public class OrganizeMedia {
 	}
 		
 	public int countFiles(File dir) {
+		if (!checkPause()) {
+			return 0;
+		}
 		if (ignoreSubdirNames.contains(dir.getName())) {
 			logger.info("IGNORING "+dir.getName());
 			return 0;
 		}
-		logger.debug("Counting files under "+dir);
+		
+		uiStatus("Counting files under "+dir);
 		File[] dFiles = dir.listFiles(noDirectories);
 		int count = dFiles.length;
 		dFiles = dir.listFiles(directories);
+		Arrays.sort(dFiles);
 		for (File f : dFiles) {
 			count += countFiles(f);
 		}
-		logger.debug("Counted "+count+" files under "+dir);
+		uiStatus("Counted "+count+" files under "+dir);
 		return count;
 	}
 	
@@ -290,20 +325,38 @@ public class OrganizeMedia {
 			return;
 		}
 		logger.info("START Organizing directory: "+dir);
+		boolean abort = false;
 		if (!fireHandlerDirectoryStart(dir)) {
 			logger.info("ABORTING Organizing directory: "+dir+" due to handler init");
+			abort = true;
 			return;
 		}
-		File[] dFiles = dir.listFiles(noDirectories);
-		for (File f : dFiles) {
-			if (!checkPause()) {
-				return;
-			}
-			fireHandlerFile(f);
+		
+		// Are any handlers not disabled?
+		if (allHandlersDisabled()) {
+			logger.info("All handlers are temporarily disabled!");
+			abort = true;
 		}
+		
+		File[] dFiles = dir.listFiles(noDirectories);
+		if (!abort) {
+			Arrays.sort(dFiles);
+			for (File f : dFiles) {
+				if (!checkPause()) {
+					return;
+				}
+				fireHandlerFile(f);
+			}
+		} else {
+			if (ui != null) {
+				ui.incrementProgress(dFiles.length);
+			}
+		}
+		
 		logger.info("PROGRESS Organized files, starting on subdirectories: "+dir);
 		
 		dFiles = dir.listFiles(directories);
+		Arrays.sort(dFiles);
 		for (File f : dFiles) {
 			if (f.isDirectory()) {
 				fireHandlerSubDirectoryStart(dir, f);
@@ -311,7 +364,7 @@ public class OrganizeMedia {
 				fireHandlerSubDirectoryComplete(dir, f);
 			}
 		}
-
+		
 		logger.info("COMPLETE Organizing directory: "+dir);
 		fireHandlerDirectoryComplete(dir);
 	}
@@ -321,6 +374,15 @@ public class OrganizeMedia {
 			ui.updateStatus(status);
 		}
 		logger.debug(status);
+	}
+	
+	protected boolean allHandlersDisabled() {
+		for (MediaHandler handler : handlers) {
+			if (!handler.isTemporarilyDisabled()) {
+				return false;
+			}
+		}
+		return true;
 	}
 		
 	protected boolean fireHandlerDirectoryStart(File dir) {
@@ -382,7 +444,7 @@ public class OrganizeMedia {
 		if (imageOnly && !mFile.isImageFile()) {
 			logger.debug("Ignoring non image file: "+f);
 			if (ui != null) {
-				ui.incrementProgress();
+				ui.incrementProgress(1);
 			}
 			return;
 		}

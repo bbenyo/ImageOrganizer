@@ -12,7 +12,7 @@ public interface OrganizeMediaUIInterface {
 	
 	public void initializeUI(int max);
 	
-	public void incrementProgress();
+	public void incrementProgress(int count);
 	
 	// Pointer to the controller for start/stop.  Could use an interface here, 
 	//   but there will only be one controller (OrganizeMedia)

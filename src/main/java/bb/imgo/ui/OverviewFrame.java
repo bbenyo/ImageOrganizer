@@ -289,12 +289,7 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		startButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (startButton.getText().equals("Start")) {
-					Thread oThread = new Thread(new Runnable() {
-						public void run() {
-							controller.organize();
-						}
-					});
-					oThread.start();
+					controller.startThread();
 					start();
 				} else {
 					startButton.setText("Start");
@@ -407,8 +402,8 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 	}
 
 	@Override
-	public void incrementProgress() {
-		progress.setValue(progress.getValue() + 1);		
+	public void incrementProgress(int count) {
+		progress.setValue(progress.getValue() + count);		
 	}
 
 }
