@@ -105,12 +105,15 @@ public class UserChooser extends MediaHandler {
 	
 	public boolean directoryInit(File directory) {
 		logger.debug(label+" DirectoryInit");
+		this.setTemporarilyDisabled(false);
+		
 		if (currentProgressDirectory != null) {
-			if (directory.getAbsolutePath().equals(currentProgressDirectory)) {
+			if (directory.getAbsolutePath().equalsIgnoreCase(currentProgressDirectory)) {
 				logger.info("Resuming at "+directory);
 				currentProgressDirectory = null;
 			} else {
-				logger.info("UserChooser waiting to resume progress at "+currentProgressDirectory);
+				logger.info("UserChooser waiting to resume progress at "+currentProgressDirectory+", Cur directory is: "+directory.getAbsolutePath());
+				this.setTemporarilyDisabled(true);
 				return true;
 			}			 
 		}
@@ -155,6 +158,11 @@ public class UserChooser extends MediaHandler {
 			}
 		}
 		return true;
+	}
+	
+	@Override
+	public void directoryComplete(File directory) {
+		this.setTemporarilyDisabled(false);
 	}
 	
 	// We only handle the entire directory

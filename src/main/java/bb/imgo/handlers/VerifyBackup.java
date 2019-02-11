@@ -110,15 +110,17 @@ public class VerifyBackup extends MediaHandler {
 		}
 		
 		File[] prefixFiles = backupFile.getParentFile().listFiles(pff);
-		for (File bFile : prefixFiles) {
-			if (doChecksum) {
-				if (verifyBackupFile(f1.getBaseFile(), bFile)) {
-					logger.debug("Backup file "+backupFile+" found");
+		if (prefixFiles != null) {
+			for (File bFile : prefixFiles) {
+				if (doChecksum) {
+					if (verifyBackupFile(f1.getBaseFile(), bFile)) {
+						logger.debug("Backup file "+backupFile+" found");
+						return false;
+					}
+				} else {
+					logger.debug("Backup file "+backupFile+" found, checksum verification disabled");
 					return false;
 				}
-			} else {
-				logger.debug("Backup file "+backupFile+" found, checksum verification disabled");
-				return false;
 			}
 		}
 		

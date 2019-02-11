@@ -46,4 +46,7 @@ public class PropertyNames {
 	static public String USER_CHOOSER_COLUMNS="userchooser.columns";
 	// Number of rows
 	static public String USER_CHOOSER_ROWS="userchooser.rows";
+	
+	// File extensions to delete, comma separated
+	static public String DELETE_FILE_TYPE_EXTENSIONS="delete.extensions";
 }
