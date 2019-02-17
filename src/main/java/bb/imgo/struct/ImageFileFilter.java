@@ -21,7 +21,7 @@ public class ImageFileFilter implements FileFilter {
 		
 		try {
 			String type = Files.probeContentType(pathname.toPath());
-			if (type != null && type.startsWith("image")) {
+			if (type != null && type.startsWith("image") && !type.equalsIgnoreCase("image/heic")) {
 				return true;
 			}
 		} catch (Exception ex) {			
