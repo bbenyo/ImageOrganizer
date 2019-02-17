@@ -3,19 +3,23 @@ package bb.imgo.handlers;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.ArrayList;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
 import bb.imgo.PropertyNames;
+import bb.imgo.struct.ImageFileFilter;
 import bb.imgo.struct.MediaFile;
 import bb.imgo.ui.ImageGridPanel;
 
 /**
  * Let the user mark files as delete/good, archive is the default
  * Popup a 9x9 frame with next/prev buttons
+ *   
  * @author Brett
  *
  */
@@ -34,6 +38,9 @@ public class UserChooser extends MediaHandler {
 	// number of rows
 	protected int rows = 2;
 		
+	ArrayList<MediaFile> mediaFiles = new ArrayList<MediaFile>();
+	static public FileFilter imageFilter = new ImageFileFilter();
+	
 	// Start (or restart) processing directories
 	// Return true if we initialized propertly, false if there was an error
 	public boolean initialize(Properties props) {
@@ -103,9 +110,18 @@ public class UserChooser extends MediaHandler {
 		return true;
 	}
 	
+	public String getCurrentProgressDirectory() {
+		return currentProgressDirectory;
+	}
+	
+	public void setCurrentProgressDirectory(String cpd) {
+		currentProgressDirectory = cpd;
+	}
+	
 	public boolean directoryInit(File directory) {
 		logger.debug(label+" DirectoryInit");
-		this.setTemporarilyDisabled(false);
+		this.setTemporarilyDisabled(false);	
+		mediaFiles.clear();
 		
 		if (currentProgressDirectory != null) {
 			if (directory.getAbsolutePath().equalsIgnoreCase(currentProgressDirectory)) {
@@ -116,8 +132,17 @@ public class UserChooser extends MediaHandler {
 				this.setTemporarilyDisabled(true);
 				return true;
 			}			 
+		}		
+		return true;		
+	}
+	
+	@Override
+	public void directoryComplete(File directory) {
+		if (this.isTemporarilyDisabled()) {
+			this.setTemporarilyDisabled(false);
+			return;
 		}
-
+		
 		if (currentProgressFile != null) {
 			try {
 				BufferedWriter bwrite = new BufferedWriter(new FileWriter(currentProgressFile, false));
@@ -128,14 +153,13 @@ public class UserChooser extends MediaHandler {
 			}
 		}
 
-		File[] files = directory.listFiles(ImageGridPanel.imageFilter);
-		if (files == null || files.length == 0) {
+		if (mediaFiles.size() == 0) {
 			logger.info("No images found in "+directory+", skipping it");
-			return true;
+			return;
 		}		
 		
 		logger.info("Displaying ImageGridPanel for "+directory);
-		ImageGridPanel ig = new ImageGridPanel(directory, columns, rows);
+		ImageGridPanel ig = new ImageGridPanel(directory, mediaFiles, columns, rows);
 		ig.setLocationRelativeTo(null);
 		ig.setVisible(true);
 		
@@ -149,30 +173,36 @@ public class UserChooser extends MediaHandler {
 				if (ig.isVisible()) {
 					logger.warn("Notified, but ImageGridPanel is still visible!");
 				} else {
-					logger.info("Closed ImageGridPanel");					
-					return true;
+					logger.info("Closed ImageGridPanel");	
+					if (ig.wasCancelled()) {
+						logger.info("ImageGridPanel was cancelled by the user");
+						main.abort();
+					} else {
+						for (MediaFile mf : mediaFiles) {
+							main.completeMediaFileHandling(mf);
+						}
+					}
+
+					mediaFiles.clear();
+					return;
 				}
 			} catch (Exception ex) {
 				ex.printStackTrace();
-				return true;
 			}
 		}
-		return true;
 	}
 	
-	@Override
-	public void directoryComplete(File directory) {
-		this.setTemporarilyDisabled(false);
-	}
-	
-	// We only handle the entire directory
 	@Override
 	public boolean fileFilter(MediaFile f1) {
+		if (imageFilter.accept(f1.getBaseFile())) {
+			return true;
+		}
 		return false;
 	}
 
 	@Override
 	public boolean handleFile(MediaFile f1) {
+		mediaFiles.add(f1);
 		return false;
 	}
 
