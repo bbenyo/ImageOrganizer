@@ -26,6 +26,7 @@ import javax.swing.JTextArea;
 import bb.imgo.OrganizeMedia;
 import bb.imgo.OrganizeMediaUIInterface;
 import bb.imgo.handlers.MediaHandler;
+import bb.imgo.handlers.UserChooser;
 
 @SuppressWarnings("serial")
 public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
@@ -34,6 +35,8 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 	JButton rootDirectoryBrowse;
 	JLabel startSubdirLabel;
 	JButton startSubdirBrowse;
+	JLabel userProgressLabel;
+	JButton userProgressBrowse;
 	
 	JScrollPane actionLogPane;
 	JTextArea actionLogArea;
@@ -68,7 +71,7 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 	// Replace with an interface if needed
 	
 	// TODO: Specify via properties
-	Font arial18 = new Font("Arial", Font.PLAIN, 18);
+	static public Font arial18 = new Font("Arial", Font.PLAIN, 18);
 		
 	public OverviewFrame() {
 		super("Media Organizer");
@@ -144,6 +147,43 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 				}				
 			}
 		});
+		
+		MediaHandler uHandler = oMedia.getSpecificHandler(UserChooser.class);
+		if (uHandler != null) {
+			UserChooser uChoose = (UserChooser)uHandler;
+			String cpd = uChoose.getCurrentProgressDirectory();
+			if (cpd == null) {
+				userProgressLabel = new JLabel("Start at the beginning: "+oMedia.getRootDirectory().getAbsolutePath());
+			} else {
+				userProgressLabel = new JLabel("Resume at "+cpd);
+			}
+			userProgressLabel.setFont(arial18);
+			gbc.gridx=0;
+			gbc.gridy++;
+			gbc.gridwidth=3;
+			gbc.gridheight=1;
+			mainPanel.add(userProgressLabel, gbc);
+			
+			userProgressBrowse = new JButton("Change");
+			userProgressBrowse.setFont(arial18);
+			gbc.gridx=3;
+			gbc.weightx=0;
+			gbc.gridwidth=1;
+			mainPanel.add(userProgressBrowse, gbc);
+			userProgressBrowse.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					JFileChooser rChooser = new JFileChooser();
+					rChooser.setCurrentDirectory(controller.getStartSubdir());
+					rChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+					int retval = rChooser.showDialog(moi, "Select");
+					if (retval == JFileChooser.APPROVE_OPTION) {
+						File sFile = rChooser.getSelectedFile();
+						userProgressLabel.setText("Resume at "+sFile.getAbsolutePath());
+						uChoose.setCurrentProgressDirectory(sFile.getAbsolutePath());
+					}				
+				}
+			});
+		}
 		
 		// TODO: toggle on/off handlers via checkboxes
 		StringBuffer handlerStr = new StringBuffer("Handlers: ");
@@ -288,22 +328,21 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		startButton.setFont(arial18);
 		startButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (startButton.getText().equals("Start")) {
-					controller.startThread();
-					start();
-				} else {
-					startButton.setText("Start");
-					controller.resume();
-				}
+				controller.startThread();
+				start();
+				startButton.setEnabled(false);
 			}				
 		});
 		
-		stopButton = new JButton("Stop");
+		stopButton = new JButton("Pause");
 		stopButton.setFont(arial18);
 		stopButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				controller.pause();
-				startButton.setText("Resume");
+				if (stopButton.getText().equalsIgnoreCase("Pause")) {
+					controller.pause();
+				} else {
+					controller.resume();
+				}
 			}
 		});
 		
@@ -312,7 +351,8 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		cancelButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				controller.abort();
-				startButton.setText("Start");
+				stopButton.setText("Pause");
+				startButton.setEnabled(true);
 			}
 		});
 		
@@ -338,6 +378,21 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		this.setContentPane(mainPanel);
 		this.pack();
 		this.setSize(w,h);
+	}
+	
+	public void setPaused() {
+		stopButton.setText("Resume");
+		stopButton.validate();
+	}
+	
+	public void setResumed() {
+		stopButton.setText("Pause");
+		stopButton.validate();
+	}
+	
+	public void setAborted() {
+		startButton.setEnabled(true);
+		stopButton.setText("Pause");
 	}
 	
 	public void handleFile(String fname, boolean good, boolean delete) {

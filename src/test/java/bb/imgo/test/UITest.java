@@ -1,6 +1,7 @@
 package bb.imgo.test;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import javax.swing.JFrame;
 
@@ -29,8 +30,13 @@ public class UITest {
 	public void testImageGrid() {
 		File rDir = new File("data/test/Pictures/I/J/K/L");
 		Assert.assertTrue(rDir.exists());
-		
-		ImageGridPanel ig = new ImageGridPanel(rDir, 5, 2);
+		File[] files = rDir.listFiles();
+		ArrayList<MediaFile> mFiles = new ArrayList<MediaFile>();
+		for (File f : files) {
+			MediaFile mf = new MediaFile(f);
+			mFiles.add(mf);
+		}
+		ImageGridPanel ig = new ImageGridPanel(rDir, mFiles, 5, 2);
 		ig.setVisible(true);
 		Assert.assertTrue(ig.isVisible());
 	}

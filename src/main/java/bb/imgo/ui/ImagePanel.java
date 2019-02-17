@@ -1,6 +1,7 @@
 package bb.imgo.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -10,6 +11,7 @@ import java.io.File;
 import java.net.URL;
 
 import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -147,19 +149,38 @@ public class ImagePanel extends JPanel {
 		rPanel.add(trashButton);
 		rPanel.add(archiveButton);
 		bottomPanel.add(rPanel, BorderLayout.CENTER);
+		setImageBorder();
 	}
 	
+	private void setImageBorder() {
+		setBorder(BorderFactory.createLineBorder(getBorderColor(mFile), 4));
+	}
+	
+
+	private Color getBorderColor(MediaFile mf) {
+		if (mf.isGood()) {
+			return Color.green;
+		}
+		if (mf.isDelete()) {
+			return Color.red;
+		}
+		return Color.black;
+	}
+		
 	public void applyTags() {
 		if (goodButton.isSelected()) {
+			logger.info("Applying GOOD tag");
 			mFile.clearDelete();
 			mFile.setGood("User Choice");
 		} else if (trashButton.isSelected()) {
+			logger.info("Applying DELETE tag");
 			mFile.clearGood();
 			mFile.setDelete("User Choice");
 		} else {
 			mFile.clearGood();
 			mFile.clearDelete();
 		}
+		setImageBorder();
 	}
 }
 

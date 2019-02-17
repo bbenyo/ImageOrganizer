@@ -110,6 +110,7 @@ public class OrganizeMedia {
 		ignoreSubdirNames.add(".git");
 		
 		initProperties(props);
+		fireHandlerInitialize();
 		printConfig();
 	}
 	
@@ -264,7 +265,7 @@ public class OrganizeMedia {
 	public void organize() {
 		// TODO: Two phase pass, first for moving file handlers, second for handlers that don't move
 		actionLog.clear();
-		fireHandlerInitialize();
+		//fireHandlerInitialize();  done on startup
 		running.set(true);
 		int totalFiles = countFiles(startSubdir);
 		if (ui != null) {
@@ -587,7 +588,7 @@ public class OrganizeMedia {
 		}
 	}
 	
-	protected void completeMediaFileHandling(MediaFile mFile) {
+	public void completeMediaFileHandling(MediaFile mFile) {
 		String mFileName = mFile.getBaseFile().getName();
 		uiStatus("Complete handling for "+mFileName);
 		// If the file is marked delete, remove it my moving it to trash
@@ -709,15 +710,18 @@ public class OrganizeMedia {
 	
 	public void pause() {
 		running.set(false);
+		ui.setPaused();
 	}
 	
 	public void abort() {
 		abortFlag = true;
 		running.set(false);
+		ui.setAborted();
 	}
 
 	public void resume() {
 		running.set(true);
+		ui.setResumed();
 		synchronized(sync) {
 			sync.notifyAll();
 		}
@@ -737,6 +741,15 @@ public class OrganizeMedia {
 	
 	public List<MediaHandler> getHandlers() {
 		return handlers;
+	}
+	
+	public MediaHandler getSpecificHandler(Class<?> handlerClass) {
+		for (MediaHandler h : handlers) {
+			if (h.getClass().equals(handlerClass)) {
+				return h;
+			}
+		}
+		return null;
 	}
 	
 	static public void main(String[] args) {

@@ -11,11 +11,14 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.FileFilter;
+import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 
 import org.apache.log4j.Logger;
 
@@ -26,22 +29,27 @@ import bb.imgo.struct.MediaFile;
 public class ImageGridPanel extends JFrame {
 	static private Logger logger = Logger.getLogger(ImageGridPanel.class.getName());
 	
+	JLabel countLabel;
 	JPanel mainPanel;
 	JPanel buttonPanel;
 	JButton back;
 	JButton next;
 	JButton done;
+	JButton cancel;
 	
 	File directory;
 	
 	int x,y;
 	int startIndex = -1;
 	int endIndex = -1;
+		
+	boolean wasCancelled = false;
 	
-	static public FileFilter imageFilter = new ImageFileFilter();
-	
-	public ImageGridPanel(File directory, int x, int y) {
+	ArrayList<MediaFile> mediaFiles;
+		
+	public ImageGridPanel(File directory, ArrayList<MediaFile> mediaFiles, int x, int y) {
 		super(directory.getAbsolutePath());
+		this.mediaFiles = mediaFiles;
 		this.directory = directory;
 		this.x = x;
 		this.y = y;
@@ -77,6 +85,14 @@ public class ImageGridPanel extends JFrame {
 			}
 		});
 		
+		cancel = new JButton("Cancel");
+		cancel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				wasCancelled = true;
+				cleanup();				
+			}
+		});
+		
 		back = new JButton("<<");
 		back.setFont(new Font("Arial", Font.BOLD, 32));
 		back.addActionListener(new ActionListener() {
@@ -104,6 +120,10 @@ public class ImageGridPanel extends JFrame {
 			
 		});
 		
+		countLabel = new JLabel("Showing 0 out of 0 images");
+		countLabel.setFont(OverviewFrame.arial18);
+		
+		cPane.add(countLabel, BorderLayout.NORTH);
 		cPane.add(mainPanel, BorderLayout.CENTER);
 		cPane.add(buttonPanel, BorderLayout.SOUTH);
 		this.setContentPane(cPane);
@@ -121,34 +141,39 @@ public class ImageGridPanel extends JFrame {
 		}
 	}
 	
+	public boolean wasCancelled() {
+		return wasCancelled;
+	}
+	
 	private void showPage() {
 		logger.info("Showing page for "+directory+" starting at "+startIndex);
 		mainPanel.removeAll();
 		buttonPanel.removeAll();
-		File[] files = directory.listFiles(imageFilter);
 		
 		int expectedEndIndex = startIndex + x*y;
-		for (int i=startIndex; (i<expectedEndIndex && i<files.length); ++i) {
-			File f = files[i];
-			MediaFile mFile = new MediaFile(f);
+		for (int i=startIndex; (i<expectedEndIndex && i<mediaFiles.size()); ++i) {
+			MediaFile mFile = mediaFiles.get(i);
 			ImagePanel iPanel = new ImagePanel(mFile);
-			iPanel.setBorder(BorderFactory.createLineBorder(Color.black, 4));
 			mainPanel.add(iPanel);
 			endIndex = i;
 		}
-		
+
+		countLabel.setText("Showing "+(startIndex+1)+" - "+(endIndex+1)+" of "+(mediaFiles.size())+" images");
+		countLabel.setFont(OverviewFrame.arial18);
+		countLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		if (startIndex > 0) {
 			buttonPanel.add(back, BorderLayout.WEST);
 		}
-		
-		if (endIndex < (files.length - 1)) {
-			buttonPanel.add(next, BorderLayout.EAST);
-		}
-		
+
 		JPanel bcPanel = new JPanel();
-		bcPanel.add(done);
+		bcPanel.add(cancel);
+		if (endIndex < (mediaFiles.size() - 1)) {
+			buttonPanel.add(next, BorderLayout.EAST);
+		} else {
+			bcPanel.add(done);
+		}
 		buttonPanel.add(bcPanel, BorderLayout.CENTER);
-		
+				
 		revalidate();	
 		repaint();
 	}
