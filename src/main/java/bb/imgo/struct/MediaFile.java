@@ -2,6 +2,7 @@ package bb.imgo.struct;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -254,5 +255,25 @@ public class MediaFile {
 		}
 		return originalTimestamp;
 	}
+	
+	public Metadata getMetadata() {
+		Parser parser = new AutoDetectParser();
+		BodyContentHandler handler = new BodyContentHandler();
+		Metadata metadata = new Metadata();   //empty metadata object 
+		ParseContext context = new ParseContext();
+		try {
+			FileInputStream inputstream = new FileInputStream(baseFile);
+			parser.parse(inputstream, handler, metadata, context);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (SAXException e) {
+			e.printStackTrace();
+		} catch (TikaException e) {
+			e.printStackTrace();
+		}
 		
+		return metadata;
+	}
 }

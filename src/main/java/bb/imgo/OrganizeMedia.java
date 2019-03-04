@@ -426,6 +426,7 @@ public class OrganizeMedia {
 			uiStatus("Firing finalize for "+handler.getLabel());
 			handler.finalize();
 		}
+		uiStatus("FINISHED");
 	}
 	
 	protected void fireHandlerInitialize() {

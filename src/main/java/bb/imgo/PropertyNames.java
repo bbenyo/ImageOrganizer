@@ -47,6 +47,15 @@ public class PropertyNames {
 	// Number of rows
 	static public String USER_CHOOSER_ROWS="userchooser.rows";
 	
+	// User chooser, do we want to take into account any previous progress and start where we left off?
+	static public String VIDEO_RENAME_USE_PROGRESS="videorename.progress.enabled";
+	// Current progress file
+	static public String VIDEO_RENAME_PROGRESS_FILENAME="videorename.progress.filename";
+	// Number of images on a row
+	static public String VIDEO_RENAME_COLUMNS="userchooser.columns";
+	// Number of rows
+	static public String VIDEO_RENAME_ROWS="userchooser.rows";
+	
 	// File extensions to delete, comma separated
 	static public String DELETE_FILE_TYPE_EXTENSIONS="delete.extensions";
 }
