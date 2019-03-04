@@ -39,10 +39,12 @@ public class UserChooser extends MediaHandler {
 	protected int rows = 2;
 		
 	ArrayList<MediaFile> mediaFiles = new ArrayList<MediaFile>();
-	static public FileFilter imageFilter = new ImageFileFilter();
+	protected FileFilter imageFilter = new ImageFileFilter();
+	
+	protected boolean cancelled = false;
 	
 	// Start (or restart) processing directories
-	// Return true if we initialized propertly, false if there was an error
+	// Return true if we initialized properly, false if there was an error
 	public boolean initialize(Properties props) {
 		logger.info(getLabel()+" initialized");
 		
@@ -87,6 +89,11 @@ public class UserChooser extends MediaHandler {
 			}
 		}		
 		
+		boolean ret = readCurrentProgressFile();
+		return ret;
+	}
+	
+	protected boolean readCurrentProgressFile() {
 		if (currentProgressFile.exists()) {
 			try {
 				logger.info("Trying to read progress from "+currentProgressFile.getAbsolutePath());
@@ -105,8 +112,7 @@ public class UserChooser extends MediaHandler {
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
-		}
-		
+		}		
 		return true;
 	}
 	
@@ -136,10 +142,18 @@ public class UserChooser extends MediaHandler {
 		return true;		
 	}
 	
+	protected ImageGridPanel createImageGridPanel(File directory) {
+		return new ImageGridPanel(directory, mediaFiles, columns, rows);
+	}
+	
 	@Override
 	public void directoryComplete(File directory) {
 		if (this.isTemporarilyDisabled()) {
 			this.setTemporarilyDisabled(false);
+			return;
+		}
+		
+		if (cancelled) {
 			return;
 		}
 		
@@ -154,12 +168,12 @@ public class UserChooser extends MediaHandler {
 		}
 
 		if (mediaFiles.size() == 0) {
-			logger.info("No images found in "+directory+", skipping it");
+			logger.info("No media files found in "+directory+", skipping it");
 			return;
 		}		
 		
 		logger.info("Displaying ImageGridPanel for "+directory);
-		ImageGridPanel ig = new ImageGridPanel(directory, mediaFiles, columns, rows);
+		ImageGridPanel ig = createImageGridPanel(directory);
 		ig.setLocationRelativeTo(null);
 		ig.setVisible(true);
 		
@@ -176,6 +190,7 @@ public class UserChooser extends MediaHandler {
 					logger.info("Closed ImageGridPanel");	
 					if (ig.wasCancelled()) {
 						logger.info("ImageGridPanel was cancelled by the user");
+						cancelled = true;
 						main.abort();
 					} else {
 						for (MediaFile mf : mediaFiles) {

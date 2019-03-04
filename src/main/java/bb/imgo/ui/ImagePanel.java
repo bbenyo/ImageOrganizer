@@ -33,18 +33,18 @@ public class ImagePanel extends JPanel {
 	// Stat label
 	// Radio button (good/trash/archive)
 	
-	ImageIcon imgIcon;
-	JLabel statsLabel;
-	JLabel sizeLabel;
-	JLabel title;
+	protected ImageIcon imgIcon;
+	protected JLabel statsLabel;
+	protected JLabel sizeLabel;
+	protected JLabel title;
 	
-	JRadioButton goodButton;
-	JRadioButton trashButton;
-	JRadioButton archiveButton;
+	protected JRadioButton goodButton;
+	protected JRadioButton trashButton;
+	protected JRadioButton archiveButton;
 	
-	ButtonGroup tagGroup;
+	protected ButtonGroup tagGroup;
 
-	MediaFile mFile;
+	protected MediaFile mFile;
 	
 	// TODO: Allow you to specify via properties
 	Font arial14 = new Font("Arial", Font.BOLD, 14);
@@ -64,8 +64,7 @@ public class ImagePanel extends JPanel {
 		return frame;
 	}
 	
-	private void init() {
-		setLayout(new BorderLayout());
+	protected void displayCenter() {
 		URL imgUrl = mFile.getURL();
 		try {
 			if (imgUrl != null) {
@@ -86,12 +85,19 @@ public class ImagePanel extends JPanel {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
+		
+		JLabel iLbl = new JLabel(imgIcon);
+		add(iLbl, BorderLayout.CENTER);
+	}
+	
+	private void init() {
+		setLayout(new BorderLayout());
 		JLabel name = new JLabel(mFile.getBaseFile().getName());
 		name.setFont(arial14);
 		name.setHorizontalAlignment(SwingConstants.CENTER);
 		add(name, BorderLayout.NORTH);
-		JLabel iLbl = new JLabel(imgIcon);
-		add(iLbl, BorderLayout.CENTER);
+		displayCenter();
+		
 		JPanel bottomPanel = new JPanel();
 		bottomPanel.setLayout(new BorderLayout());
 		add(bottomPanel, BorderLayout.SOUTH);

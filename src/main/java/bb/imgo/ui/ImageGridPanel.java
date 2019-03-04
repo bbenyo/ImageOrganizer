@@ -145,6 +145,10 @@ public class ImageGridPanel extends JFrame {
 		return wasCancelled;
 	}
 	
+	protected ImagePanel createPanel(MediaFile mFile) {
+		return new ImagePanel(mFile);
+	}
+	
 	private void showPage() {
 		logger.info("Showing page for "+directory+" starting at "+startIndex);
 		mainPanel.removeAll();
@@ -153,7 +157,7 @@ public class ImageGridPanel extends JFrame {
 		int expectedEndIndex = startIndex + x*y;
 		for (int i=startIndex; (i<expectedEndIndex && i<mediaFiles.size()); ++i) {
 			MediaFile mFile = mediaFiles.get(i);
-			ImagePanel iPanel = new ImagePanel(mFile);
+			ImagePanel iPanel = createPanel(mFile);
 			mainPanel.add(iPanel);
 			endIndex = i;
 		}
