@@ -31,7 +31,7 @@ public class VideoRenameAndTag extends UserChooser {
 
 		imageFilter = new VideoFileFilter();
 		
-		columns = 5;
+		columns = 2;
 		String cStr = props.getProperty(PropertyNames.VIDEO_RENAME_COLUMNS);
 		if (cStr != null) {
 			try {

@@ -27,6 +27,7 @@ import bb.imgo.OrganizeMedia;
 import bb.imgo.OrganizeMediaUIInterface;
 import bb.imgo.handlers.MediaHandler;
 import bb.imgo.handlers.UserChooser;
+import bb.imgo.handlers.VideoRenameAndTag;
 
 @SuppressWarnings("serial")
 public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
@@ -43,6 +44,7 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 	
 	JLabel activeHandlers;
 	JCheckBox moveFilesBox;
+	JCheckBox recountBox;
 	JLabel startTimeLabel;
 	JLabel statisticsLabel;
 	
@@ -148,7 +150,11 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 			}
 		});
 		
+		// TODO: Allow handlers to contribute to a panel (tabbed pane?) on the ui instead of this custom code
 		MediaHandler uHandler = oMedia.getSpecificHandler(UserChooser.class);
+		if (uHandler == null) {
+			uHandler = oMedia.getSpecificHandler(VideoRenameAndTag.class);
+		}
 		if (uHandler != null) {
 			UserChooser uChoose = (UserChooser)uHandler;
 			String cpd = uChoose.getCurrentProgressDirectory();
@@ -214,13 +220,33 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		
 		gbc.gridy+=2;
 		gbc.weighty=0;
+		gbc.gridwidth=2;
 		gbc.gridheight=1;
 		mainPanel.add(moveFilesBox, gbc);
 		
+		recountBox = new JCheckBox("Count Files again? ");
+		recountBox.setFont(arial18);
+		
+		if (oMedia.isRecountFiles()) {
+			recountBox.setSelected(true);
+		} else {
+			recountBox.setSelected(false);
+		}
+		recountBox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				controller.setRecountFiles(recountBox.isSelected());
+			}
+		});
+		
+		gbc.gridx=2;
+		mainPanel.add(recountBox, gbc);
+				
 		actionLogArea = new JTextArea("Action Log:\n");
 		actionLogArea.setFont(arial18);
 		actionLogPane = new JScrollPane(actionLogArea);
 		gbc.gridy++;
+		gbc.gridx=0;
+		gbc.gridwidth=4;
 		gbc.gridheight=6;
 		gbc.weighty=0.75;
 		gbc.fill=GridBagConstraints.BOTH;

@@ -30,6 +30,8 @@ public class PropertyNames {
 	static public String TRASH_DIR = "directory.trash";
 	// Directory to store files marked good
 	static public String GOOD_DIR = "directory.good";
+	// File to store directory files counts so we don't need to recalculate them
+	static public String DIR_COUNT_FILE = "directory.count.file";
 
 	// Video root directory
 	static public String VIDEO_ROOT_DIR = "separate.video.root";

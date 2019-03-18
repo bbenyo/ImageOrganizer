@@ -19,7 +19,7 @@ public class VerifyBackup extends MediaHandler {
 	static private Logger logger = Logger.getLogger(VerifyBackup.class.getName());
 	
 	File imageBackupRoot = new File("X:\\Pictures");
-	File videoBackupRoot = new File("X:\\Videos");
+	File videoBackupRoot = new File("X:\\Home Videos");
 	
 	SimpleDateFormat ymdhms = new SimpleDateFormat("yyyyMMdd_HHmmss");
 	
@@ -53,6 +53,13 @@ public class VerifyBackup extends MediaHandler {
 		}
 		
 		return !failed;
+	}
+	
+	public String printConfig(String indent) {
+		StringBuffer sb = new StringBuffer();
+		sb.append(indent+"Image Backup Root: "+imageBackupRoot+System.lineSeparator());
+		sb.append(indent+"Video Backup Root: "+videoBackupRoot);
+		return sb.toString();
 	}
 	
 	protected boolean verifyBackupFile(File f1, File f2) {
@@ -96,6 +103,8 @@ public class VerifyBackup extends MediaHandler {
 				return false;
 			}
 		}
+		
+		// TODO: Check md5sums for any backup file that matches
 		
 		String base = f1.getBaseName();
 		PrefixFileFilter pff = new PrefixFileFilter(base);

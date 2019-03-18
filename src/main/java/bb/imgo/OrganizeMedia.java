@@ -1,5 +1,6 @@
 package bb.imgo;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -24,7 +25,6 @@ import bb.imgo.handlers.MediaHandler;
 import bb.imgo.struct.ActionLog;
 import bb.imgo.struct.DirectoryFileFilter;
 import bb.imgo.struct.FileUtilities;
-import bb.imgo.struct.ImageFileFilter;
 import bb.imgo.struct.MediaFile;
 import bb.imgo.struct.NonDirectoryFileFilter;
 import bb.imgo.ui.OverviewFrame;
@@ -44,6 +44,8 @@ public class OrganizeMedia {
 	File trashDir = new File("data/test/ForDeletion");
 	public boolean imageOnly = true;
 	public boolean moveFiles = true;
+	public boolean recountFiles = true;
+	File countFilesSave = new File("fileCounts.txt");
 	
 	// True if we can use File.renameTo.  If that fails, we'll try move instead
 	private boolean ableToRename = true;
@@ -112,6 +114,14 @@ public class OrganizeMedia {
 		initProperties(props);
 		fireHandlerInitialize();
 		printConfig();
+	}
+	
+	public boolean isRecountFiles() {
+		return recountFiles;
+	}
+
+	public void setRecountFiles(boolean recountFiles) {
+		this.recountFiles = recountFiles;
 	}
 	
 	public void addIgnoreSubdirName(String sname) {
@@ -201,6 +211,16 @@ public class OrganizeMedia {
 				ex.printStackTrace();
 			}
 		}
+		
+		String fcSave = props.getProperty(PropertyNames.DIR_COUNT_FILE);
+		if (fcSave != null) {
+			countFilesSave = new File(fcSave);
+			if (!countFilesSave.exists()) {
+				if (countFilesSave.getParentFile() != null) {
+					countFilesSave.getParentFile().mkdirs();
+				}
+			}
+		}
 	}
 	
 	public File getStartSubdir() {
@@ -216,6 +236,7 @@ public class OrganizeMedia {
 		StringBuffer sb = new StringBuffer("OrganizeMedia Configuration: "+ls);
 		sb.append("  Working Directory: "+rootDirectory+ls);
 		sb.append("  Start Subdir: "+startSubdir+ls);
+		sb.append("  Directory Count Save File: "+countFilesSave+ls);
 		sb.append("  Good Storage Directory: "+goodDir+ls);
 		sb.append("  Trash Directory: "+trashDir+ls);
 		sb.append("  Image Only? "+imageOnly+ls);
@@ -267,7 +288,24 @@ public class OrganizeMedia {
 		actionLog.clear();
 		//fireHandlerInitialize();  done on startup
 		running.set(true);
-		int totalFiles = countFiles(startSubdir);
+		
+		int totalFiles = 0;
+		if (!isRecountFiles() && countFilesSave != null && countFilesSave.exists()) {
+			totalFiles = loadFileCounts(startSubdir);
+			logger.info("Loaded file count for "+startSubdir+": "+totalFiles);
+		} else {		
+			if (countFilesSave != null) {
+				try {
+					BufferedWriter bwrite = new BufferedWriter(new FileWriter(countFilesSave));
+					totalFiles = countFiles(startSubdir, bwrite);
+					bwrite.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+					return;
+				}
+			}
+		}
+		
 		if (ui != null) {
 			ui.initializeUI(totalFiles);
 		}
@@ -295,8 +333,42 @@ public class OrganizeMedia {
 		}
 		return true;
 	}
+	
+	public int loadFileCounts(File dir) {
+		try {
+			BufferedReader bread = new BufferedReader(new FileReader(countFilesSave));
+			String line = bread.readLine();
+			while (line != null) {
+				int pos = line.lastIndexOf(": ");				
+				if (pos > -1) {
+					String d = line.substring(0, pos);
+					if (d.equalsIgnoreCase(dir.getAbsolutePath())) {
+						try {
+							String cStr = line.substring(pos+2).trim();
+							return Integer.parseInt(cStr);
+						} catch (Exception ex) {
+							ex.printStackTrace();
+							return -1;
+						} finally {
+							bread.close();
+						}
+					}
+				} else {
+					logger.warn("Unable to parse file count line: "+line);
+					bread.close();
+					return -1;
+				}
+				line = bread.readLine();
+			}
+			bread.close();
+			return -1;
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return -1;
+		} 		
+	}
 		
-	public int countFiles(File dir) {
+	public int countFiles(File dir, BufferedWriter saveFileWriter) {
 		if (!checkPause()) {
 			return 0;
 		}
@@ -311,9 +383,16 @@ public class OrganizeMedia {
 		dFiles = dir.listFiles(directories);
 		Arrays.sort(dFiles);
 		for (File f : dFiles) {
-			count += countFiles(f);
+			count += countFiles(f, saveFileWriter);
 		}
 		uiStatus("Counted "+count+" files under "+dir);
+		if (saveFileWriter != null) {
+			try {
+				saveFileWriter.write(dir.getAbsolutePath()+": "+count+System.lineSeparator());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 		return count;
 	}
 	
@@ -592,6 +671,21 @@ public class OrganizeMedia {
 	public void completeMediaFileHandling(MediaFile mFile) {
 		String mFileName = mFile.getBaseFile().getName();
 		uiStatus("Complete handling for "+mFileName);
+		if (mFile.getRenameTo() != null) {
+			logger.debug("Renaming to "+mFile.getRenameTo());
+			addActionLog(mFile.getBaseFile().getAbsolutePath(), ActionLog.Action.RENAME, mFile.getRenameReason());
+			if (moveFiles) {
+				try {
+					File p1 = mFile.getBaseFile();
+					File p2 = new File(mFile.getBaseFile().getParentFile(), mFile.getRenameTo());
+					moveFile(p1, p2);
+					mFile.setBaseFile(p2);
+					mFileName = p2.getName();					
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 		// If the file is marked delete, remove it my moving it to trash
 		if (mFile.isDelete()) {
 			if (ui != null) {

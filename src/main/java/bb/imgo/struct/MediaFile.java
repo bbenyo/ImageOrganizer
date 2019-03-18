@@ -33,7 +33,6 @@ public class MediaFile {
 	// These values are 1 << n
 	static public int TAG_DELETE = 0x1;
 	static public int TAG_GOOD = 0x2;
-	// next tag = 0x4
 
 	int tag = 0;
 	
@@ -44,6 +43,9 @@ public class MediaFile {
 	
 	private String deleteReason;
 	private String goodReason;
+	
+	private String renameTo;
+	private String renameReason;
 	
 	private long originalTimestamp = -1;
 	
@@ -72,6 +74,23 @@ public class MediaFile {
 
 	public void setGoodReason(String goodReason) {
 		this.goodReason = goodReason;
+	}
+	
+	public String getRenameReason() {
+		return renameReason;
+	}
+
+	public void setRenameReason(String renameReason) {
+		this.renameReason = renameReason;
+	}
+	
+	public String getRenameTo() {
+		return renameTo;
+	}
+
+	public void setRenameTo(String renameTo) {
+		logger.info("Setting "+this.getBaseName()+" rename to "+renameTo);
+		this.renameTo = renameTo;
 	}
 
 	public URL getURL() {

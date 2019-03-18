@@ -17,6 +17,8 @@ import bb.imgo.struct.MediaFile;
 
 @SuppressWarnings("serial")
 public class VideoPanel extends ImagePanel {
+	
+	JTextField txtField;
 
 	public VideoPanel(MediaFile mFile) {
 		super(mFile);
@@ -28,9 +30,16 @@ public class VideoPanel extends ImagePanel {
 		playBtn.setPreferredSize(new Dimension(100,40));
 		JLabel rename = new JLabel("Rename video to: ");
 		rename.setFont(OverviewFrame.arial18);
-		JTextField txtField = new JTextField("");
+		txtField = new JTextField("");
 		txtField.setFont(OverviewFrame.arial18);
 		txtField.setPreferredSize(new Dimension(300,40));
+		
+		txtField.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				changeName();
+			}
+		});
+			
 		
 		playBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -57,5 +66,18 @@ public class VideoPanel extends ImagePanel {
 		add(vPanel, BorderLayout.CENTER);
 	}
 	
+	public void changeName() {
+		String ext = mFile.getExt();
+		String newname = txtField.getText();
+		if (!newname.endsWith("."+ext)) {
+			newname = newname+"."+ext;
+		}
+		mFile.setRenameTo(newname);
+		mFile.setRenameReason("User via VideoRenameAndTag");
+	}
+	
+	public void finalize() {
+		changeName();
+	}
 
 }

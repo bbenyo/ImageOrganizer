@@ -150,6 +150,7 @@ public class UserChooser extends MediaHandler {
 	public void directoryComplete(File directory) {
 		if (this.isTemporarilyDisabled()) {
 			this.setTemporarilyDisabled(false);
+			this.mediaFiles.clear();
 			return;
 		}
 		
