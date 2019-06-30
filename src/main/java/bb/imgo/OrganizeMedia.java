@@ -22,6 +22,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 
 import bb.imgo.handlers.MediaHandler;
+import bb.imgo.handlers.UserChooser;
 import bb.imgo.handlers.VerifyBackup;
 import bb.imgo.struct.ActionLog;
 import bb.imgo.struct.DirectoryFileFilter;
@@ -108,6 +109,11 @@ public class OrganizeMedia {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+		
+		String ucFileName = props.getProperty(PropertyNames.USER_CHOOSER_PROGRESS_FILENAME);
+		if (ucFileName != null) {
+			UserChooser.currentProgressFilename = ucFileName;
 		}
 		
 		ignoreSubdirNames.add(".svn");
