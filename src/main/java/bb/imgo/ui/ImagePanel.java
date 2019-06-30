@@ -28,7 +28,7 @@ import bb.imgo.struct.MediaFile;
 @SuppressWarnings("serial")
 
 public class ImagePanel extends JPanel {
-	static private Logger logger = Logger.getLogger(ImagePanel.class.getName());
+	private static Logger logger = Logger.getLogger(ImagePanel.class.getName());
 	// Image icon
 	// Stat label
 	// Radio button (good/trash/archive)

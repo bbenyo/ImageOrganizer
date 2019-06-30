@@ -13,11 +13,13 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.apache.log4j.Logger;
+
 import bb.imgo.struct.MediaFile;
 
 @SuppressWarnings("serial")
 public class VideoPanel extends ImagePanel {
-	
+	private static Logger logger = Logger.getLogger(VideoPanel.class.getName());
 	JTextField txtField;
 
 	public VideoPanel(MediaFile mFile) {
@@ -33,6 +35,10 @@ public class VideoPanel extends ImagePanel {
 		txtField = new JTextField("");
 		txtField.setFont(OverviewFrame.arial18);
 		txtField.setPreferredSize(new Dimension(300,40));
+		
+		if (mFile.getRenameTo() != null) {
+			txtField.setText(mFile.getRenameTo());
+		}
 		
 		txtField.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -73,6 +79,7 @@ public class VideoPanel extends ImagePanel {
 			if (!newname.endsWith("."+ext)) {
 				newname = newname+"."+ext;
 			}
+			logger.info("Setting renameTo to: "+newname);
 			mFile.setRenameTo(newname);
 			mFile.setRenameReason("User via VideoRenameAndTag");
 		}

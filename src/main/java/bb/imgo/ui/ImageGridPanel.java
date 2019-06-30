@@ -149,7 +149,7 @@ public class ImageGridPanel extends JFrame {
 		return new ImagePanel(mFile);
 	}
 	
-	private void showPage() {
+	protected void showPage() {
 		logger.info("Showing page for "+directory+" starting at "+startIndex);
 		mainPanel.removeAll();
 		buttonPanel.removeAll();
