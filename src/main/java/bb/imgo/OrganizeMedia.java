@@ -45,7 +45,7 @@ public class OrganizeMedia {
 	File goodDir = new File("data/test/Good");
 	File trashDir = new File("data/test/ForDeletion");
 	public boolean imageOnly = true;
-	public boolean moveFiles = false;
+	public boolean moveFiles = true;
 	public boolean recountFiles = true;
 	File countFilesSave = new File("fileCounts.txt");
 	
