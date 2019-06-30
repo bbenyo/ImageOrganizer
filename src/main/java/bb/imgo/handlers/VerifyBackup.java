@@ -81,8 +81,7 @@ public class VerifyBackup extends MediaHandler {
 		}
 	}
 	
-	@Override
-	public boolean handleFile(MediaFile f1) {
+	public File getBackupFile(MediaFile f1) {
 		File backupFile = null;
 		if (f1.isImageFile()) {
 			backupFile = f1.getNewFilePath(main.getRootDirectory(), imageBackupRoot);
@@ -90,6 +89,15 @@ public class VerifyBackup extends MediaHandler {
 			backupFile = f1.getNewFilePath(main.getRootDirectory(), videoBackupRoot);			
 		} else {
 			logger.error("Logic error, should have filtered out any non-image/video files with the fileFilter!");
+			return null;
+		}
+		return backupFile;
+	}
+	
+	@Override
+	public boolean handleFile(MediaFile f1) {
+		File backupFile = getBackupFile(f1);
+		if (backupFile == null) {
 			return false;
 		}
 		

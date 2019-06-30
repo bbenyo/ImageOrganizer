@@ -10,7 +10,7 @@ import bb.imgo.OrganizeMedia;
 public class ActionLog {
 	static private Logger logger = Logger.getLogger(ActionLog.class.getName());
 	String filename;
-	public enum Action {GOOD, DELETE, ARCHIVE, CONVERT, COPY, RENAME, UNKNOWN};
+	public enum Action {GOOD, DELETE, CONVERT, COPY, RENAME, UNKNOWN};
 	Action action = Action.UNKNOWN;
 	String data;
 	String reason;
@@ -43,9 +43,8 @@ public class ActionLog {
 	
 	public void executeAction(OrganizeMedia oMedia) {
 		switch (action) {
-		case ARCHIVE:
-			break;
 		case CONVERT:
+			logger.error("Can't execute basic CONVERT action, this should be overridden by a subclass");
 			break;
 		case COPY:
 			File cp1 = new File(filename);

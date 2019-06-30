@@ -69,11 +69,13 @@ public class VideoPanel extends ImagePanel {
 	public void changeName() {
 		String ext = mFile.getExt();
 		String newname = txtField.getText();
-		if (!newname.endsWith("."+ext)) {
-			newname = newname+"."+ext;
+		if (newname.length() > 0) {
+			if (!newname.endsWith("."+ext)) {
+				newname = newname+"."+ext;
+			}
+			mFile.setRenameTo(newname);
+			mFile.setRenameReason("User via VideoRenameAndTag");
 		}
-		mFile.setRenameTo(newname);
-		mFile.setRenameReason("User via VideoRenameAndTag");
 	}
 	
 	public void finalize() {

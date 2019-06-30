@@ -6,6 +6,8 @@ import java.io.IOException;
 import org.apache.log4j.Logger;
 
 import bb.imgo.OrganizeMedia;
+import bb.imgo.struct.ActionLog;
+import bb.imgo.struct.HEICConvertAction;
 import bb.imgo.struct.MediaFile;
 import bb.util.StreamGobbler;
 
@@ -65,36 +67,41 @@ public class HEICConverter extends MediaHandler {
 		return true;
 	}
 
+	public void execute(MediaFile f1) {
+		String cmd = psCommand + " "+f1.getBaseFile().getAbsolutePath();
+		try {
+			long lastMod = f1.getOriginalTimestamp();
+			if (lastMod == 0) {
+				lastMod = f1.getBaseFile().lastModified();
+			}
+			logger.info("LastMod time for "+f1+" is "+lastMod);
+			Process psProc = Runtime.getRuntime().exec(cmd);
+			StreamGobbler errorGobbler = new StreamGobbler(psProc.getErrorStream(), "err", logger);
+			errorGobbler.start();
+			StreamGobbler outGobbler = new StreamGobbler(psProc.getInputStream(), "out", logger);
+			outGobbler.start();
+			int exitVal = psProc.waitFor();
+			logger.info("PowerShell ExitValue: " +exitVal); 
+			
+			File f2 = new File(f1.getBaseFile().getParentFile(), f1.getBaseFile().getName()+".jpg");
+			f2.setLastModified(lastMod);
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}		
+	}
+	
 	@Override
 	public boolean handleFile(MediaFile f1) {
-		if (main.moveFiles) {
-			String cmd = psCommand + " "+f1.getBaseFile().getAbsolutePath();
-			try {
-				long lastMod = f1.getOriginalTimestamp();
-				if (lastMod == 0) {
-					lastMod = f1.getBaseFile().lastModified();
-				}
-				logger.info("LastMod time for "+f1+" is "+lastMod);
-				Process psProc = Runtime.getRuntime().exec(cmd);
-				StreamGobbler errorGobbler = new StreamGobbler(psProc.getErrorStream(), "err", logger);
-				errorGobbler.start();
-				StreamGobbler outGobbler = new StreamGobbler(psProc.getInputStream(), "out", logger);
-				outGobbler.start();
-				int exitVal = psProc.waitFor();
-				logger.info("PowerShell ExitValue: " +exitVal); 
-				
-				File f2 = new File(f1.getBaseFile().getParentFile(), f1.getBaseFile().getName()+".jpg");
-				f2.setLastModified(lastMod);
-				
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
+		HEICConvertAction hAction = 
+				new HEICConvertAction(f1.getBaseFile().getAbsolutePath(), "HEIC to JPG Convert", this, f1);
 		
-		main.addConvertActionLog(f1.getBaseFile().getName(), 
-				f1.getBaseFile().getName()+".jpg", "HEIC to JPG convert");
+		main.addActionLog(hAction);
+		if (main.moveFiles) {
+			hAction.executeAction(main);
+		}
             
 		// Copy the original HEIC file to an HEIC subdirectory
 		File heicDir = new File(f1.getBaseFile().getParentFile(), "HEIC");
@@ -104,15 +111,10 @@ public class HEICConverter extends MediaHandler {
 		}
             
 		File moveTo = new File(heicDir, f1.getBaseFile().getName());
-		main.addRenameActionLog(f1.getBaseFile().getAbsolutePath(), moveTo.getAbsolutePath(), "HEIC");
+		ActionLog al = main.addRenameActionLog(f1.getBaseFile().getAbsolutePath(), moveTo.getAbsolutePath(), "HEIC");
 		if (main.moveFiles) {
-			try {
-				logger.info("Moving original HEIC file to subdir: "+moveTo.getAbsolutePath());
-				main.moveFile(f1.getBaseFile(), moveTo);
-				f1.setBaseFile(moveTo);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			al.executeAction(main);
+			f1.setBaseFile(moveTo);
 		}
 		return false;
 	} 

@@ -22,6 +22,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 
 import bb.imgo.handlers.MediaHandler;
+import bb.imgo.handlers.VerifyBackup;
 import bb.imgo.struct.ActionLog;
 import bb.imgo.struct.DirectoryFileFilter;
 import bb.imgo.struct.FileUtilities;
@@ -40,6 +41,7 @@ public class OrganizeMedia {
 	File rootDirectory;
 	File startSubdir = null;
 	List<MediaHandler> handlers = new ArrayList<MediaHandler>();
+	VerifyBackup backupHandler = null;
 	File goodDir = new File("data/test/Good");
 	File trashDir = new File("data/test/ForDeletion");
 	public boolean imageOnly = true;
@@ -672,13 +674,11 @@ public class OrganizeMedia {
 		return al;
 	}
 	
-	public ActionLog addConvertActionLog(String oldFileName, String newFileName, String reason) {
-		ActionLog al = new ActionLog(oldFileName, ActionLog.Action.CONVERT, newFileName, reason);
+	public void addActionLog(ActionLog al) {
 		actionLog.add(al);
 		if (ui != null) {
 			ui.updateActionLog(al.toString());
 		}
-		return al;
 	}
 	
 	public void completeMediaFileHandling(MediaFile mFile) {
@@ -690,9 +690,24 @@ public class OrganizeMedia {
 			File p1 = mFile.getBaseFile();
 			File p2 = new File(mFile.getBaseFile().getParentFile(), mFile.getRenameTo());
 			ActionLog al = addRenameActionLog(p1.getAbsolutePath(), p2.getAbsolutePath(), mFile.getRenameReason());
+
 			if (moveFiles) {
 				al.executeAction(this);
 			}
+			
+			if (backupHandler != null) {
+				File backupFile = backupHandler.getBackupFile(mFile);
+				if (backupFile != null && backupFile.exists()) {
+					File bp2 = new File(backupFile.getParentFile(), p2.getName());
+					ActionLog al2 = addRenameActionLog(backupFile.getAbsolutePath(), bp2.getAbsolutePath(), mFile.getRenameReason());
+					if (moveFiles) {
+						al2.executeAction(this);
+					}
+				} else {
+					logger.warn("No backup file found for "+p1.getAbsolutePath());
+				}
+			}
+			
 			mFile.setBaseFile(p2);
 			mFileName = p2.getName();					
 		}
@@ -752,9 +767,15 @@ public class OrganizeMedia {
 	}
 	
 	public void executeActionLog() {
+		ui.clearActionLog();
+		ui.initializeProgress(actionLog.size());
 		for (ActionLog aLog : actionLog) {
+			if (!checkPause()) {
+				break;
+			}
 			logger.info("Executing: "+aLog);
-			
+			aLog.executeAction(this);			
+			ui.incrementProgress(1);
 		}
 	}
 	
@@ -770,6 +791,9 @@ public class OrganizeMedia {
 		}
 		logger.info("Registering "+handler.getClass());
 		handlers.add(handler);
+		if (handler instanceof VerifyBackup) {
+			backupHandler = (VerifyBackup)handler;
+		}
 		handler.linkOrganizeMedia(this);
 	}
 	

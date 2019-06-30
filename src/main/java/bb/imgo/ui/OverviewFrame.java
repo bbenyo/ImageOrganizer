@@ -216,6 +216,11 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		moveFilesBox.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				controller.setMoveFiles(moveFilesBox.isSelected());
+				if (moveFilesBox.isSelected()) {
+					executeActions.setEnabled(false);
+				} else {
+					executeActions.setEnabled(true);
+				}
 			}
 		});
 		
@@ -239,6 +244,7 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 			}
 		});
 
+		gbc.gridwidth=1;
 		gbc.gridx=2;
 		mainPanel.add(recountBox, gbc);
 		
@@ -253,8 +259,8 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 			executeActions.setEnabled(false);
 		}
 
-		gbc.gridx=4;
-		mainPanel.add(recountBox, executeActions);
+		gbc.gridx=3;
+		mainPanel.add(executeActions, gbc);
 
 				
 		actionLogArea = new JTextArea("Action Log:\n");
@@ -477,6 +483,10 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		actionLogArea.append(System.lineSeparator()+log);
 	}
 	
+	public void clearActionLog() {
+		actionLogArea.setText("Action Log:\n");
+	}
+	
 	public void start() {
 		startTime = System.currentTimeMillis();
 		startTimeLabel.setText("Started at "+ymdhms.format(new Date(startTime)));
@@ -501,6 +511,14 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 	@Override
 	public void incrementProgress(int count) {
 		progress.setValue(progress.getValue() + count);		
+	}
+	
+	public void initializeProgress(int maximum) {
+		progress.setMinimum(0);
+		progress.setMaximum(maximum);
+		progress.setValue(0);
+		progress.setStringPainted(true);
+		progress.revalidate();
 	}
 
 }
