@@ -43,7 +43,7 @@ public class OrganizeMedia {
 	File goodDir = new File("data/test/Good");
 	File trashDir = new File("data/test/ForDeletion");
 	public boolean imageOnly = true;
-	public boolean moveFiles = true;
+	public boolean moveFiles = false;
 	public boolean recountFiles = true;
 	File countFilesSave = new File("fileCounts.txt");
 	
@@ -240,7 +240,7 @@ public class OrganizeMedia {
 		sb.append("  Good Storage Directory: "+goodDir+ls);
 		sb.append("  Trash Directory: "+trashDir+ls);
 		sb.append("  Image Only? "+imageOnly+ls);
-		sb.append("  Move Files? "+moveFiles+ls);
+		sb.append("  Do actions? (or just log)? "+moveFiles+ls);
 		sb.append("  Action Log Filename: "+actionLogFilename+ls);
 		sb.append("  Show UI? "+showUI+ls);
 		sb.append("  Handlers: "+ls);
@@ -636,36 +636,49 @@ public class OrganizeMedia {
 		uiStatus("Copied to "+p2.getAbsolutePath());
 	}
 	
-	public void addActionLog(String fname, ActionLog.Action act, String reason) {
-		ActionLog al = new ActionLog(fname, act, reason);
+	public ActionLog addDeleteActionLog(String fname, String delFileName, String reason) {
+		ActionLog al = new ActionLog(fname, ActionLog.Action.DELETE, delFileName, reason);
 		actionLog.add(al);
 		if (ui != null) {
 			ui.updateActionLog(al.toString());
 		}
+		return al;
 	}
 	
-	public void addRenameActionLog(String oldFileName, String newFileName, String reason) {
+	public ActionLog addGoodActionLog(String fname, String gFileName, String reason) {
+		ActionLog al = new ActionLog(fname, ActionLog.Action.GOOD, gFileName, reason);
+		actionLog.add(al);
+		if (ui != null) {
+			ui.updateActionLog(al.toString());
+		}
+		return al;
+	}
+	
+	public ActionLog addRenameActionLog(String oldFileName, String newFileName, String reason) {
 		ActionLog al = new ActionLog(oldFileName, ActionLog.Action.RENAME, newFileName, reason);
 		actionLog.add(al);
 		if (ui != null) {
 			ui.updateActionLog(al.toString());
 		}
+		return al;
 	}
 	
-	public void addCopyActionLog(String oldFileName, String newFileName, String reason) {
+	public ActionLog addCopyActionLog(String oldFileName, String newFileName, String reason) {
 		ActionLog al = new ActionLog(oldFileName, ActionLog.Action.COPY, newFileName, reason);
 		actionLog.add(al);
 		if (ui != null) {
 			ui.updateActionLog(al.toString());
 		}
+		return al;
 	}
 	
-	public void addConvertActionLog(String oldFileName, String newFileName, String reason) {
+	public ActionLog addConvertActionLog(String oldFileName, String newFileName, String reason) {
 		ActionLog al = new ActionLog(oldFileName, ActionLog.Action.CONVERT, newFileName, reason);
 		actionLog.add(al);
 		if (ui != null) {
 			ui.updateActionLog(al.toString());
 		}
+		return al;
 	}
 	
 	public void completeMediaFileHandling(MediaFile mFile) {
@@ -673,18 +686,15 @@ public class OrganizeMedia {
 		uiStatus("Complete handling for "+mFileName);
 		if (mFile.getRenameTo() != null) {
 			logger.debug("Renaming to "+mFile.getRenameTo());
-			addActionLog(mFile.getBaseFile().getAbsolutePath(), ActionLog.Action.RENAME, mFile.getRenameReason());
+
+			File p1 = mFile.getBaseFile();
+			File p2 = new File(mFile.getBaseFile().getParentFile(), mFile.getRenameTo());
+			ActionLog al = addRenameActionLog(p1.getAbsolutePath(), p2.getAbsolutePath(), mFile.getRenameReason());
 			if (moveFiles) {
-				try {
-					File p1 = mFile.getBaseFile();
-					File p2 = new File(mFile.getBaseFile().getParentFile(), mFile.getRenameTo());
-					moveFile(p1, p2);
-					mFile.setBaseFile(p2);
-					mFileName = p2.getName();					
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+				al.executeAction(this);
 			}
+			mFile.setBaseFile(p2);
+			mFileName = p2.getName();					
 		}
 		// If the file is marked delete, remove it my moving it to trash
 		if (mFile.isDelete()) {
@@ -692,15 +702,11 @@ public class OrganizeMedia {
 				ui.handleFile(mFileName, false, true);
 			}
 			logger.debug("Marked for deletion");
-			addActionLog(mFile.getBaseFile().getAbsolutePath(), ActionLog.Action.DELETE, mFile.getDeleteReason());
+			File p1 = mFile.getBaseFile();
+			File p2 = mFile.getNewFilePath(rootDirectory, trashDir);
+			ActionLog al = addDeleteActionLog(p1.getAbsolutePath(), p2.getAbsolutePath(), mFile.getDeleteReason());
 			if (moveFiles) {
-				try {
-					File p1 = mFile.getBaseFile();
-					File p2 = mFile.getNewFilePath(rootDirectory, trashDir);
-					moveFile(p1, p2);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+				al.executeAction(this);				
 			}
 		} else if (mFile.isGood()) {
 			// If the file is marked good, move it to the good dir
@@ -708,15 +714,11 @@ public class OrganizeMedia {
 			if (ui != null) {
 				ui.handleFile(mFileName, true, false);
 			}
-			addActionLog(mFile.getBaseFile().getAbsolutePath(), ActionLog.Action.GOOD, mFile.getGoodReason());
+			File p1 = mFile.getBaseFile();
+			File p2 = mFile.getNewFilePath(rootDirectory, goodDir);
+			ActionLog al = addGoodActionLog(p1.getAbsolutePath(), p2.getAbsolutePath(), mFile.getGoodReason());
 			if (moveFiles) {
-				try {
-					File p1 = mFile.getBaseFile();
-					File p2 = mFile.getNewFilePath(rootDirectory, goodDir);
-					moveFile(p1, p2);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+				al.executeAction(this);
 			}
 		} else {
 			// The file is neither good nor delete, so keep it here
@@ -747,6 +749,13 @@ public class OrganizeMedia {
 	public File getActionLogFile() {
 		File alf = new File(actionLogFilename);
 		return alf;
+	}
+	
+	public void executeActionLog() {
+		for (ActionLog aLog : actionLog) {
+			logger.info("Executing: "+aLog);
+			
+		}
 	}
 	
 	static public void error(String msg) {

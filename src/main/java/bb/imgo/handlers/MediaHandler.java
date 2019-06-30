@@ -40,9 +40,9 @@ abstract public class MediaHandler {
 		this.main = om;
 	}
 	
-	public void addActionLog(String filename, ActionLog.Action action, String reason) {
+	public void addDeleteActionLog(String filename, String reason) {
 		if (main != null) {
-			main.addActionLog(filename, action, reason);
+			main.addDeleteActionLog(filename, null, reason);
 		}
 	}
 

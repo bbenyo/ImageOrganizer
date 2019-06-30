@@ -34,7 +34,7 @@ public class RemoveEmptySubdirectory extends MediaHandler {
 				if (!logOnly) {
 					directory.delete();
 				}
-				addActionLog(directory.getAbsolutePath(), ActionLog.Action.DELETE, "Empty Dir");
+				addDeleteActionLog(directory.getAbsolutePath(), "Empty Dir");
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
@@ -50,7 +50,7 @@ public class RemoveEmptySubdirectory extends MediaHandler {
 				}
 			}
 			logger.debug("Only thumbnail files remain, deleting directory");
-			addActionLog(directory.getAbsolutePath(), ActionLog.Action.DELETE, "Empty Dir");
+			addDeleteActionLog(directory.getAbsolutePath(), "Empty Dir");
 			if (!logOnly) {
 				files = directory.listFiles();
 				for (File f : files) {

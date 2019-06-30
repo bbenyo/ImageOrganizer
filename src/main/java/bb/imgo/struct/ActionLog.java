@@ -1,7 +1,14 @@
 package bb.imgo.struct;
 
-public class ActionLog {
+import java.io.File;
+import java.io.IOException;
 
+import org.apache.log4j.Logger;
+
+import bb.imgo.OrganizeMedia;
+
+public class ActionLog {
+	static private Logger logger = Logger.getLogger(ActionLog.class.getName());
 	String filename;
 	public enum Action {GOOD, DELETE, ARCHIVE, CONVERT, COPY, RENAME, UNKNOWN};
 	Action action = Action.UNKNOWN;
@@ -34,4 +41,60 @@ public class ActionLog {
 		return sb.toString();
 	}
 	
+	public void executeAction(OrganizeMedia oMedia) {
+		switch (action) {
+		case ARCHIVE:
+			break;
+		case CONVERT:
+			break;
+		case COPY:
+			File cp1 = new File(filename);
+			File cp2 = new File(data);
+			try {
+				oMedia.copyFile(cp1, cp2);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			break;
+		case DELETE:
+			File f = new File(filename);
+			if (f.isDirectory()) {
+				File[] files = f.listFiles();
+				if (files != null) {
+					for (File f1 : files) {
+						if (f1.getName().equals("Thumbs.db") || f1.getName().equals("ZbThumbnail.info")) {
+							f1.delete();
+						} else {
+							logger.warn("Unable to delete non-empty directory: "+f1.getAbsolutePath());
+							return;
+						}
+					}
+				}
+				f.delete();
+			} else {
+				File p2 = new File(data);
+				try {
+					oMedia.moveFile(f, p2);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			break;
+		case GOOD:
+		case RENAME:
+			File p1 = new File(filename);
+			File p2 = new File(data);
+			try {
+				oMedia.moveFile(p1, p2);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			break;
+		case UNKNOWN:
+			break;
+		default:
+			break;
+		}
+	}
+		
 }

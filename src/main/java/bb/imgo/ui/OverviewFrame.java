@@ -45,6 +45,7 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 	JLabel activeHandlers;
 	JCheckBox moveFilesBox;
 	JCheckBox recountBox;
+	JButton executeActions;
 	JLabel startTimeLabel;
 	JLabel statisticsLabel;
 	
@@ -205,7 +206,7 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		activeHandlers.setFont(arial18);
 		mainPanel.add(new JScrollPane(activeHandlers), gbc);
 		
-		moveFilesBox = new JCheckBox("Move Files (or just log) ?");
+		moveFilesBox = new JCheckBox("Auto Execute Actions?");
 		moveFilesBox.setFont(arial18);
 		if (oMedia.moveFiles) {
 			moveFilesBox.setSelected(true);
@@ -237,9 +238,24 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 				controller.setRecountFiles(recountBox.isSelected());
 			}
 		});
-		
+
 		gbc.gridx=2;
 		mainPanel.add(recountBox, gbc);
+		
+		executeActions = new JButton("Execute Actions");
+		executeActions.setFont(arial18);
+		executeActions.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				oMedia.executeActionLog();
+			}
+		});
+		if (oMedia.moveFiles) {
+			executeActions.setEnabled(false);
+		}
+
+		gbc.gridx=4;
+		mainPanel.add(recountBox, executeActions);
+
 				
 		actionLogArea = new JTextArea("Action Log:\n");
 		actionLogArea.setFont(arial18);

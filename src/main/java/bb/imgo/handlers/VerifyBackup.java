@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 
 import bb.imgo.MD5Checksum;
 import bb.imgo.PropertyNames;
+import bb.imgo.struct.ActionLog;
 import bb.imgo.struct.MediaFile;
 
 // Verify that a defined backup directory has a copy of every file here
@@ -135,13 +136,9 @@ public class VerifyBackup extends MediaHandler {
 		
 		// No joy, we found nothing that looks like it.  Could check file sizes, or all files in the directory
 		logger.info("Backup version doesn't exist: "+backupFile);
-		main.addCopyActionLog(f1.getBaseFile().getAbsolutePath(), backupFile.getAbsolutePath(), "Backup");
+		ActionLog al = main.addCopyActionLog(f1.getBaseFile().getAbsolutePath(), backupFile.getAbsolutePath(), "Backup");
 		if (main.moveFiles) {
-			try {
-				main.copyFile(f1.getBaseFile(), backupFile);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			al.executeAction(main);
 		}
 			
 		return false;
