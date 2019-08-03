@@ -174,6 +174,12 @@ public class OrganizeMedia {
 		if (moveFilesStr != null) {
 			moveFiles = Boolean.parseBoolean(moveFilesStr);
 		}
+		
+		// Boolean flag for whether we're actually moving files or not
+		String recountFilesStr = props.getProperty(PropertyNames.RECOUNT_FILES);
+		if (recountFilesStr != null) {
+			recountFiles = Boolean.parseBoolean(recountFilesStr);
+		}
 				
 		// Directory to store files for deleteion
 		String tDir = props.getProperty(PropertyNames.TRASH_DIR);
@@ -292,16 +298,16 @@ public class OrganizeMedia {
 	 * Main method to organize a directory.  Fire each handler on all directories and files
 	 */
 	public void organize() {
-		// TODO: Two phase pass, first for moving file handlers, second for handlers that don't move
 		actionLog.clear();
-		//fireHandlerInitialize();  done on startup
 		running.set(true);
 		
+		// Count all files we'll be working on, so we can have a progress bar
 		int totalFiles = 0;
 		if (!isRecountFiles() && countFilesSave != null && countFilesSave.exists()) {
 			totalFiles = loadFileCounts(startSubdir);
 			logger.info("Loaded file count for "+startSubdir+": "+totalFiles);
 		} else {		
+			// Save the file count so we don't need to always re-do it (recount on demand)
 			if (countFilesSave != null) {
 				try {
 					BufferedWriter bwrite = new BufferedWriter(new FileWriter(countFilesSave));
@@ -317,6 +323,7 @@ public class OrganizeMedia {
 		if (ui != null) {
 			ui.initializeUI(totalFiles);
 		}
+		
 		organize(startSubdir);
 		fireHandlerFinalize();
 		writeActionLog();
@@ -408,10 +415,12 @@ public class OrganizeMedia {
 		if (!checkPause()) {
 			return;
 		}
+		
 		if (ignoreSubdirNames.contains(dir.getName())) {
 			logger.info("IGNORING "+dir.getName());
 			return;
 		}
+		
 		logger.info("START Organizing directory: "+dir);
 		boolean abort = false;
 		if (!fireHandlerDirectoryStart(dir)) {
@@ -421,6 +430,8 @@ public class OrganizeMedia {
 		}
 		
 		// Are any handlers not disabled?
+		//  If all handlers are disabled (may be temporary), ignore the files in this directory
+		//  But do dig into subdirectories, we may un-disable a handler in a directory init
 		if (allHandlersDisabled()) {
 			logger.info("All handlers are temporarily disabled!");
 			abort = true;
@@ -472,6 +483,12 @@ public class OrganizeMedia {
 		}
 		return true;
 	}
+	
+	public void setTemporarilyDisableAllHandlers(boolean flag) {
+		for (MediaHandler handler : handlers) {
+			handler.setTemporarilyDisabled(flag);
+		}
+	}		
 		
 	protected boolean fireHandlerDirectoryStart(File dir) {
 		for (MediaHandler handler : handlers) {

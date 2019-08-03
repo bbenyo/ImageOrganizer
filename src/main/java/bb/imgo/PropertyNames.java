@@ -10,6 +10,8 @@ public class PropertyNames {
 	static public String IMAGE_ONLY = "handler.imageonly";
 	// Move marked files?  If false, we'll just log the marks
 	static public String MOVE_FILES = "handler.moveFiles";
+	// Re-count all files at the start
+	static public String RECOUNT_FILES = "handler.recountFiles";
 	// Action Log output name
 	static public String ACTION_LOG_NAME = "handler.actionLog.name";
 	// Show the UI

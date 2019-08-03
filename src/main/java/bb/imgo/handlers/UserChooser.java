@@ -43,6 +43,8 @@ public class UserChooser extends MediaHandler {
 	
 	protected boolean cancelled = false;
 	
+	protected boolean temporaryDisableAllHandlers = true; // TODO: Make this a property
+	
 	// Start (or restart) processing directories
 	// Return true if we initialized properly, false if there was an error
 	public boolean initialize(Properties props) {
@@ -133,9 +135,17 @@ public class UserChooser extends MediaHandler {
 			if (directory.getAbsolutePath().equalsIgnoreCase(currentProgressDirectory)) {
 				logger.info("Resuming at "+directory);
 				currentProgressDirectory = null;
+
+				if (this.temporaryDisableAllHandlers) {
+					main.setTemporarilyDisableAllHandlers(false);
+				}
+
 			} else {
 				logger.info("UserChooser waiting to resume progress at "+currentProgressDirectory+", Cur directory is: "+directory.getAbsolutePath());
 				this.setTemporarilyDisabled(true);
+				if (this.temporaryDisableAllHandlers) {
+					main.setTemporarilyDisableAllHandlers(true);
+				}
 				return true;
 			}			 
 		}		
