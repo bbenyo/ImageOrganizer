@@ -744,7 +744,7 @@ public class OrganizeMedia {
 			File p2 = mFile.getNewFilePath(rootDirectory, trashDir);
 			ActionLog al = addDeleteActionLog(p1.getAbsolutePath(), p2.getAbsolutePath(), mFile.getDeleteReason());
 			if (moveFiles) {
-				al.executeAction(this);				
+				al.executeAction(this);			
 			}
 		} else if (mFile.isGood()) {
 			// If the file is marked good, move it to the good dir
@@ -757,6 +757,9 @@ public class OrganizeMedia {
 			ActionLog al = addGoodActionLog(p1.getAbsolutePath(), p2.getAbsolutePath(), mFile.getGoodReason());
 			if (moveFiles) {
 				al.executeAction(this);
+			}
+			if (backupHandler != null) {
+				backupHandler.handleGoodBackup(mFile);
 			}
 		} else {
 			// The file is neither good nor delete, so keep it here

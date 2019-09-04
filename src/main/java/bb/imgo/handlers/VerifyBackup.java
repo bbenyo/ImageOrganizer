@@ -18,9 +18,11 @@ import bb.imgo.struct.MediaFile;
 // Verify that a defined backup directory has a copy of every file here
 public class VerifyBackup extends MediaHandler {
 	static private Logger logger = Logger.getLogger(VerifyBackup.class.getName());
-	
+
 	File imageBackupRoot = new File("X:\\Pictures");
-	File videoBackupRoot = new File("X:\\Home Videos");
+	File videoBackupRoot = new File("Y:\\All Videos");
+	File imageBackupRootGood = new File("X:\\Good Pictures");
+	File videoBackupRootGood = new File("Y:\\Good Videos");
 	
 	SimpleDateFormat ymdhms = new SimpleDateFormat("yyyyMMdd_HHmmss");
 	
@@ -42,6 +44,14 @@ public class VerifyBackup extends MediaHandler {
 		if (videoRoot != null) {
 			videoBackupRoot = new File(videoRoot);
 		}
+		String imageRootGood = props.getProperty(PropertyNames.BACKUP_IMAGE_ROOT_GOOD);
+		if (imageRoot != null) {
+			imageBackupRootGood = new File(imageRootGood);
+		}
+		String videoRootGood = props.getProperty(PropertyNames.BACKUP_VIDEO_ROOT_GOOD);
+		if (videoRoot != null) {
+			videoBackupRootGood = new File(videoRootGood);
+		}
 		
 		boolean failed = false;
 		if (!imageBackupRoot.exists()) {
@@ -54,6 +64,35 @@ public class VerifyBackup extends MediaHandler {
 		}
 		
 		return !failed;
+	}
+	
+	public boolean handleGoodBackup(MediaFile mFile) {
+		File regBackup = getBackupFile(mFile);
+		if (regBackup.exists()) {
+			File gBackup = getGoodBackupFile(mFile);
+			if (regBackup.equals(gBackup)) {
+				logger.debug("Good backup is the same as regular backup");
+				return true;
+			} else {
+				try {
+					logger.info("Moving backup to "+gBackup.getAbsolutePath());
+					main.moveFile(regBackup, gBackup);
+					return true;
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		} else {
+			logger.warn("Backup not foune for "+mFile.getBaseName());
+			File gBackup = getGoodBackupFile(mFile);
+			try {
+				logger.info("Moving backup to "+gBackup.getAbsolutePath());
+				main.copyFile(mFile.getBaseFile(), gBackup);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return false;
 	}
 	
 	public String printConfig(String indent) {
@@ -87,6 +126,19 @@ public class VerifyBackup extends MediaHandler {
 			backupFile = f1.getNewFilePath(main.getRootDirectory(), imageBackupRoot);
 		} else if (f1.isVideoFile()) {
 			backupFile = f1.getNewFilePath(main.getRootDirectory(), videoBackupRoot);			
+		} else {
+			logger.error("Logic error, should have filtered out any non-image/video files with the fileFilter!");
+			return null;
+		}
+		return backupFile;
+	}
+	
+	public File getGoodBackupFile(MediaFile f1) {
+		File backupFile = null;
+		if (f1.isImageFile()) {
+			backupFile = f1.getNewFilePath(main.getRootDirectory(), imageBackupRootGood);
+		} else if (f1.isVideoFile()) {
+			backupFile = f1.getNewFilePath(main.getRootDirectory(), videoBackupRootGood);			
 		} else {
 			logger.error("Logic error, should have filtered out any non-image/video files with the fileFilter!");
 			return null;
