@@ -1,6 +1,7 @@
 package bb.imgo;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.security.MessageDigest;
 
 /**

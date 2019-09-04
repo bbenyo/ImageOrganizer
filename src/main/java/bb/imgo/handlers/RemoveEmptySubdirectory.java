@@ -5,8 +5,6 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
-import bb.imgo.PropertyNames;
-import bb.imgo.struct.ActionLog;
 import bb.imgo.struct.MediaFile;
 
 /**

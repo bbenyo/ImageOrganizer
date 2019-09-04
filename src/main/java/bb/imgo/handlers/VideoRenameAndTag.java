@@ -1,7 +1,6 @@
 package bb.imgo.handlers;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;

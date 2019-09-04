@@ -3,7 +3,6 @@ package bb.imgo.handlers;
 import java.util.Properties;
 
 import bb.imgo.PropertyNames;
-import bb.imgo.struct.ActionLog.Action;
 import bb.imgo.struct.MediaFile;
 
 /**

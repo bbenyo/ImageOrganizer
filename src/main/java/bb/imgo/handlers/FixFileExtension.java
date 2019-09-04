@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import org.apache.log4j.Logger;
-import org.apache.tika.Tika;
 
 import bb.imgo.struct.MediaFile;
 

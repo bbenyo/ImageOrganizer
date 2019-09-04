@@ -2,7 +2,6 @@ package bb.imgo.handlers;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.HashSet;
 
 import org.apache.log4j.Logger;
 

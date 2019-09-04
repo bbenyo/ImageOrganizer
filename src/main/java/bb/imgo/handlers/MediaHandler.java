@@ -6,7 +6,6 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 
 import bb.imgo.OrganizeMedia;
-import bb.imgo.struct.ActionLog;
 import bb.imgo.struct.MediaFile;
 
 // Handle a media file, decide what flag to apply to it

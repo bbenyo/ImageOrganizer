@@ -1,7 +1,6 @@
 package bb.imgo.ui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -10,10 +9,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
-import java.io.FileFilter;
 import java.util.ArrayList;
 
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -22,7 +19,6 @@ import javax.swing.SwingConstants;
 
 import org.apache.log4j.Logger;
 
-import bb.imgo.struct.ImageFileFilter;
 import bb.imgo.struct.MediaFile;
 
 @SuppressWarnings("serial")

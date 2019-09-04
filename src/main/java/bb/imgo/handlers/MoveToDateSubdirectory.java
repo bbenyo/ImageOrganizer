@@ -9,7 +9,6 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 
 import bb.imgo.MD5Checksum;
-import bb.imgo.struct.ActionLog;
 import bb.imgo.struct.MediaFile;
 
 /**
