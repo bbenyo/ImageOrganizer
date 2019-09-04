@@ -18,7 +18,6 @@ import bb.imgo.MD5Checksum;
 import bb.imgo.OrganizeMedia;
 import bb.imgo.struct.FileTypeStats;
 import bb.imgo.struct.FileUtilities;
-import bb.imgo.struct.MediaFile;
 
 public class UtilitiesTest {
 

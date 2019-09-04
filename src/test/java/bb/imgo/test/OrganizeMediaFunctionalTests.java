@@ -2,7 +2,6 @@ package bb.imgo.test;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 
 import org.junit.Assert;
