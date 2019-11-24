@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Properties;
+import java.util.Stack;
 
 import org.apache.log4j.Logger;
 
@@ -37,8 +38,9 @@ public class UserChooser extends MediaHandler {
 	protected int columns = 5;
 	// number of rows
 	protected int rows = 2;
-		
-	ArrayList<MediaFile> mediaFiles = new ArrayList<MediaFile>();
+
+	Stack<ArrayList<MediaFile>> mediaFileStack = new Stack<ArrayList<MediaFile>>();
+	ArrayList<MediaFile> mediaFiles = null;
 	protected FileFilter imageFilter = new ImageFileFilter();
 	
 	protected boolean cancelled = false;
@@ -128,8 +130,8 @@ public class UserChooser extends MediaHandler {
 	
 	public boolean directoryInit(File directory) {
 		logger.debug(label+" DirectoryInit");
-		this.setTemporarilyDisabled(false);	
-		mediaFiles.clear();
+		this.setTemporarilyDisabled(false);
+		mediaFiles = new ArrayList<MediaFile>();
 		
 		if (currentProgressDirectory != null) {
 			if (directory.getAbsolutePath().equalsIgnoreCase(currentProgressDirectory)) {
@@ -228,8 +230,21 @@ public class UserChooser extends MediaHandler {
 
 	@Override
 	public boolean handleFile(MediaFile f1) {
+		
 		mediaFiles.add(f1);
 		return false;
+	}
+	
+	@Override
+	public void subDirectoryInit(File dir, File subDir) {
+		// Push the parent's files
+		mediaFileStack.push(mediaFiles);
+	}
+	
+	@Override
+	public void subDirectoryComplete(File dir, File subDir) {
+		// Pop, get the parent's files back
+		mediaFiles = mediaFileStack.pop();
 	}
 
 }
