@@ -1,6 +1,7 @@
 package bb.imgo.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -16,6 +17,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import org.apache.log4j.Logger;
 
@@ -49,7 +51,9 @@ public class ImageGridPanel extends JFrame {
 		this.directory = directory;
 		this.x = x;
 		this.y = y;
+		this.startIndex = 0;
 		init();
+		showPage();
 		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		WindowListener exitListener = new WindowAdapter() {
 		    @Override
@@ -65,7 +69,6 @@ public class ImageGridPanel extends JFrame {
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new GridLayout(y,x,10,10));
 		
-		startIndex = 0;
 		back = null;
 		next = null;
 
@@ -100,6 +103,7 @@ public class ImageGridPanel extends JFrame {
 					startIndex = 0;
 				}
 				showPage();
+				loadImagesThread();
 			}
 		});
 		
@@ -112,6 +116,7 @@ public class ImageGridPanel extends JFrame {
 				startIndex = startIndex + (x*y);
 				logger.info("NEXT");
 				showPage();
+				loadImagesThread();
 			}
 			
 		});
@@ -123,8 +128,6 @@ public class ImageGridPanel extends JFrame {
 		cPane.add(mainPanel, BorderLayout.CENTER);
 		cPane.add(buttonPanel, BorderLayout.SOUTH);
 		this.setContentPane(cPane);
-
-		showPage();
 	}
 	
 	public void cleanup() {
@@ -140,23 +143,21 @@ public class ImageGridPanel extends JFrame {
 	public boolean wasCancelled() {
 		return wasCancelled;
 	}
-	
+
 	protected ImagePanel createPanel(MediaFile mFile) {
 		return new ImagePanel(mFile);
 	}
 	
-	protected void showPage() {
+	public void showPage() {		
 		logger.info("Showing page for "+directory+" starting at "+startIndex);
+		for (Component c : mainPanel.getComponents()) {
+			if (c instanceof ImagePanel) {
+				((ImagePanel)c).clean();
+			}
+		}
 		mainPanel.removeAll();
 		buttonPanel.removeAll();
-		
-		int expectedEndIndex = startIndex + x*y;
-		for (int i=startIndex; (i<expectedEndIndex && i<mediaFiles.size()); ++i) {
-			MediaFile mFile = mediaFiles.get(i);
-			ImagePanel iPanel = createPanel(mFile);
-			mainPanel.add(iPanel);
-			endIndex = i;
-		}
+		mainPanel.revalidate();
 
 		countLabel.setText("Showing "+(startIndex+1)+" - "+(endIndex+1)+" of "+(mediaFiles.size())+" images");
 		countLabel.setFont(OverviewFrame.arial18);
@@ -165,6 +166,14 @@ public class ImageGridPanel extends JFrame {
 			buttonPanel.add(back, BorderLayout.WEST);
 		}
 
+		int expectedEndIndex = startIndex + x*y;
+		for (int i=startIndex; (i<expectedEndIndex && i<mediaFiles.size()); ++i) {
+			MediaFile mFile = mediaFiles.get(i);
+			ImagePanel iPanel = createPanel(mFile);
+			mainPanel.add(iPanel);
+			endIndex = i;
+		}	
+		
 		JPanel bcPanel = new JPanel();
 		bcPanel.add(cancel);
 		if (endIndex < (mediaFiles.size() - 1)) {
@@ -173,8 +182,27 @@ public class ImageGridPanel extends JFrame {
 			bcPanel.add(done);
 		}
 		buttonPanel.add(bcPanel, BorderLayout.CENTER);
-				
+					
 		revalidate();	
 		repaint();
+	}
+	
+	public void loadImages() {
+		for (Component c : mainPanel.getComponents()) {
+			if (c instanceof ImagePanel) {
+				((ImagePanel)c).displayCenter();
+				revalidate();
+			}
+		}
+	}
+	
+	// Load images on a thread off the AWT event thread
+	public void loadImagesThread() {
+		Thread t = new Thread(new Runnable() {
+			public void run() {
+				loadImages();
+			}
+		});
+		t.start();
 	}
 }

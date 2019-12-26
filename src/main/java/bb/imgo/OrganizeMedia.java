@@ -870,7 +870,9 @@ public class OrganizeMedia {
 	public void abort() {
 		abortFlag = true;
 		running.set(false);
-		ui.setAborted();
+		if (ui != null) {
+			ui.setAborted();
+		}
 	}
 
 	public void resume() {

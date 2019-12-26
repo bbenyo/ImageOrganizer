@@ -26,7 +26,7 @@ public class VideoPanel extends ImagePanel {
 	}
 	
 	@Override
-	protected void displayCenter() {
+	public void displayCenter() {
 		JButton playBtn = new JButton("PLAY");
 		playBtn.setPreferredSize(new Dimension(100,40));
 		JLabel rename = new JLabel("Rename video to: ");

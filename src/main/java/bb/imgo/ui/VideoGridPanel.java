@@ -13,7 +13,7 @@ public class VideoGridPanel extends ImageGridPanel {
 		super(directory, mediaFiles, x, y);
 	}
 	
-	protected void showPage() {
+	public void showPage() {
 		if (panels != null) {
 			for (VideoPanel vp : panels) {
 				vp.finalize();

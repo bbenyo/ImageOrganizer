@@ -189,6 +189,7 @@ public class UserChooser extends MediaHandler {
 		ImageGridPanel ig = createImageGridPanel(directory);
 		ig.setLocationRelativeTo(null);
 		ig.setVisible(true);
+		ig.loadImages();
 		
 		while (ig.isVisible()) {
 			try {

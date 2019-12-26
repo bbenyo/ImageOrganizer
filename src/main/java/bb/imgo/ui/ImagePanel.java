@@ -2,6 +2,7 @@ package bb.imgo.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -64,7 +65,8 @@ public class ImagePanel extends JPanel {
 		return frame;
 	}
 	
-	protected void displayCenter() {
+	public void displayCenter() {
+		logger.info("Loading image from "+mFile.getURL());
 		URL imgUrl = mFile.getURL();
 		try {
 			if (imgUrl != null) {
@@ -96,7 +98,10 @@ public class ImagePanel extends JPanel {
 		name.setFont(arial14);
 		name.setHorizontalAlignment(SwingConstants.CENTER);
 		add(name, BorderLayout.NORTH);
-		displayCenter();
+		JLabel iLbl = new JLabel();
+		iLbl.setPreferredSize(new Dimension(400,300));
+		add(iLbl, BorderLayout.CENTER);
+		//displayCenter();
 		
 		JPanel bottomPanel = new JPanel();
 		bottomPanel.setLayout(new BorderLayout());
@@ -162,7 +167,6 @@ public class ImagePanel extends JPanel {
 		setBorder(BorderFactory.createLineBorder(getBorderColor(mFile), 4));
 	}
 	
-
 	private Color getBorderColor(MediaFile mf) {
 		if (mf.isGood()) {
 			return Color.green;
@@ -187,6 +191,16 @@ public class ImagePanel extends JPanel {
 			mFile.clearDelete();
 		}
 		setImageBorder();
+	}
+	
+	public void clean() {
+		logger.info("Cleaning ImagePanel");
+		if (imgIcon != null && imgIcon.getImage() != null) {
+			logger.info("Flushing imageIcon");
+			imgIcon.getImage().flush();
+		}
+		imgIcon = null;
+		
 	}
 }
 
