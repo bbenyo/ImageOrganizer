@@ -159,13 +159,6 @@ public class ImageGridPanel extends JFrame {
 		buttonPanel.removeAll();
 		mainPanel.revalidate();
 
-		countLabel.setText("Showing "+(startIndex+1)+" - "+(endIndex+1)+" of "+(mediaFiles.size())+" images");
-		countLabel.setFont(OverviewFrame.arial18);
-		countLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		if (startIndex > 0) {
-			buttonPanel.add(back, BorderLayout.WEST);
-		}
-
 		int expectedEndIndex = startIndex + x*y;
 		for (int i=startIndex; (i<expectedEndIndex && i<mediaFiles.size()); ++i) {
 			MediaFile mFile = mediaFiles.get(i);
@@ -173,6 +166,13 @@ public class ImageGridPanel extends JFrame {
 			mainPanel.add(iPanel);
 			endIndex = i;
 		}	
+
+		countLabel.setText("Showing "+(startIndex+1)+" - "+(endIndex+1)+" of "+(mediaFiles.size())+" images");
+		countLabel.setFont(OverviewFrame.arial18);
+		countLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		if (startIndex > 0) {
+			buttonPanel.add(back, BorderLayout.WEST);
+		}
 		
 		JPanel bcPanel = new JPanel();
 		bcPanel.add(cancel);
