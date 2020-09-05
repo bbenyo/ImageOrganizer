@@ -9,8 +9,8 @@ import bb.imgo.struct.MediaFile;
 public class VideoGridPanel extends ImageGridPanel {
 	ArrayList<VideoPanel> panels;
 	
-	public VideoGridPanel(File directory, ArrayList<MediaFile> mediaFiles, int x, int y) {
-		super(directory, mediaFiles, x, y);
+	public VideoGridPanel(File directory, ArrayList<MediaFile> mediaFiles, int nx, int ny) {
+		super(directory, mediaFiles, nx, ny);
 	}
 	
 	public void showPage() {

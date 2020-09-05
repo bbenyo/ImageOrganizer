@@ -30,9 +30,9 @@ public class VideoPanel extends ImagePanel {
 		JButton playBtn = new JButton("PLAY");
 		playBtn.setPreferredSize(new Dimension(100,40));
 		JLabel rename = new JLabel("Rename video to: ");
-		rename.setFont(OverviewFrame.arial18);
+		rename.setFont(OverviewFrame.labelFont);
 		txtField = new JTextField("");
-		txtField.setFont(OverviewFrame.arial18);
+		txtField.setFont(OverviewFrame.labelFont);
 		txtField.setPreferredSize(new Dimension(300,40));
 		
 		if (mFile.getRenameTo() != null) {

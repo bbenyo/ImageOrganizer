@@ -37,7 +37,7 @@ public class ImageGridPanel extends JFrame {
 	
 	File directory;
 	
-	int x,y;
+	int nx,ny;
 	int startIndex = -1;
 	int endIndex = -1;
 		
@@ -45,12 +45,12 @@ public class ImageGridPanel extends JFrame {
 	
 	ArrayList<MediaFile> mediaFiles;
 		
-	public ImageGridPanel(File directory, ArrayList<MediaFile> mediaFiles, int x, int y) {
+	public ImageGridPanel(File directory, ArrayList<MediaFile> mediaFiles, int nx, int ny) {
 		super(directory.getAbsolutePath());
 		this.mediaFiles = mediaFiles;
 		this.directory = directory;
-		this.x = x;
-		this.y = y;
+		this.nx = nx;
+		this.ny = ny;
 		this.startIndex = 0;
 		init();
 		showPage();
@@ -67,7 +67,7 @@ public class ImageGridPanel extends JFrame {
 	
 	private void init() {
 		mainPanel = new JPanel();
-		mainPanel.setLayout(new GridLayout(y,x,10,10));
+		mainPanel.setLayout(new GridLayout(ny,nx,10,10));
 		
 		back = null;
 		next = null;
@@ -98,7 +98,7 @@ public class ImageGridPanel extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				logger.info("BACK");
-				startIndex = startIndex - (x*y);
+				startIndex = startIndex - (nx*ny);
 				if (startIndex < 0) {
 					startIndex = 0;
 				}
@@ -113,7 +113,7 @@ public class ImageGridPanel extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				startIndex = startIndex + (x*y);
+				startIndex = startIndex + (nx*ny);
 				logger.info("NEXT");
 				showPage();
 				loadImagesThread();
@@ -122,7 +122,7 @@ public class ImageGridPanel extends JFrame {
 		});
 		
 		countLabel = new JLabel("Showing 0 out of 0 images");
-		countLabel.setFont(OverviewFrame.arial18);
+		countLabel.setFont(OverviewFrame.labelFont);
 		
 		cPane.add(countLabel, BorderLayout.NORTH);
 		cPane.add(mainPanel, BorderLayout.CENTER);
@@ -159,7 +159,7 @@ public class ImageGridPanel extends JFrame {
 		buttonPanel.removeAll();
 		mainPanel.revalidate();
 
-		int expectedEndIndex = startIndex + x*y;
+		int expectedEndIndex = startIndex + nx*ny;
 		for (int i=startIndex; (i<expectedEndIndex && i<mediaFiles.size()); ++i) {
 			MediaFile mFile = mediaFiles.get(i);
 			ImagePanel iPanel = createPanel(mFile);
@@ -168,7 +168,7 @@ public class ImageGridPanel extends JFrame {
 		}	
 
 		countLabel.setText("Showing "+(startIndex+1)+" - "+(endIndex+1)+" of "+(mediaFiles.size())+" images");
-		countLabel.setFont(OverviewFrame.arial18);
+		countLabel.setFont(OverviewFrame.labelFont);
 		countLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		if (startIndex > 0) {
 			buttonPanel.add(back, BorderLayout.WEST);

@@ -21,7 +21,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTextArea;
+
+import org.apache.log4j.Logger;
 
 import bb.imgo.OrganizeMedia;
 import bb.imgo.OrganizeMediaUIInterface;
@@ -31,18 +34,24 @@ import bb.imgo.handlers.VideoRenameAndTag;
 
 @SuppressWarnings("serial")
 public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
+
+	static private Logger logger = Logger.getLogger(OverviewFrame.class.getName());
 	
-	JLabel rootDirectoryLabel;
-	JButton rootDirectoryBrowse;
-	JLabel startSubdirLabel;
-	JButton startSubdirBrowse;
-	JLabel userProgressLabel;
-	JButton userProgressBrowse;
+	BrowseLabel startSubdirBrowse;
+	BrowseLabel userProgressBrowse;
+	
+	BrowseLabel unorganizedDirectoryBrowse;
+	BrowseLabel goodDirectoryBrowse;
+	BrowseLabel trashDirectoryBrowse;
+	BrowseLabel trashVideoDirectoryBrowse;
+	BrowseLabel archiveImageDirectoryBrowse;
+	BrowseLabel archiveVideoDirectoryBrowse;
 	
 	JScrollPane actionLogPane;
 	JTextArea actionLogArea;
 	
-	JLabel activeHandlers;
+	JTextArea activeHandlers;
+	JButton editHandlers;
 	JCheckBox moveFilesBox;
 	JCheckBox recountBox;
 	JButton executeActions;
@@ -74,7 +83,7 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 	// Replace with an interface if needed
 	
 	// TODO: Specify via properties
-	static public Font arial18 = new Font("Arial", Font.PLAIN, 18);
+	static public Font labelFont = new Font("Arial", Font.PLAIN, 18);
 		
 	public OverviewFrame() {
 		super("Media Organizer");
@@ -87,9 +96,6 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new GridBagLayout());
 		GridBagConstraints gbc = new GridBagConstraints();
-		
-		rootDirectoryLabel = new JLabel("Root: "+rootDir);
-		rootDirectoryLabel.setFont(arial18);
 		gbc.gridx=0;
 		gbc.gridy=0;
 		gbc.weightx=1.0;
@@ -98,98 +104,53 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		gbc.insets = new Insets(5,5,5,5); 
 		gbc.fill=GridBagConstraints.BOTH;
 		gbc.anchor=GridBagConstraints.LINE_START;
-		mainPanel.add(rootDirectoryLabel, gbc);
-		
-		rootDirectoryBrowse = new JButton("Browse");
-		rootDirectoryBrowse.setFont(arial18);
-		gbc.gridx=3;
-		gbc.weightx=0;
-		gbc.gridwidth=1;
-		mainPanel.add(rootDirectoryBrowse, gbc);
-		final JFrame moi = this;
-		rootDirectoryBrowse.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JFileChooser rChooser = new JFileChooser();
-				rChooser.setCurrentDirectory(controller.getRootDirectory());
-				rChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-				int retval = rChooser.showDialog(moi, "Select");
-				if (retval == JFileChooser.APPROVE_OPTION) {
-					File sFile = rChooser.getSelectedFile();
-					controller.setRootDirectory(sFile);
-					rootDirectoryLabel.setText("Root: "+sFile.getAbsolutePath());
-					controller.setStartSubdir(null);
-					startSubdirLabel.setText("Start in Subdir: ");
-				}				
-			}
-		});
-		
-		startSubdirLabel = new JLabel("Start in Subdir: "+controller.getStartSubdir().getAbsolutePath());
-		startSubdirLabel.setFont(arial18);
-		gbc.gridx=0;
-		gbc.gridy++;
-		gbc.gridwidth=3;
-		gbc.gridheight=1;
-		mainPanel.add(startSubdirLabel, gbc);
-		
-		startSubdirBrowse = new JButton("Browse");
-		startSubdirBrowse.setFont(arial18);
-		gbc.gridx=3;
-		gbc.weightx=0;
-		gbc.gridwidth=1;
-		mainPanel.add(startSubdirBrowse, gbc);
-		startSubdirBrowse.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JFileChooser rChooser = new JFileChooser();
-				rChooser.setCurrentDirectory(controller.getStartSubdir());
-				rChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-				int retval = rChooser.showDialog(moi, "Select");
-				if (retval == JFileChooser.APPROVE_OPTION) {
-					File sFile = rChooser.getSelectedFile();
-					controller.setStartSubdir(sFile);
-					startSubdirLabel.setText("Start in Subdir: "+sFile.getAbsolutePath());
-				}				
-			}
-		});
+
+		unorganizedDirectoryBrowse = new BrowseLabel("Unorganized Media", "Unorganized", controller.getRootDirectory());
+		unorganizedDirectoryBrowse.addToGridBagLayout(gbc, mainPanel, this, oMedia, labelFont);		
+				
+		startSubdirBrowse = new BrowseLabel("Start in Subdir", "StartSubdir", controller.getStartSubdir());
+		startSubdirBrowse.addToGridBagLayout(gbc, mainPanel, this, oMedia, labelFont);
 		
 		// TODO: Allow handlers to contribute to a panel (tabbed pane?) on the ui instead of this custom code
 		MediaHandler uHandler = oMedia.getSpecificHandler(UserChooser.class);
 		if (uHandler == null) {
 			uHandler = oMedia.getSpecificHandler(VideoRenameAndTag.class);
 		}
+		
 		if (uHandler != null) {
 			UserChooser uChoose = (UserChooser)uHandler;
 			String cpd = uChoose.getCurrentProgressDirectory();
 			if (cpd == null) {
-				userProgressLabel = new JLabel("Start at the beginning: "+oMedia.getRootDirectory().getAbsolutePath());
+				userProgressBrowse = new BrowseLabel("Start at the beginning", "UserProgress", controller.getRootDirectory());
+				userProgressBrowse.setLabelPrefix("Resume at");
 			} else {
-				userProgressLabel = new JLabel("Resume at "+cpd);
+				userProgressBrowse = new BrowseLabel("Resume at", "UserProgress", new File(cpd));
 			}
-			userProgressLabel.setFont(arial18);
-			gbc.gridx=0;
-			gbc.gridy++;
-			gbc.gridwidth=3;
-			gbc.gridheight=1;
-			mainPanel.add(userProgressLabel, gbc);
-			
-			userProgressBrowse = new JButton("Change");
-			userProgressBrowse.setFont(arial18);
-			gbc.gridx=3;
-			gbc.weightx=0;
-			gbc.gridwidth=1;
-			mainPanel.add(userProgressBrowse, gbc);
-			userProgressBrowse.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					JFileChooser rChooser = new JFileChooser();
-					rChooser.setCurrentDirectory(controller.getStartSubdir());
-					rChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-					int retval = rChooser.showDialog(moi, "Select");
-					if (retval == JFileChooser.APPROVE_OPTION) {
-						File sFile = rChooser.getSelectedFile();
-						userProgressLabel.setText("Resume at "+sFile.getAbsolutePath());
-						uChoose.setCurrentProgressDirectory(sFile.getAbsolutePath());
-					}				
-				}
-			});
+			userProgressBrowse.addToGridBagLayout(gbc, mainPanel, this, oMedia, labelFont);
+		}
+		
+		gbc.gridx = 0;
+		gbc.gridy++;
+		gbc.gridwidth = 4;
+		gbc.gridheight = 1;
+		mainPanel.add(new JSeparator(JSeparator.HORIZONTAL), gbc);
+		
+		goodDirectoryBrowse = new BrowseLabel("Good Files", "Good", controller.getGoodDir());
+		goodDirectoryBrowse.addToGridBagLayout(gbc, mainPanel, this, oMedia, labelFont);
+				
+		trashDirectoryBrowse = new BrowseLabel("Trash Files", "Trash", controller.getTrashDir());
+		trashDirectoryBrowse.addToGridBagLayout(gbc, mainPanel, this, oMedia, labelFont);
+		
+		File archiveGood = controller.getArchiveImageDir();
+		if (archiveGood != null) {
+			archiveImageDirectoryBrowse = new BrowseLabel("Image Archive", "ImageArchive", controller.getArchiveImageDir());
+			archiveImageDirectoryBrowse.addToGridBagLayout(gbc, mainPanel, this, oMedia, labelFont);
+		}
+		
+		File archiveVideoGood = controller.getArchiveVideoDir();
+		if (archiveVideoGood != null) {
+			archiveVideoDirectoryBrowse = new BrowseLabel("Video Archive", "VideoArchive", controller.getArchiveVideoDir());
+			archiveVideoDirectoryBrowse.addToGridBagLayout(gbc, mainPanel, this, oMedia, labelFont);
 		}
 		
 		// TODO: toggle on/off handlers via checkboxes
@@ -202,12 +163,28 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		gbc.gridwidth=4;
 		gbc.gridheight=2;
 		gbc.weighty=0.25;
-		activeHandlers = new JLabel(handlerStr.toString());
-		activeHandlers.setFont(arial18);
+		activeHandlers = new JTextArea(handlerStr.toString());
+		activeHandlers.setFont(labelFont);
+		activeHandlers.setLineWrap(true);
+		activeHandlers.setWrapStyleWord(true);
 		mainPanel.add(new JScrollPane(activeHandlers), gbc);
 		
+		editHandlers = new JButton("Edit Handlers");
+		editHandlers.setFont(labelFont);
+		editHandlers.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				showEditHandlerDialog();
+			}
+		});
+		
+		gbc.gridy+=2;
+		gbc.weighty=0;
+		gbc.gridwidth=1;
+		gbc.gridheight=1;
+		mainPanel.add(editHandlers, gbc);
+		
 		moveFilesBox = new JCheckBox("Auto Execute Actions?");
-		moveFilesBox.setFont(arial18);
+		moveFilesBox.setFont(labelFont);
 		if (oMedia.moveFiles) {
 			moveFilesBox.setSelected(true);
 		} else {
@@ -224,14 +201,14 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 			}
 		});
 		
-		gbc.gridy+=2;
+		gbc.gridx+=1;
 		gbc.weighty=0;
-		gbc.gridwidth=2;
+		gbc.gridwidth=1;
 		gbc.gridheight=1;
 		mainPanel.add(moveFilesBox, gbc);
 		
 		recountBox = new JCheckBox("Count Files again? ");
-		recountBox.setFont(arial18);
+		recountBox.setFont(labelFont);
 		
 		if (oMedia.isRecountFiles()) {
 			recountBox.setSelected(true);
@@ -249,7 +226,7 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		mainPanel.add(recountBox, gbc);
 		
 		executeActions = new JButton("Execute Actions");
-		executeActions.setFont(arial18);
+		executeActions.setFont(labelFont);
 		executeActions.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				oMedia.executeActionLog();
@@ -264,7 +241,7 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 
 				
 		actionLogArea = new JTextArea("Action Log:\n");
-		actionLogArea.setFont(arial18);
+		actionLogArea.setFont(labelFont);
 		actionLogPane = new JScrollPane(actionLogArea);
 		gbc.gridy++;
 		gbc.gridx=0;
@@ -275,13 +252,13 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		mainPanel.add(actionLogPane, gbc);
 		
 		statisticsLabel = new JLabel();
-		statisticsLabel.setFont(arial18);
+		statisticsLabel.setFont(labelFont);
 		gbc.gridy = gbc.gridy + 6;
 		gbc.weighty=0;
 		gbc.gridwidth=3;
 		gbc.gridheight=1;
 		startTimeLabel = new JLabel("Not Started");
-		startTimeLabel.setFont(arial18);
+		startTimeLabel.setFont(labelFont);
 		updateStatistics();
 		mainPanel.add(startTimeLabel, gbc);
 		
@@ -347,7 +324,7 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		mainPanel.add(viewTrashDirectory, gbc);
 		
 		curDirectoryLabel = new JLabel("Working in: ");
-		curDirectoryLabel.setFont(arial18);
+		curDirectoryLabel.setFont(labelFont);
 		gbc.gridy++;
 		gbc.gridx=0;
 		gbc.gridwidth=4;
@@ -355,7 +332,7 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		mainPanel.add(curDirectoryLabel, gbc);
 		
 		statusLabel = new JLabel("Status");
-		statusLabel.setFont(arial18);
+		statusLabel.setFont(labelFont);
 		gbc.gridy++;
 		gbc.gridx=0;
 		gbc.gridwidth=4;
@@ -366,14 +343,14 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		progress.setMinimum(0);
 		progress.setMaximum(100);
 		progress.setValue(1);
-		progress.setFont(arial18);
+		progress.setFont(labelFont);
 		gbc.gridy+=2;
 		gbc.gridheight=1;
 		mainPanel.add(progress, gbc);
 				
 		JPanel buttonPanel = new JPanel();
 		startButton = new JButton("Start");
-		startButton.setFont(arial18);
+		startButton.setFont(labelFont);
 		startButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				controller.startThread();
@@ -383,7 +360,7 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		});
 		
 		stopButton = new JButton("Pause");
-		stopButton.setFont(arial18);
+		stopButton.setFont(labelFont);
 		stopButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (stopButton.getText().equalsIgnoreCase("Pause")) {
@@ -395,7 +372,7 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		});
 		
 		cancelButton = new JButton("Cancel");
-		cancelButton.setFont(arial18);
+		cancelButton.setFont(labelFont);
 		cancelButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				controller.abort();
@@ -405,7 +382,7 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		});
 		
 		exitButton = new JButton("Exit");
-		exitButton.setFont(arial18);
+		exitButton.setFont(labelFont);
 		exitButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				controller.exit();
@@ -426,6 +403,10 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		this.setContentPane(mainPanel);
 		this.pack();
 		this.setSize(w,h);
+	}
+	
+	public void showEditHandlerDialog() {
+		logger.info("Edit Handler Dialog: TBD");
 	}
 	
 	public void setPaused() {

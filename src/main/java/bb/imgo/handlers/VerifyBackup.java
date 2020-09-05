@@ -211,6 +211,22 @@ public class VerifyBackup extends MediaHandler {
 		}
 		return false;
 	}
+	
+	public File getImageBackupRoot() {
+		return imageBackupRoot;
+	}
+
+	public void setImageBackupRoot(File imageBackupRoot) {
+		this.imageBackupRoot = imageBackupRoot;
+	}
+
+	public File getVideoBackupRoot() {
+		return videoBackupRoot;
+	}
+
+	public void setVideoBackupRoot(File videoBackupRoot) {
+		this.videoBackupRoot = videoBackupRoot;
+	}
 
 	private class PrefixFileFilter implements FileFilter {
 
@@ -236,6 +252,5 @@ public class VerifyBackup extends MediaHandler {
 			}
 			return false;
 		}
-		
 	}
 }

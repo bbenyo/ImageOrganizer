@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 import bb.imgo.handlers.MediaHandler;
 import bb.imgo.handlers.UserChooser;
 import bb.imgo.handlers.VerifyBackup;
+import bb.imgo.handlers.VideoRenameAndTag;
 import bb.imgo.struct.ActionLog;
 import bb.imgo.struct.DirectoryFileFilter;
 import bb.imgo.struct.FileUtilities;
@@ -31,7 +32,7 @@ import bb.imgo.struct.MediaFile;
 import bb.imgo.struct.NonDirectoryFileFilter;
 import bb.imgo.ui.OverviewFrame;
 
-public class OrganizeMedia {
+public class OrganizeMedia implements DirectoryController {
 
 	static private Logger logger = Logger.getLogger(OrganizeMedia.class.getName());
 	static public String PropertyFileName = "om.properties";
@@ -300,6 +301,10 @@ public class OrganizeMedia {
 	public void organize() {
 		actionLog.clear();
 		running.set(true);
+		
+		if (startSubdir == null) {
+			startSubdir = this.rootDirectory;
+		}
 		
 		// Count all files we'll be working on, so we can have a progress bar
 		int totalFiles = 0;
@@ -854,6 +859,44 @@ public class OrganizeMedia {
 	public void setTrashDir(File trashDir) {
 		this.trashDir = trashDir;
 	}
+
+	public File getArchiveImageDir() {
+		MediaHandler uHandler = getSpecificHandler(VerifyBackup.class);
+		if (uHandler != null) {
+			VerifyBackup vBackup = (VerifyBackup)uHandler;
+			return vBackup.getImageBackupRoot();
+		}
+		return null;
+	}
+
+	public File getArchiveVideoDir() {
+		MediaHandler uHandler = getSpecificHandler(VerifyBackup.class);
+		if (uHandler != null) {
+			VerifyBackup vBackup = (VerifyBackup)uHandler;
+			return vBackup.getVideoBackupRoot();
+		}
+		return null;
+	}
+	
+	public void setArchiveImageDir(File dir) {
+		MediaHandler uHandler = getSpecificHandler(VerifyBackup.class);
+		if (uHandler != null) {
+			VerifyBackup vBackup = (VerifyBackup)uHandler;
+			vBackup.setImageBackupRoot(dir);
+		} else {
+			logger.error("Unable to find VerifyBackup handler, can't set Image Archive directory");
+		}
+	}
+
+	public void setArchiveVideoDir(File dir) {
+		MediaHandler uHandler = getSpecificHandler(VerifyBackup.class);
+		if (uHandler != null) {
+			VerifyBackup vBackup = (VerifyBackup)uHandler;
+			vBackup.setVideoBackupRoot(dir);
+		} else {
+			logger.error("Unable to find VerifyBackup handler, can't set Video Archive directory");
+		}
+	}
 	
 	public void startUI() {
 		ui = new OverviewFrame();
@@ -906,6 +949,82 @@ public class OrganizeMedia {
 			}
 		}
 		return null;
+	}
+	
+	public File getDirectory(String id) {
+		if (id == null) {
+			logger.error("Null directory passed to getDirectory!");
+			return null;
+		}
+		
+		if (id.equalsIgnoreCase("StartSubdir")) {
+			return getStartSubdir();
+		} else if (id.equalsIgnoreCase("Unorganized")) {
+			return getRootDirectory();
+		} else if (id.equalsIgnoreCase("Good")) {
+			return getGoodDir();
+		} else if (id.equalsIgnoreCase("Trash")) {
+			return getTrashDir();
+		} else if (id.equalsIgnoreCase("ImageArchive")) {
+			return getArchiveImageDir();
+		} else if (id.equalsIgnoreCase("VideoArchive")) {
+			return getArchiveVideoDir();
+		} else if (id.equalsIgnoreCase("UserProgress")) {
+			MediaHandler uHandler = getSpecificHandler(UserChooser.class);
+			if (uHandler == null) {
+				uHandler = getSpecificHandler(VideoRenameAndTag.class);
+			}
+			if (uHandler != null) {
+				if (uHandler instanceof UserChooser) {
+					File f1 = new File(((UserChooser)uHandler).getCurrentProgressDirectory());
+					return f1;
+				} else {
+					logger.error("UserChooser handler isn't a UserChooser!");
+				}
+			} else {
+				logger.error("Unable to find a UserChooser handler");
+			}
+		}
+		
+		logger.error("Unrecognized directory id in getDirectory: "+id);
+		return null;
+	}
+	
+	public void setDirectory(String id, File dir) {
+		if (id == null || dir == null) {
+			logger.error("Null passed to getDirectory!");
+			return;
+		}
+		logger.info("Setting "+id+" to "+dir.getAbsolutePath());
+		if (id.equalsIgnoreCase("StartSubdir")) {
+			this.setStartSubdir(dir);
+		} else if (id.equalsIgnoreCase("Unorganized")) {
+			this.setRootDirectory(dir);
+		} else if (id.equalsIgnoreCase("Good")) {
+			this.setGoodDir(dir);
+		} else if (id.equalsIgnoreCase("Trash")) {
+			this.setTrashDir(dir);
+		} else if (id.equalsIgnoreCase("ImageArchive")) {
+			this.setArchiveImageDir(dir);
+		} else if (id.equalsIgnoreCase("VideoArchive")) {
+			this.setArchiveVideoDir(dir);
+		} else if (id.equalsIgnoreCase("UserProgress")) {
+			MediaHandler uHandler = getSpecificHandler(UserChooser.class);
+			if (uHandler == null) {
+				uHandler = getSpecificHandler(VideoRenameAndTag.class);
+			}
+			if (uHandler != null) {
+				if (uHandler instanceof UserChooser) {
+					((UserChooser)uHandler).setCurrentProgressDirectory(dir.getAbsolutePath());
+				} else {
+					logger.error("UserChooser handler isn't a UserChooser!");
+				}
+			} else {
+				logger.error("Unable to find a UserChooser handler");
+			}
+		} else {		
+			logger.error("Unrecognized directory id in setDirectory: "+id);
+		}
 	}
 	
 	static public void main(String[] args) {
