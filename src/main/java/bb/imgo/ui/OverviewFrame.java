@@ -406,7 +406,9 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 	}
 	
 	public void showEditHandlerDialog() {
-		logger.info("Edit Handler Dialog: TBD");
+		EditHandlersFrame ehFrame = new EditHandlersFrame(controller);
+		ehFrame.setLocationRelativeTo(this);
+		ehFrame.setVisible(true);
 	}
 	
 	public void setPaused() {
@@ -501,5 +503,5 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 		progress.setStringPainted(true);
 		progress.revalidate();
 	}
-
+	
 }

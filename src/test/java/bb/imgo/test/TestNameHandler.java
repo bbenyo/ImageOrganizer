@@ -1,5 +1,7 @@
 package bb.imgo.test;
 
+import java.util.Map;
+
 import bb.imgo.handlers.MediaHandler;
 import bb.imgo.struct.MediaFile;
 
@@ -19,6 +21,20 @@ public class TestNameHandler extends MediaHandler {
 			f1.setDelete("Test");
 		}
 		return true;
+	}
+
+	@Override
+	public String getDescription() {
+		return "Test";
+	}
+
+	@Override
+	public Map<String, String> getConfigurationOptions() {
+		return null;
+	}
+
+	@Override
+	public void setConfigurationOption(String key, String value) {		
 	}
 
 }
