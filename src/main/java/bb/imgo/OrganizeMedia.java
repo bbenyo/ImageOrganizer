@@ -32,7 +32,7 @@ import bb.imgo.struct.MediaFile;
 import bb.imgo.struct.NonDirectoryFileFilter;
 import bb.imgo.ui.OverviewFrame;
 
-public class OrganizeMedia implements DirectoryController {
+public class OrganizeMedia implements DirectoryController, MediaHandlerController {
 
 	static private Logger logger = Logger.getLogger(OrganizeMedia.class.getName());
 	static public String PropertyFileName = "om.properties";

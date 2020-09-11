@@ -2,6 +2,7 @@ package bb.imgo.handlers;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
@@ -62,6 +63,20 @@ public class RemoveDuplicates extends MediaHandler {
 	@Override
 	public boolean fileFilter(MediaFile f1) {
 		return true; 
+	}
+
+	@Override
+	public String getDescription() {
+		return "Use MD5 checksums to remove any duplicates";
+	}
+
+	@Override
+	public Map<String, String> getConfigurationOptions() {
+		return new HashMap<String, String>();
+	}
+
+	@Override
+	public void setConfigurationOption(String key, String value) {
 	}
 
 }

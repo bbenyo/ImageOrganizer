@@ -1,6 +1,7 @@
 package bb.imgo.handlers;
 
 import java.io.File;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
@@ -44,6 +45,12 @@ abstract public class MediaHandler {
 			main.addDeleteActionLog(filename, null, reason);
 		}
 	}
+	
+	abstract public String getDescription();
+	
+	abstract public Map<String, String> getConfigurationOptions();
+	
+	abstract public void setConfigurationOption(String key, String value);
 
 	// Return true if you handle this type of file, false if not
 	abstract public boolean fileFilter(MediaFile f1);

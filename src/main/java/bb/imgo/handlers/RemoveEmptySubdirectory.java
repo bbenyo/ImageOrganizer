@@ -1,6 +1,8 @@
 package bb.imgo.handlers;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
@@ -67,6 +69,20 @@ public class RemoveEmptySubdirectory extends MediaHandler {
 	@Override
 	public boolean handleFile(MediaFile f1) {
 		return false;
+	}
+
+	@Override
+	public String getDescription() {
+		return "Delete empty directories";
+	}
+
+	@Override
+	public Map<String, String> getConfigurationOptions() {
+		return new HashMap<String, String>();
+	}
+
+	@Override
+	public void setConfigurationOption(String key, String value) {		
 	}
 
 }

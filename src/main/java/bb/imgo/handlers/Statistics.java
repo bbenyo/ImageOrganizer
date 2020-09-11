@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
@@ -152,6 +153,36 @@ public class Statistics extends MediaHandler {
 		} else {
 			logger.error("No root stats found");
 		}
+	}
+
+	@Override
+	public String getDescription() {
+		return "Write out file types and sizes to a statistics text and csv file";
+	}
+
+	@Override
+	public Map<String, String> getConfigurationOptions() {
+		HashMap<String, String> configs = new HashMap<String, String>();
+		configs.put(PropertyNames.STATS_OUTPUTFILEDIR, OutputFileDir);
+		configs.put(PropertyNames.STATS_OUTPUTFILENAME, OutputFileName);
+		configs.put(PropertyNames.STATS_OUTPUTFILECSV, OutputFileCSV);
+		return configs;
+	}
+
+	@Override
+	public void setConfigurationOption(String key, String value) {
+		if (key.equalsIgnoreCase(PropertyNames.STATS_OUTPUTFILEDIR)) {
+			File f1 = new File(value);
+			if (!f1.exists()) {
+				logger.error("New outputFileDir "+value+" doesn't exist!");
+				return;
+			}
+			OutputFileDir = f1.getAbsolutePath();
+		} else if (key.equalsIgnoreCase(PropertyNames.STATS_OUTPUTFILENAME)) {
+			OutputFileName = value;
+		} else if (key.equalsIgnoreCase(PropertyNames.STATS_OUTPUTFILECSV)) {
+			OutputFileCSV = value;
+		}		
 	}
 
 }

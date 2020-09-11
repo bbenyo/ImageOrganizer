@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
@@ -47,6 +49,20 @@ public class DirectoryNameUnderscoreToDash extends MediaHandler {
 	@Override
 	public boolean handleFile(MediaFile f1) {
 		return false;
+	}
+
+	@Override
+	public String getDescription() {
+		return "Rename directories from YYYY_mm_dd to YYYY-mm-dd";
+	}
+
+	@Override
+	public Map<String, String> getConfigurationOptions() {
+		return new HashMap<String, String>();
+	}
+
+	@Override
+	public void setConfigurationOption(String key, String value) {
 	}
 
 }

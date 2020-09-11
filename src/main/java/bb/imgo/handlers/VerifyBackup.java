@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
@@ -75,18 +77,18 @@ public class VerifyBackup extends MediaHandler {
 				return true;
 			} else {
 				try {
-					logger.info("Moving backup to "+gBackup.getAbsolutePath());
-					main.moveFile(regBackup, gBackup);
+					logger.info("Copying backup to "+gBackup.getAbsolutePath());
+					main.copyFile(regBackup, gBackup);
 					return true;
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
 		} else {
-			logger.warn("Backup not foune for "+mFile.getBaseName());
+			logger.warn("Backup not found for "+mFile.getBaseName());
 			File gBackup = getGoodBackupFile(mFile);
 			try {
-				logger.info("Moving backup to "+gBackup.getAbsolutePath());
+				logger.info("Copying backup to "+gBackup.getAbsolutePath());
 				main.copyFile(mFile.getBaseFile(), gBackup);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -252,5 +254,44 @@ public class VerifyBackup extends MediaHandler {
 			}
 			return false;
 		}
+	}
+
+	@Override
+	public String getDescription() {
+		return "Backup all files to an image or video archive directory";
+	}
+
+	@Override
+	public Map<String, String> getConfigurationOptions() {
+		HashMap<String, String> configs = new HashMap<String, String>();
+		configs.put(PropertyNames.BACKUP_IMAGE_ROOT, imageBackupRoot.getAbsolutePath());
+		configs.put(PropertyNames.BACKUP_VIDEO_ROOT, videoBackupRoot.getAbsolutePath());
+		configs.put(PropertyNames.BACKUP_IMAGE_ROOT_GOOD, imageBackupRootGood.getAbsolutePath());
+		configs.put(PropertyNames.BACKUP_VIDEO_ROOT_GOOD, videoBackupRootGood.getAbsolutePath());
+		return configs;
+	}
+
+	@Override
+	public void setConfigurationOption(String key, String value) {
+		File f1 = new File(value);
+		if (!f1.isDirectory()) {
+			logger.error(value+" is not a directory!");
+			return;
+		}
+		if (key.equalsIgnoreCase(PropertyNames.BACKUP_IMAGE_ROOT)) {
+			imageBackupRoot = f1;
+			logger.info("Image backup directory is now "+f1);
+		} else if (key.equalsIgnoreCase(PropertyNames.BACKUP_VIDEO_ROOT)) {
+			videoBackupRoot = f1;
+			logger.info("Video backup directory is now "+f1);
+		} else if (key.equalsIgnoreCase(PropertyNames.BACKUP_IMAGE_ROOT_GOOD)) {
+			imageBackupRootGood = f1;
+			logger.info("Good Image backup directory is now "+f1);
+		} else if (key.equalsIgnoreCase(PropertyNames.BACKUP_VIDEO_ROOT_GOOD)) {
+			videoBackupRootGood = f1;
+			logger.info("Good Video backup directory is now "+f1);
+		} else {
+			logger.error("Unknown config option: "+key);
+		}		
 	}
 }

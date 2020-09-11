@@ -7,6 +7,8 @@ import java.io.FileFilter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Stack;
 
@@ -51,7 +53,7 @@ public class UserChooser extends MediaHandler {
 	// Return true if we initialized properly, false if there was an error
 	public boolean initialize(Properties props) {
 		logger.info(getLabel()+" initialized");
-		
+
 		String cStr = props.getProperty(PropertyNames.USER_CHOOSER_COLUMNS);
 		if (cStr != null) {
 			try {
@@ -71,7 +73,7 @@ public class UserChooser extends MediaHandler {
 				return false;
 			}
 		}
-		
+
 		String cpFile = props.getProperty(PropertyNames.USER_CHOOSER_PROGRESS_FILENAME);
 		if (cpFile != null) {
 			currentProgressFilename = cpFile;
@@ -246,6 +248,46 @@ public class UserChooser extends MediaHandler {
 	public void subDirectoryComplete(File dir, File subDir) {
 		// Pop, get the parent's files back
 		mediaFiles = mediaFileStack.pop();
+	}
+
+	@Override
+	public String getDescription() {
+		return "Let the user specify whether an image/video is Good or Trash";
+	}
+
+	@Override
+	public Map<String, String> getConfigurationOptions() {
+		HashMap<String, String> configs = new HashMap<String, String>();
+		configs.put(PropertyNames.USER_CHOOSER_COLUMNS, Integer.toString(columns));
+		configs.put(PropertyNames.USER_CHOOSER_ROWS, Integer.toString(rows));
+		if (currentProgressFile != null) {
+			configs.put(PropertyNames.USER_CHOOSER_PROGRESS_FILENAME, currentProgressFile.getAbsolutePath());
+		} else {
+			configs.put(PropertyNames.USER_CHOOSER_PROGRESS_FILENAME, "");
+		}
+		return configs; 
+	}
+
+	@Override
+	public void setConfigurationOption(String key, String value) {
+		if (key.equalsIgnoreCase(PropertyNames.USER_CHOOSER_COLUMNS)) {
+			try {
+				columns = Integer.valueOf(value);
+			} catch (NumberFormatException ex) {
+				logger.error(ex.toString(), ex);
+			}
+		} else if (key.equalsIgnoreCase(PropertyNames.USER_CHOOSER_ROWS)) {
+			try {
+				rows = Integer.valueOf(value);
+			} catch (NumberFormatException ex) {
+				logger.error(ex.toString(), ex);
+			}
+		} if (key.equalsIgnoreCase(PropertyNames.USER_CHOOSER_PROGRESS_FILENAME)) {
+			currentProgressFile = new File(value);
+			logger.info("Writing User Chooser current progress to file: "+currentProgressFile.getAbsolutePath());
+		} else {
+			logger.error("Unknown config option: "+key);
+		}		
 	}
 
 }

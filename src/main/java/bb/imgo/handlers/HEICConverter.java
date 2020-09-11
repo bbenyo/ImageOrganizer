@@ -2,6 +2,8 @@ package bb.imgo.handlers;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
@@ -117,5 +119,19 @@ public class HEICConverter extends MediaHandler {
 			f1.setBaseFile(moveTo);
 		}
 		return false;
+	}
+
+	@Override
+	public String getDescription() {
+		return "Convert HEIC images to JPG using Windows Powershell";
+	}
+
+	@Override
+	public Map<String, String> getConfigurationOptions() {
+		return new HashMap<String, String>();
+	}
+
+	@Override
+	public void setConfigurationOption(String key, String value) {		
 	} 
 }

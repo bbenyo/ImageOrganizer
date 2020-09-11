@@ -3,6 +3,7 @@ package bb.imgo.handlers;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
@@ -90,6 +91,20 @@ public class FixFileExtension extends MediaHandler {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public String getDescription() {
+		return "Use Apache TIKA to figure out the real type of a file, and change the extension to match";
+	}
+
+	@Override
+	public Map<String, String> getConfigurationOptions() {
+		return new HashMap<String, String>();
+	}
+
+	@Override
+	public void setConfigurationOption(String key, String value) {		
 	}
 
 }

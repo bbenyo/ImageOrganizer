@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
@@ -199,6 +201,20 @@ public class MoveToDateSubdirectory extends MediaHandler {
 		}
 		
 		return true;
+	}
+
+	@Override
+	public String getDescription() {
+		return "Move all files in a YYYY or YYYY-MM directory to a YYYY-MM-DD directory";
+	}
+
+	@Override
+	public Map<String, String> getConfigurationOptions() {
+		return new HashMap<String, String>();
+	}
+
+	@Override
+	public void setConfigurationOption(String key, String value) {		
 	}
 
 }

@@ -2,6 +2,8 @@ package bb.imgo.handlers;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
@@ -59,6 +61,34 @@ public class SeparateVideos extends MediaHandler {
 			}
 		}
 		return true;
+	}
+
+	@Override
+	public String getDescription() {
+		return "Move any Video files to "+videoRoot;
+	}
+
+	@Override
+	public Map<String, String> getConfigurationOptions() {
+		HashMap<String, String> configs = new HashMap<String, String>();
+		if (videoRoot != null) {
+			configs.put(PropertyNames.VIDEO_ROOT_DIR, videoRoot.getAbsolutePath());
+		} else {
+			configs.put(PropertyNames.VIDEO_ROOT_DIR, "");
+		}
+		return configs;
+	}
+
+	@Override
+	public void setConfigurationOption(String key, String value) {
+		if (key.equalsIgnoreCase(PropertyNames.VIDEO_ROOT_DIR)) {
+			File v1 = new File(value);
+			if (!v1.exists()) {
+				logger.error("New video root doesn't exist: "+value);
+				return;
+			}			
+			logger.info("Setting VideoRoot to "+v1.getAbsolutePath());
+		}		
 	}
 
 }
