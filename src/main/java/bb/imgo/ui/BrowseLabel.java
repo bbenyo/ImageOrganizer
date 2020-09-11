@@ -22,7 +22,7 @@ public class BrowseLabel {
 	protected JButton browse;
 	protected String controllerAction;
 	
-	protected boolean directoryOnly;
+	protected boolean directoryOnly = true;
 	
 	public BrowseLabel(String lblText, String controllerAction, File curFile) {
 		this.currentFile = curFile;
