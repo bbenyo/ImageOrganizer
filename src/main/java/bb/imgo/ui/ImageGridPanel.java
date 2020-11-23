@@ -25,7 +25,7 @@ import bb.imgo.struct.MediaFile;
 
 @SuppressWarnings("serial")
 public class ImageGridPanel extends JFrame {
-	static private Logger logger = Logger.getLogger(ImageGridPanel.class.getName());
+	private static Logger logger = Logger.getLogger(ImageGridPanel.class.getName());
 	
 	JLabel countLabel;
 	JPanel mainPanel;

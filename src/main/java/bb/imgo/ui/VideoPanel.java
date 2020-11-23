@@ -20,9 +20,14 @@ import bb.imgo.struct.MediaFile;
 public class VideoPanel extends ImagePanel {
 	private static Logger logger = Logger.getLogger(VideoPanel.class.getName());
 	JTextField txtField;
+	String pDup = null;
 
 	public VideoPanel(MediaFile mFile) {
 		super(mFile);
+	}
+	
+	public void setPotentialDuplicate(String dName) {
+		pDup = dName;
 	}
 	
 	@Override
@@ -31,7 +36,11 @@ public class VideoPanel extends ImagePanel {
 		playBtn.setPreferredSize(new Dimension(100,40));
 		JLabel rename = new JLabel("Rename video to: ");
 		rename.setFont(OverviewFrame.labelFont);
-		txtField = new JTextField("");
+		String defaultName = "";
+		if (pDup != null) {
+			defaultName = "PotentialDuplicateOf_"+pDup;
+		}
+		txtField = new JTextField(defaultName);
 		txtField.setFont(OverviewFrame.labelFont);
 		txtField.setPreferredSize(new Dimension(300,40));
 		

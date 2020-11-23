@@ -106,6 +106,11 @@ public class VerifyBackup extends MediaHandler {
 	
 	protected boolean verifyBackupFile(File f1, File f2) {
 		try {
+			if (f1.length() != f2.length()) {
+				// No need to check the md5, sizes are different
+				logger.warn("Backup is a different size, no need to check md5");
+				return false;
+			}
 			String cs = MD5Checksum.getMD5Checksum(f1.getAbsolutePath());
 			String bs = MD5Checksum.getMD5Checksum(f2.getAbsolutePath());
 			if (!cs.equals(bs)) {

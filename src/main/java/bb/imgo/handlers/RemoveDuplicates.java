@@ -23,7 +23,12 @@ public class RemoveDuplicates extends MediaHandler {
 	File curDirectory = null;
 	
 	// MD5 -> filename
-	HashMap<String, String> md5Checksums = new HashMap<String, String>();
+	// Instead of doing md5s, the probability of two images/videos with the exact same size in bytes is very low
+	//  We'll only bother with an md5 if there's a file with the same size.
+	//HashMap<String, String> md5Checksums = new HashMap<String, String>();
+	
+	// FileSize -> filename, for a quick check before bothering with an md5
+	HashMap<Long, String> sizeToName = new HashMap<Long, String>();
 	
 	public RemoveDuplicates() {
 		super();
@@ -32,7 +37,8 @@ public class RemoveDuplicates extends MediaHandler {
 	@Override
 	public boolean directoryInit(File directory) {
 		super.directoryInit(directory);
-		md5Checksums.clear();
+		//md5Checksums.clear();
+		sizeToName.clear();
 		curDirectory = directory;
 		return true;
 	}
@@ -40,19 +46,26 @@ public class RemoveDuplicates extends MediaHandler {
 	@Override
 	public boolean handleFile(MediaFile f1) {
 		try {
+			long size = f1.getBaseFile().length();
+			String sameSize = sizeToName.get(size);
+			if (sameSize == null) {
+				// No prev file with this name
+				sizeToName.put(size, f1.getBaseFile().getAbsolutePath());
+				return false;				
+			} 
+			logger.debug("Found file "+sameSize+" with the same size as "+f1.getBaseName()+", checking md5s");
 			String cs = MD5Checksum.getMD5Checksum(f1.getBaseFile().getAbsolutePath());
+			String cs2 = MD5Checksum.getMD5Checksum(sameSize);
 			logger.debug("MD5 for "+f1.getBaseFile().getAbsolutePath()+": "+cs);
-			if (md5Checksums.containsKey(cs)) {
-				String dName = md5Checksums.get(cs);
-				if (!ignoreName && dName.equals(f1.getBaseFile().getName())) {
-					logger.info("Found duplicate but file names are different: "+f1+" and "+dName);
+			logger.debug("MD5 for "+sameSize+": "+cs2);
+			if (cs != null && cs.equals(cs2)) {
+				if (!ignoreName && !sameSize.equals(f1.getBaseFile().getAbsolutePath())) {
+					logger.info("Found duplicate but file names are different: "+f1+" and "+sameSize);
 					return false;
 				}
-				logger.info("Duplicate found: "+f1.getBaseFile().getName()+" and "+dName);
+				logger.info("Duplicate found: "+f1.getBaseFile().getName()+" and "+sameSize);
 				f1.setDelete("Duplicate Found");
 				return true;
-			} else {
-				md5Checksums.put(cs, f1.getBaseFile().getName());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -67,7 +80,7 @@ public class RemoveDuplicates extends MediaHandler {
 
 	@Override
 	public String getDescription() {
-		return "Use MD5 checksums to remove any duplicates";
+		return "Use file size and MD5 checksums to remove any duplicates";
 	}
 
 	@Override
