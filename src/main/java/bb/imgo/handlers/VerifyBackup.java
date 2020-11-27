@@ -27,7 +27,7 @@ public class VerifyBackup extends MediaHandler {
 	File videoBackupRootGood = new File("Y:\\Good Videos");
 	
 	SimpleDateFormat ymdhms = new SimpleDateFormat("yyyyMMdd_HHmmss");
-	
+		
 	boolean doChecksum = true;
 	
 	public VerifyBackup() {
@@ -54,6 +54,8 @@ public class VerifyBackup extends MediaHandler {
 		if (videoRoot != null) {
 			videoBackupRootGood = new File(videoRootGood);
 		}
+		
+		doChecksum = Boolean.parseBoolean(props.getProperty(PropertyNames.BACKUP_CHECK_MD5));	
 		
 		boolean failed = false;
 		if (!imageBackupRoot.exists()) {
@@ -106,20 +108,30 @@ public class VerifyBackup extends MediaHandler {
 	
 	protected boolean verifyBackupFile(File f1, File f2) {
 		try {
-			if (f1.length() != f2.length()) {
-				// No need to check the md5, sizes are different
-				logger.warn("Backup is a different size, no need to check md5");
-				return false;
-			}
-			String cs = MD5Checksum.getMD5Checksum(f1.getAbsolutePath());
-			String bs = MD5Checksum.getMD5Checksum(f2.getAbsolutePath());
-			if (!cs.equals(bs)) {
-				logger.warn("Backup doesn't match MD5 sums: "+cs+" vs "+bs);
-				return false;
+			if (!doChecksum) {
+				if (f1.length() == f2.length()) {
+					logger.debug("Backup "+f2+" verified with size check");
+					return true;
+				} else {
+					logger.warn("Backup "+f2+" has a different size: "+f1.length()+" vs "+f2.length());
+					return false;
+				}
 			} else {
-				// backup matches
-				logger.debug("Backup "+f2+" verified with MD5 checksum");
-				return true;
+				if (f1.length() != f2.length()) {
+					// No need to check the md5, sizes are different
+					logger.warn("Backup is a different size, no need to check md5");
+					return false;
+				}
+				String cs = MD5Checksum.getMD5Checksum(f1.getAbsolutePath());
+				String bs = MD5Checksum.getMD5Checksum(f2.getAbsolutePath());
+				if (!cs.equals(bs)) {
+					logger.warn("Backup doesn't match MD5 sums: "+cs+" vs "+bs);
+					return false;
+				} else {
+					// backup matches
+					logger.debug("Backup "+f2+" verified with MD5 checksum");
+					return true;
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -161,19 +173,15 @@ public class VerifyBackup extends MediaHandler {
 		}
 		
 		if (backupFile.exists()) {
-			if (doChecksum) {
-				if (verifyBackupFile(f1.getBaseFile(), backupFile)) {
-					logger.debug("Backup file "+backupFile+" found");
-					return false;
-				}
-			} else {
-				logger.debug("Backup file "+backupFile+" found, checksum verification disabled");
+			if (verifyBackupFile(f1.getBaseFile(), backupFile)) {
+				logger.debug("Backup file "+backupFile+" found");
 				return false;
 			}
+		} else {
+			logger.debug("Backup file "+backupFile+" not found");
 		}
 		
-		// TODO: Check md5sums for any backup file that matches
-		
+		// TODO: Check md5sums for any backup file that matches		
 		String base = f1.getBaseName();
 		PrefixFileFilter pff = new PrefixFileFilter(base);
 		// Check for a backup file using the datetime naming convention

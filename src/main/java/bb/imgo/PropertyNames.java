@@ -45,6 +45,8 @@ public class PropertyNames {
 	static public String BACKUP_IMAGE_ROOT_GOOD="backup.image.root.good";
 	static public String BACKUP_VIDEO_ROOT_GOOD="backup.video.root.good";
 	
+	static public String BACKUP_CHECK_MD5 = "backup.check.md5";
+	
 	// User chooser, do we want to take into account any previous progress and start where we left off?
 	static public String USER_CHOOSER_USE_PROGRESS="userchooser.progress.enabled";
 	// Current progress file
