@@ -13,9 +13,23 @@ import java.nio.file.Files;
  */
 public class VideoFileFilter implements FileFilter {
 		
+	String ignoreDir;
+	
+	// Ignore any directory with this name
+	//   Can update this to be a set of directories to ignore if necessary
+	//   For now it's just a single one since that's all we need
+	//   Used for ignoring LivePhotos
+	public void setIgnoreDir(String id) {
+		this.ignoreDir = id;
+	}
+	
 	@Override
 	public boolean accept(File pathname) {
 		if (pathname.isDirectory()) {
+			return false;
+		}
+		
+		if (ignoreDir != null && ignoreDir.equals(pathname.getParentFile().getName())) {
 			return false;
 		}
 		

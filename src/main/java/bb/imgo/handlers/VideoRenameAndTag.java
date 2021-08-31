@@ -29,6 +29,11 @@ public class VideoRenameAndTag extends UserChooser {
 		logger.info(getLabel()+" initialized");
 
 		imageFilter = new VideoFileFilter();
+		// Ignore livephoto subdir
+		String livePhotoDir = props.getProperty(PropertyNames.LIVEPHOTO_SUB_DIR);
+		if (livePhotoDir != null) {
+			((VideoFileFilter)imageFilter).setIgnoreDir(livePhotoDir);
+		}
 		
 		columns = 2;
 		String cStr = props.getProperty(PropertyNames.VIDEO_RENAME_COLUMNS);

@@ -38,6 +38,9 @@ public class PropertyNames {
 	// Video root directory
 	static public String VIDEO_ROOT_DIR = "separate.video.root";
 	
+	// Live photo subdir
+	static public String LIVEPHOTO_SUB_DIR = "livephoto.subdir";
+	
 	// Backup directories
 	static public String BACKUP_IMAGE_ROOT="backup.image.root";
 	static public String BACKUP_VIDEO_ROOT="backup.video.root";
