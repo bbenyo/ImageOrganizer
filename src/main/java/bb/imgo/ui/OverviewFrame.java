@@ -83,7 +83,7 @@ public class OverviewFrame extends JFrame implements OrganizeMediaUIInterface {
 	// Replace with an interface if needed
 	
 	// TODO: Specify via properties
-	static public Font labelFont = new Font("Arial", Font.PLAIN, 18);
+	static public Font labelFont = new Font("Arial", Font.PLAIN, 24);
 		
 	public OverviewFrame() {
 		super("Media Organizer");

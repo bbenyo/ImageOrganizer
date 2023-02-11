@@ -5,8 +5,11 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.URL;
@@ -15,6 +18,7 @@ import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -25,6 +29,9 @@ import org.apache.log4j.Logger;
 
 import bb.imgo.struct.FileUtilities;
 import bb.imgo.struct.MediaFile;
+import bb.util.ImageUtils;
+import bb.util.MathUtils;
+import bb.util.NoopMouseListener;
 
 @SuppressWarnings("serial")
 
@@ -47,6 +54,9 @@ public class ImagePanel extends JPanel {
 
 	protected MediaFile mFile;
 	
+	// Child popup frame for a larger view
+	JFrame zoomedFrame = null;
+	
 	// TODO: Allow you to specify via properties
 	Font arial14 = new Font("Arial", Font.BOLD, 14);
 	
@@ -65,7 +75,12 @@ public class ImagePanel extends JPanel {
 		return frame;
 	}
 	
+	// No arguments for width/height, only scale if we're too large
 	public void displayCenter() {
+		displayCenter(-1, -1);
+	}
+	
+	public void displayCenter(int scaledWidth, int scaledHeight) {
 		logger.info("Loading image from "+mFile.getURL());
 		URL imgUrl = mFile.getURL();
 		try {
@@ -73,8 +88,16 @@ public class ImagePanel extends JPanel {
 				BufferedImage img = null;
 				img = ImageIO.read(imgUrl);		
 				if (img != null) {
+					if (scaledWidth < 0 || scaledHeight < 0) {
+						Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+						int width = MathUtils.toInt(screenSize.getWidth());
+						int height = MathUtils.toInt(screenSize.getHeight());
+						Dimension resized = ImageUtils.resizeImage(img.getWidth(), img.getHeight(), width, height);
+						scaledWidth = MathUtils.toInt(resized.getWidth());
+						scaledHeight = MathUtils.toInt(resized.getHeight());
+					}
 					// TODO: Allow you to set the size via properties
-					Image imgResized = img.getScaledInstance(400, 300, Image.SCALE_SMOOTH);
+					Image imgResized = img.getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_DEFAULT);
 					imgIcon = new ImageIcon(imgResized);
 				} else {
 					logger.info("Unable to read Image from "+imgUrl);
@@ -90,6 +113,22 @@ public class ImagePanel extends JPanel {
 		
 		JLabel iLbl = new JLabel(imgIcon);
 		add(iLbl, BorderLayout.CENTER);
+		iLbl.addMouseListener(new NoopMouseListener() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if (zoomedFrame != null) {
+					zoomedFrame.setVisible(false);
+					zoomedFrame.dispose();
+					zoomedFrame = null;
+					return;
+				}
+				ImagePanel zoomed = new ImagePanel(mFile);
+				zoomed.displayCenter();
+				zoomed.zoomedFrame = zoomed.createFrame();
+				// zoomed.zoomedFrame.setLocation(width-25, height-25);
+				zoomed.zoomedFrame.setVisible(true);
+			}			
+		});
 	}
 	
 	private void init() {

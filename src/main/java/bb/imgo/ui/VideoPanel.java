@@ -31,7 +31,7 @@ public class VideoPanel extends ImagePanel {
 	}
 	
 	@Override
-	public void displayCenter() {
+	public void displayCenter(int scaledWidth, int scaledHeight) {
 		JButton playBtn = new JButton("PLAY");
 		playBtn.setPreferredSize(new Dimension(100,40));
 		JLabel rename = new JLabel("Rename video to: ");

@@ -121,7 +121,7 @@ public class ImageGridPanel extends JFrame {
 			
 		});
 		
-		countLabel = new JLabel("Showing 0 out of 0 images");
+		countLabel = new JLabel(this.directory.getName()+" Showing 0 out of 0 images");
 		countLabel.setFont(OverviewFrame.labelFont);
 		
 		cPane.add(countLabel, BorderLayout.NORTH);
@@ -167,7 +167,7 @@ public class ImageGridPanel extends JFrame {
 			endIndex = i;
 		}	
 
-		countLabel.setText("Showing "+(startIndex+1)+" - "+(endIndex+1)+" of "+(mediaFiles.size())+" images");
+		countLabel.setText(this.directory.getName()+": Showing "+(startIndex+1)+" - "+(endIndex+1)+" of "+(mediaFiles.size())+" images");
 		countLabel.setFont(OverviewFrame.labelFont);
 		countLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		if (startIndex > 0) {
@@ -187,10 +187,11 @@ public class ImageGridPanel extends JFrame {
 		repaint();
 	}
 	
+	// TODO: Load scaled width/height from properties, or compute from width/height
 	public void loadImages() {
 		for (Component c : mainPanel.getComponents()) {
 			if (c instanceof ImagePanel) {
-				((ImagePanel)c).displayCenter();
+				((ImagePanel)c).displayCenter(400, 300);
 				revalidate();
 			}
 		}

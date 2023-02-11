@@ -20,6 +20,7 @@ public class SeparateVideos extends MediaHandler {
 	static private Logger logger = Logger.getLogger(SeparateVideos.class.getName());
 	
 	File videoRoot = null;
+	String ignoreDir = null;
 	
 	public boolean initialize(Properties props) {
 		logger.info(getLabel()+" initialized");
@@ -36,11 +37,22 @@ public class SeparateVideos extends MediaHandler {
 		} else {
 			logger.error(videoRoot+" doesn't exist!");
 		}
+		
+		// Ignore livephoto subdir
+		String livePhotoDir = props.getProperty(PropertyNames.LIVEPHOTO_SUB_DIR);
+		if (livePhotoDir != null) {
+			ignoreDir = livePhotoDir;
+		}
+		
 		return false;
 	}
 	
 	@Override
 	public boolean fileFilter(MediaFile f1) {
+		if (f1.getBaseFile().getParentFile().getName().equalsIgnoreCase(ignoreDir)) {
+			logger.debug("In ignored subdir: "+ignoreDir+": skipping SeparateVideos");
+			return false;
+		}
 		if (f1.isVideoFile()) {
 			return true;
 		}
