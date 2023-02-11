@@ -1,1 +1,1 @@
-java -cp ImageOrganizer.jar;src/main/resources bb.imgo.OrganizeMedia -d c:/Users/Brett/Pictures -p src/main/resources/user.properties
+java -cp ImageOrganizer.jar;src/main/resources bb.imgo.OrganizeMedia -d D:/Pictures -p src/main/resources/user.properties

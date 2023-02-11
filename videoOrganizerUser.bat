@@ -1,0 +1,1 @@
+java -cp ImageOrganizer.jar;src/main/resources bb.imgo.OrganizeMedia -d c:/Users/Brett/Videos -p src/main/resources/uservideo.properties
